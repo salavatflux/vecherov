@@ -84,6 +84,7 @@
     height: 52px;
     pointer-events: all;
     transition: opacity 0.5s ease, transform 0.5s ease;
+    border-top: none;
   }
   #nav-bar.hidden {
     opacity: 0;
@@ -92,12 +93,9 @@
   }
   .nav-btn {
     flex: 1;
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: none;
     border: none;
-    border-top: 1px solid rgba(255,255,255,0.07);
-    color: rgba(255,255,255,0.6);
+    color: rgba(255,255,255,0.55);
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 10px;
     letter-spacing: 0.16em;
@@ -107,15 +105,13 @@
     align-items: center;
     justify-content: center;
     gap: 7px;
-    transition: background 0.3s, color 0.3s;
+    transition: color 0.3s;
+    text-shadow: 0 1px 12px rgba(0,0,0,0.8);
   }
-  .nav-btn:hover, .nav-btn:active {
-    background: rgba(0,0,0,0.75);
-    color: rgba(255,255,255,0.9);
-  }
+  .nav-btn:hover, .nav-btn:active { color: rgba(255,255,255,0.9); }
   .nav-btn-center {
     flex: 0 0 1px;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.12);
     pointer-events: none;
   }
   .nav-arrow { font-size: 13px; opacity: 0.7; }
@@ -126,7 +122,7 @@
     bottom: 62px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 10;
+    z-index: 16;
     color: rgba(255,255,255,0.45);
     font-size: 9px;
     letter-spacing: 0.22em;
@@ -160,30 +156,31 @@
     position: fixed;
     bottom: 0; left: 0; right: 0;
     z-index: 20;
-    background: rgba(8,8,8,0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(255,255,255,0.08);
+    background: rgba(18,16,14,0.72);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border-top: 1px solid rgba(255,255,255,0.06);
     transform: translateY(100%);
-    transition: transform var(--transition);
-    max-height: 82vh;
+    transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+    height: 92vh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
   #info-panel.visible {
     transform: translateY(0);
   }
-
-  .info-header {
-    padding: 14px 20px 10px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    background: rgba(8,8,8,0.95);
-    z-index: 2;
+  /* Drag handle */
+  #info-panel::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 3px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    margin: 14px auto 0;
   }
+  .info-header { display: none; }
 
   .close-btn {
     background: none;
@@ -197,39 +194,25 @@
   }
   .close-btn:hover { color: rgba(255,255,255,0.8); }
 
-  .info-tabs {
-    display: flex;
-    gap: 0;
+  .info-sections {
+    padding: 24px 28px 60px;
+  }
+  .info-section {
+    padding-bottom: 36px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
-    padding: 0 28px;
+    margin-bottom: 36px;
   }
-
-  .info-tab {
-    background: none;
-    border: none;
-    color: rgba(255,255,255,0.35);
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.18em;
+  .info-section--last {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+  .info-section-label {
+    font-size: 10px;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
-    padding: 14px 16px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid transparent;
-    margin-bottom: -1px;
-    transition: color 0.3s, border-color 0.3s;
+    color: rgba(255,255,255,0.28);
+    margin-bottom: 16px;
   }
-  .info-tab:first-child { padding-left: 0; }
-  .info-tab.active {
-    color: rgba(255,255,255,0.85);
-    border-bottom-color: transparent;
-  }
-
-  .info-content {
-    padding: 28px 28px 48px;
-  }
-
-  .tab-pane { display: none; }
-  .tab-pane.active { display: block; }
 
   .info-text {
     color: rgba(255,255,255,0.72);
@@ -304,26 +287,60 @@
     z-index: 30;
     overflow: hidden;
     transform: translateX(100%);
-    transition: transform var(--transition);
+    transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     display: flex;
     flex-direction: column;
+    will-change: transform;
   }
   .section-panel.left-entry { transform: translateX(-100%); }
-  .section-panel.visible { transform: translateX(0); }
 
-  /* Мистика — тёмная */
+  /* Мистика — тёмная, полупрозрачная */
   #section-mystic {
-    background: var(--dark-bg);
+    background: rgba(8,8,8,0.82);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     color: var(--light-text);
   }
 
-  /* Код — светлая */
+  /* Код — светлая, полупрозрачная */
   #section-code {
-    background: var(--light-bg);
+    background: rgba(235,231,224,0.85);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     color: var(--dark-text);
     transform: translateX(-100%);
   }
 
+  .section-sticky {
+    padding: 52px 28px 0;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding-bottom: 16px;
+  }
+  #section-mystic .section-sticky {
+    background: rgba(8,8,8,0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  #section-code .section-sticky {
+    background: rgba(235,231,224,0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .section-sticky--right {
+    text-align: right;
+  }
+  .section-sticky--right .section-back {
+    justify-content: flex-end;
+  }
+  .section-sticky--right .sort-bar {
+    justify-content: flex-end;
+  }
+  .section-sticky--right .section-title {
+    text-align: right;
+  }
   .section-header {
     padding: 52px 28px 0;
     flex-shrink: 0;
@@ -382,18 +399,17 @@
   #section-code .sort-btn { color: var(--dark-text); }
 
   /* Section description */
-  .section-desc-wrap { margin-bottom: 12px; }
-  .section-desc {
+  .section-desc-wrap { margin-bottom: 20px; padding-top: 4px; }
+  .section-desc-text {
     font-size: 13px;
     line-height: 1.72;
     opacity: 0.6;
     max-width: 520px;
     overflow: hidden;
     transition: max-height 0.6s ease;
-    max-height: 5.2em;
-    position: relative;
+    max-height: 4.3em;
   }
-  .section-desc.expanded { max-height: 300px; }
+  .section-desc-text.expanded { max-height: 400px; }
   .expand-btn {
     background: none;
     border: none;
@@ -401,13 +417,13 @@
     font-size: 13px;
     letter-spacing: 0;
     cursor: pointer;
-    opacity: 0.55;
+    opacity: 0.5;
     padding: 0;
     display: inline;
     transition: opacity 0.3s;
     line-height: 1.72;
   }
-  .expand-btn:hover { opacity: 0.9; }
+  .expand-btn:hover { opacity: 0.85; }
   #section-mystic .expand-btn { color: var(--light-text); }
   #section-code .expand-btn { color: var(--dark-text); }
 
@@ -417,7 +433,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    padding: 0 28px 80px;
+    padding: 16px 28px 80px;
   }
   .works-scroll::-webkit-scrollbar { width: 2px; }
   .works-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -513,8 +529,7 @@
       max-width: 520px;
       right: 0; left: auto;
       border-top: none;
-      border-left: 1px solid rgba(255,255,255,0.08);
-      max-height: 100vh;
+      border-left: 1px solid rgba(255,255,255,0.06);
       height: 100vh;
       transform: translateX(100%);
     }
@@ -580,17 +595,10 @@
 
 <!-- INFO PANEL -->
 <div id="info-panel">
-  <div class="info-header">
-    <button class="close-btn" onclick="closeInfo()" style="margin-left:auto;">×</button>
-  </div>
-  <div class="info-tabs">
-    <button class="info-tab active" onclick="switchTab(this,'statement')">Statement</button>
-    <button class="info-tab" onclick="switchTab(this,'bio')">Bio</button>
-    <button class="info-tab" onclick="switchTab(this,'cv')">CV</button>
-    <button class="info-tab" onclick="switchTab(this,'contacts')">Контакты</button>
-  </div>
-  <div class="info-content">
-    <div class="tab-pane active" id="tab-statement">
+  <div class="info-sections">
+
+    <div class="info-section">
+      <div class="info-section-label">Statement</div>
       <p class="info-text">
         Я работаю на границе видимого и предполагаемого. Меня интересует момент, когда обыденное 
         перестаёт быть собой — когда тень на стене превращается в знак, а повторяющийся жест 
@@ -600,7 +608,9 @@
         Живопись, объект, перформанс — инструменты, а не цель. Цель — точность.
       </p>
     </div>
-    <div class="tab-pane" id="tab-bio">
+
+    <div class="info-section">
+      <div class="info-section-label">Bio</div>
       <p class="info-text">
         Александр Вечеров — художник, работающий в Москве и Риге. Окончил [учебное заведение]. 
         Участник групповых и персональных выставок с [год].
@@ -609,7 +619,9 @@
         В работах исследуется напряжение между структурой и случайностью, памятью и повторением.
       </p>
     </div>
-    <div class="tab-pane" id="tab-cv">
+
+    <div class="info-section">
+      <div class="info-section-label">CV</div>
       <div class="cv-block">
         <div class="cv-year">Персональные выставки</div>
         <div class="cv-entry">2024 — «Название выставки» <span>/ Галерея, Город</span></div>
@@ -626,7 +638,9 @@
         <div class="cv-entry">2023 — Название <span>/ Город</span></div>
       </div>
     </div>
-    <div class="tab-pane" id="tab-contacts">
+
+    <div class="info-section info-section--last">
+      <div class="info-section-label">Контакты</div>
       <div class="contacts-row">
         <a href="mailto:hello@example.com" class="contact-link">
           <svg class="contact-icon" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -653,53 +667,41 @@
         </a>
       </div>
     </div>
+
   </div>
 </div>
 
 <!-- SECTION: ПОВСЕДНЕВНАЯ МИСТИКА (свайп вправо) -->
 <div id="section-mystic" class="section-panel">
-  <div class="section-header">
+  <div class="section-sticky">
     <button class="section-back" onclick="closeSection()">← Назад</button>
     <h2 class="section-title">Повседневная мистика</h2>
     <div class="sort-bar">
       <button class="sort-btn active" onclick="sortWorks('mystic','chrono',this)">Хронология</button>
       <button class="sort-btn" onclick="sortWorks('mystic','medium',this)">Медиум</button>
     </div>
-    <div class="section-desc-wrap">
-      <div class="section-desc" id="desc-mystic">
-        Серия об изнанке привычного. Каждый объект здесь несёт больше, чем ему положено по функции. 
-        Тень становится персонажем. Трещина — сообщением. Повторяющийся жест — заклинанием. 
-        Это попытка зафиксировать момент, когда реальность даёт сбой — не драматично, 
-        а тихо, почти незаметно. Как будто что-то просочилось сквозь материю. <button class="expand-btn" id="expand-mystic" onclick="toggleDesc('mystic')">…&thinsp;развернуть</button>
-      </div>
-    </div>
   </div>
   <div class="works-scroll" id="works-mystic">
-    <!-- Works injected by JS -->
+    <div class="section-desc-wrap">
+      <div class="section-desc-text" id="desc-mystic">Серия об изнанке привычного. Каждый объект здесь несёт больше, чем ему положено по функции. Тень становится персонажем. Трещина — сообщением. Повторяющийся жест — заклинанием. Это попытка зафиксировать момент, когда реальность даёт сбой — не драматично, а тихо, почти незаметно. Как будто что-то просочилось сквозь материю.</div><button class="expand-btn" id="expand-mystic" onclick="toggleDesc('mystic')">…&thinsp;развернуть</button>
+    </div>
   </div>
 </div>
 
 <!-- SECTION: КОД ВЕТВЛЕНИЯ (свайп влево) -->
 <div id="section-code" class="section-panel left-entry">
-  <div class="section-header">
+  <div class="section-sticky section-sticky--right">
     <button class="section-back" onclick="closeSection()">← Назад</button>
     <h2 class="section-title">Код ветвления</h2>
     <div class="sort-bar">
       <button class="sort-btn active" onclick="sortWorks('code','chrono',this)">Хронология</button>
       <button class="sort-btn" onclick="sortWorks('code','medium',this)">Медиум</button>
     </div>
-    <div class="section-desc-wrap">
-      <div class="section-desc" id="desc-code">
-        Серия исследует логику разветвления — в природе, в языке, в теле. 
-        Каждая работа строится как схема решений, в которых ни один выбор не является окончательным. 
-        Структура дерева, нейронной сети, родословной — всё это одна и та же фигура, 
-        повторяющаяся на разных уровнях масштаба. Интерес не к результату ветвления, 
-        а к самому моменту разделения. <button class="expand-btn" id="expand-code" onclick="toggleDesc('code')">…&thinsp;развернуть</button>
-      </div>
-    </div>
   </div>
   <div class="works-scroll" id="works-code">
-    <!-- Works injected by JS -->
+    <div class="section-desc-wrap">
+      <div class="section-desc-text" id="desc-code">Серия исследует логику разветвления — в природе, в языке, в теле. Каждая работа строится как схема решений, в которых ни один выбор не является окончательным. Структура дерева, нейронной сети, родословной — всё это одна и та же фигура, повторяющаяся на разных уровнях масштаба. Интерес не к результату ветвления, а к самому моменту разделения.</div><button class="expand-btn" id="expand-code" onclick="toggleDesc('code')">…&thinsp;развернуть</button>
+    </div>
   </div>
 </div>
 
@@ -709,53 +711,47 @@
 </div>
 
 <script>
-// ─── DATA (placeholder works) ───
 const worksData = {
   mystic: [
-    { id: 1, title: "Без названия #1", medium: "Масло на холсте", year: 2024, size: "80×60 см", img: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&q=80", category: "Живопись" },
-    { id: 2, title: "Ночная процедура", medium: "Акварель, бумага", year: 2024, size: "42×29,7 см", img: "https://images.unsplash.com/photo-1549490349-8643362247b5?w=600&q=80", category: "Графика" },
-    { id: 3, title: "Знак на левой стене", medium: "Объект, смешанная техника", year: 2023, size: "45×30×12 см", img: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=600&q=80", category: "Объект" },
-    { id: 4, title: "Инвентарь тени", medium: "Масло на холсте", year: 2023, size: "100×80 см", img: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=600&q=80", category: "Живопись" },
-    { id: 5, title: "Уловка", medium: "Графит, бумага", year: 2022, size: "50×35 см", img: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=600&q=80", category: "Графика" },
+    { id:1, title:"Без названия #1", medium:"Масло на холсте", year:2024, size:"80×60 см", img:"https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&q=80", category:"Живопись" },
+    { id:2, title:"Ночная процедура", medium:"Акварель, бумага", year:2024, size:"42×29,7 см", img:"https://images.unsplash.com/photo-1549490349-8643362247b5?w=600&q=80", category:"Графика" },
+    { id:3, title:"Знак на левой стене", medium:"Объект, смешанная техника", year:2023, size:"45×30×12 см", img:"https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=600&q=80", category:"Объект" },
+    { id:4, title:"Инвентарь тени", medium:"Масло на холсте", year:2023, size:"100×80 см", img:"https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=600&q=80", category:"Живопись" },
+    { id:5, title:"Уловка", medium:"Графит, бумага", year:2022, size:"50×35 см", img:"https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=600&q=80", category:"Графика" }
   ],
   code: [
-    { id: 6, title: "Ветвление I", medium: "Масло, холст", year: 2024, size: "120×90 см", img: "https://images.unsplash.com/photo-1482160549825-59d1b23cb208?w=600&q=80", category: "Живопись" },
-    { id: 7, title: "Развилка", medium: "Тушь, бумага", year: 2024, size: "60×40 см", img: "https://images.unsplash.com/photo-1525909002-1b05e0c869d8?w=600&q=80", category: "Графика" },
-    { id: 8, title: "Рекурсия", medium: "Акрил, холст", year: 2023, size: "70×70 см", img: "https://images.unsplash.com/photo-1496715976403-7e36dc43f17b?w=600&q=80", category: "Живопись" },
-    { id: 9, title: "Протокол ветвления", medium: "Объект, металл", year: 2023, size: "Переменные", img: "https://images.unsplash.com/photo-1502570149819-b2260483d302?w=600&q=80", category: "Объект" },
-    { id: 10, title: "Точка бифуркации", medium: "Масло на доске", year: 2022, size: "40×30 см", img: "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=600&q=80", category: "Живопись" },
+    { id:6, title:"Ветвление I", medium:"Масло, холст", year:2024, size:"120×90 см", img:"https://images.unsplash.com/photo-1482160549825-59d1b23cb208?w=600&q=80", category:"Живопись" },
+    { id:7, title:"Развилка", medium:"Тушь, бумага", year:2024, size:"60×40 см", img:"https://images.unsplash.com/photo-1525909002-1b05e0c869d8?w=600&q=80", category:"Графика" },
+    { id:8, title:"Рекурсия", medium:"Акрил, холст", year:2023, size:"70×70 см", img:"https://images.unsplash.com/photo-1496715976403-7e36dc43f17b?w=600&q=80", category:"Живопись" },
+    { id:9, title:"Протокол ветвления", medium:"Объект, металл", year:2023, size:"Переменные", img:"https://images.unsplash.com/photo-1502570149819-b2260483d302?w=600&q=80", category:"Объект" },
+    { id:10, title:"Точка бифуркации", medium:"Масло на доске", year:2022, size:"40×30 см", img:"https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=600&q=80", category:"Живопись" }
   ]
 };
 
-// ─── STATE ───
 let currentSection = null;
 let infoOpen = false;
-let currentSort = { mystic: 'chrono', code: 'chrono' };
-let touchStartX = 0, touchStartY = 0, touchActive = false;
-let zoomedEl = null;
 
 // ─── INIT ───
 document.addEventListener('DOMContentLoaded', () => {
   renderWorks('mystic', 'chrono');
   renderWorks('code', 'chrono');
-  setupPhotoSwipe();
-  setupZoom();
-
-  // nav bar always visible on home screen
+  initSwipe();
+  initScrollDown();
 });
 
-// ─── RENDER WORKS ───
+// ─── RENDER ───
 function renderWorks(section, sortBy) {
   const container = document.getElementById('works-' + section);
   let works = [...worksData[section]];
   if (sortBy === 'chrono') {
-    works.sort((a, b) => b.year - a.year);
+    works.sort((a,b) => b.year - a.year);
   } else {
-    works.sort((a, b) => a.category.localeCompare(b.category) || b.year - a.year);
+    works.sort((a,b) => a.category.localeCompare(b.category) || b.year - a.year);
   }
-  container.innerHTML = works.map(w => `
+  const descWrap = container.querySelector('.section-desc-wrap');
+  const worksHTML = works.map(w => `
     <div class="work-item" data-id="${w.id}">
-      <div class="work-img-wrap" onclick="openZoom(this, '${w.img}', '${w.title}')">
+      <div class="work-img-wrap" onclick="openZoom('${w.img}','${w.title}')">
         <img class="work-img" src="${w.img}" alt="${w.title}" loading="lazy" draggable="false">
       </div>
       <div class="work-caption">
@@ -765,10 +761,12 @@ function renderWorks(section, sortBy) {
       </div>
     </div>
   `).join('');
+  // Remove old work items, keep desc-wrap
+  container.querySelectorAll('.work-item').forEach(el => el.remove());
+  container.insertAdjacentHTML('beforeend', worksHTML);
 }
 
 function sortWorks(section, by, btn) {
-  currentSort[section] = by;
   btn.closest('.sort-bar').querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderWorks(section, by);
@@ -782,21 +780,24 @@ function switchTab(btn, id) {
   document.getElementById('tab-' + id).classList.add('active');
 }
 
-// ─── EXPAND DESC ───
+// ─── EXPAND ───
 function toggleDesc(section) {
   const desc = document.getElementById('desc-' + section);
   const btn = document.getElementById('expand-' + section);
   const expanded = desc.classList.toggle('expanded');
-  btn.innerHTML = expanded ? '…&thinsp;свернуть' : '…&thinsp;развернуть';
+  btn.innerHTML = expanded ? '\u2026\u2009свернуть' : '\u2026\u2009развернуть';
+  btn.style.display = expanded ? 'none' : 'inline';
 }
 
 // ─── INFO PANEL ───
 function openInfo() {
+  if (currentSection) return;
   infoOpen = true;
   document.getElementById('info-panel').classList.add('visible');
   document.getElementById('scroll-down').classList.add('hidden');
   document.getElementById('nav-bar').classList.add('hidden');
   document.getElementById('portrait').classList.add('blur-dark');
+  document.getElementById('portrait').classList.remove('blur-light');
 }
 
 function closeInfo() {
@@ -810,25 +811,41 @@ function closeInfo() {
 
 // ─── SECTIONS ───
 function openSection(id) {
+  if (infoOpen) closeInfo();
   const panel = document.getElementById(id);
   currentSection = id;
-  panel.classList.add('visible');
+  // Slide in from correct side
+  panel.style.transition = 'none';
+  if (id === 'section-mystic') {
+    panel.style.transform = 'translateX(100%)';
+  } else {
+    panel.style.transform = 'translateX(-100%)';
+  }
+  panel.style.display = 'flex';
+  // Force reflow
+  panel.offsetHeight;
+  panel.style.transition = '';
+  panel.style.transform = 'translateX(0)';
   document.getElementById('scroll-down').classList.add('hidden');
   document.getElementById('nav-bar').classList.add('hidden');
-  const portrait = document.getElementById('portrait');
+  const p = document.getElementById('portrait');
   if (id === 'section-mystic') {
-    portrait.classList.add('blur-dark');
-    portrait.classList.remove('blur-light');
+    p.classList.add('blur-dark'); p.classList.remove('blur-light');
   } else {
-    portrait.classList.add('blur-light');
-    portrait.classList.remove('blur-dark');
+    p.classList.add('blur-light'); p.classList.remove('blur-dark');
   }
 }
 
 function closeSection() {
   if (!currentSection) return;
   const panel = document.getElementById(currentSection);
-  panel.classList.remove('visible');
+  const isRight = currentSection === 'section-mystic';
+  panel.style.transform = isRight ? 'translateX(100%)' : 'translateX(-100%)';
+  setTimeout(() => {
+    if (!currentSection) return;
+    panel.style.display = '';
+    panel.style.transform = '';
+  }, 620);
   currentSection = null;
   document.getElementById('scroll-down').classList.remove('hidden');
   document.getElementById('nav-bar').classList.remove('hidden');
@@ -836,130 +853,151 @@ function closeSection() {
   document.getElementById('portrait').classList.remove('blur-light');
 }
 
-// ─── PHOTO SWIPE (main screen) ───
-function setupPhotoSwipe() {
-  const body = document.body;
-  let startX = 0, startY = 0, dragging = false, dx = 0;
+// ─── SCROLL DOWN (tap) ───
+function initScrollDown() {
+  document.getElementById('scroll-down').addEventListener('click', openInfo);
+  // Tap on photo-layer while info open → close
+  document.getElementById('photo-layer').addEventListener('click', () => {
+    if (infoOpen) closeInfo();
+  });
+  // Swipe down on info-panel → close
+  const panel = document.getElementById('info-panel');
+  let ipStartY = 0, ipStartScrollTop = 0;
+  panel.addEventListener('touchstart', e => {
+    ipStartY = e.touches[0].clientY;
+    ipStartScrollTop = panel.scrollTop;
+  }, {passive: true});
+  panel.addEventListener('touchend', e => {
+    const dy = e.changedTouches[0].clientY - ipStartY;
+    // Only close if at top of scroll and swiped down
+    if (ipStartScrollTop === 0 && dy > 70) closeInfo();
+  }, {passive: true});
+}
+
+// ─── SWIPE on home screen ───
+function initSwipe() {
   const portrait = document.getElementById('portrait');
+  let t0x = 0, t0y = 0, locked = null;
 
-  body.addEventListener('touchstart', (e) => {
+  document.addEventListener('touchstart', e => {
     if (currentSection || infoOpen) return;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    dragging = true;
-    dx = 0;
-  }, { passive: true });
+    t0x = e.touches[0].clientX;
+    t0y = e.touches[0].clientY;
+    locked = null;
+  }, {passive: true});
 
-  body.addEventListener('touchmove', (e) => {
-    if (!dragging || currentSection || infoOpen) return;
-    dx = e.touches[0].clientX - startX;
-    const dy = e.touches[0].clientY - startY;
-    if (Math.abs(dy) > Math.abs(dx) + 10) { dragging = false; return; }
-    // Subtle photo shift
-    portrait.style.transition = 'none';
-    portrait.style.transform = `translateX(${dx * 0.08}px)`;
-  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    const dx = e.touches[0].clientX - t0x;
+    const dy = e.touches[0].clientY - t0y;
+    if (!locked) {
+      if (Math.abs(dx) > Math.abs(dy) + 8) locked = 'h';
+      else if (Math.abs(dy) > Math.abs(dx) + 8) locked = 'v';
+    }
+    if (currentSection || infoOpen) return;
+    if (locked === 'h') {
+      portrait.style.transition = 'none';
+      portrait.style.transform = 'translateX(' + (dx * 0.07) + 'px)';
+    } else if (locked === 'v') {
+      portrait.style.transition = '';
+      portrait.style.transform = '';
+    }
+  }, {passive: true});
 
-  body.addEventListener('touchend', (e) => {
-    if (!dragging) return;
-    dragging = false;
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - t0x;
+    const dy = e.changedTouches[0].clientY - t0y;
     portrait.style.transition = '';
     portrait.style.transform = '';
-    if (Math.abs(dx) > 60) {
-      if (dx < 0) openSection('section-code');  // swipe left → code
-      else openSection('section-mystic');         // swipe right → mystic
+    // Close section with reverse swipe
+    if (currentSection && locked === 'h') {
+      if (currentSection === 'section-mystic' && dx > 60) { closeSection(); return; }
+      if (currentSection === 'section-code' && dx < -60) { closeSection(); return; }
     }
-  });
-
-  // Desktop: mouse swipe on photo
-  let mouseDown = false, mouseX = 0;
-  document.getElementById('photo-layer').addEventListener('mousedown', (e) => {
     if (currentSection || infoOpen) return;
-    mouseDown = true; mouseX = e.clientX;
+    // Upward swipe → info panel
+    if (locked === 'v' && dy < -60) { openInfo(); return; }
+    if (locked !== 'h') return;
+    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) openSection('section-mystic');
+      else openSection('section-code');
+    }
+  }, {passive: true});
+
+  // Desktop mouse swipe
+  let mDown = false, mx0 = 0;
+  document.getElementById('photo-layer').addEventListener('mousedown', e => {
+    if (currentSection || infoOpen) return;
+    mDown = true; mx0 = e.clientX;
   });
-  document.addEventListener('mouseup', (e) => {
-    if (!mouseDown) return;
-    const mdx = e.clientX - mouseX;
-    mouseDown = false;
+  document.addEventListener('mousemove', e => {
+    if (!mDown || currentSection || infoOpen) return;
+    const dx = e.clientX - mx0;
+    portrait.style.transition = 'none';
+    portrait.style.transform = 'translateX(' + (dx * 0.06) + 'px)';
+  });
+  document.addEventListener('mouseup', e => {
+    if (!mDown) return;
+    const dx = e.clientX - mx0;
+    mDown = false;
+    portrait.style.transition = '';
     portrait.style.transform = '';
-    if (Math.abs(mdx) > 60) {
-      if (mdx < 0) openSection('section-code');
-      else openSection('section-mystic');
+    if (Math.abs(dx) > 55) {
+      if (dx < 0) openSection('section-mystic');
+      else openSection('section-code');
     }
   });
-  document.addEventListener('mousemove', (e) => {
-    if (!mouseDown || currentSection || infoOpen) return;
-    const mdx = e.clientX - mouseX;
-    portrait.style.transition = 'none';
-    portrait.style.transform = `translateX(${mdx * 0.06}px)`;
-  });
 
-  // Scroll down to info on wheel
-  let lastWheel = 0;
-  body.addEventListener('wheel', (e) => {
+  // Wheel → info
+  let lastW = 0;
+  document.addEventListener('wheel', e => {
     if (currentSection || infoOpen) return;
     const now = Date.now();
-    if (now - lastWheel < 800) return;
-    lastWheel = now;
-    if (e.deltaY > 30) openInfo();
-  }, { passive: true });
+    if (now - lastW < 900) return;
+    lastW = now;
+    if (e.deltaY > 20) openInfo();
+  }, {passive: true});
 }
 
 // ─── ZOOM ───
-function setupZoom() {
-  const overlay = document.getElementById('zoom-overlay');
-  // Prevent overlay click from bubbling when dragging
-  overlay.addEventListener('touchend', closeZoom);
-}
-
-function openZoom(wrap, imgSrc, title) {
-  const overlay = document.getElementById('zoom-overlay');
-  const zoomImg = document.getElementById('zoom-img');
-  zoomImg.src = imgSrc;
-  zoomImg.alt = title;
-  overlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
-  zoomedEl = wrap;
-
-  // Pinch-to-zoom on mobile within overlay
-  setupPinch(zoomImg);
+function openZoom(src, title) {
+  const ov = document.getElementById('zoom-overlay');
+  const img = document.getElementById('zoom-img');
+  img.src = src;
+  img.alt = title;
+  img.style.transform = '';
+  ov.classList.add('active');
+  setupPinch(img);
 }
 
 function closeZoom() {
-  const overlay = document.getElementById('zoom-overlay');
-  overlay.classList.remove('active');
-  document.body.style.overflow = '';
-  zoomedEl = null;
-  // Reset pinch
-  const zoomImg = document.getElementById('zoom-img');
-  zoomImg.style.transform = '';
+  document.getElementById('zoom-overlay').classList.remove('active');
 }
 
-// ─── PINCH ───
 function setupPinch(el) {
-  let initDist = 0, currentScale = 1;
-  el.addEventListener('touchstart', (e) => {
+  // Remove old listeners by cloning
+  const fresh = el.cloneNode(true);
+  el.parentNode.replaceChild(fresh, el);
+  document.getElementById('zoom-img');
+
+  let d0 = 0, scale = 1;
+  fresh.addEventListener('touchstart', e => {
     if (e.touches.length === 2) {
-      initDist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
+      d0 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                      e.touches[0].clientY - e.touches[1].clientY);
     }
-  }, { passive: true });
-  el.addEventListener('touchmove', (e) => {
+  }, {passive: true});
+  fresh.addEventListener('touchmove', e => {
     if (e.touches.length === 2) {
       e.preventDefault();
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      currentScale = Math.min(Math.max(dist / initDist, 0.5), 3);
-      el.style.transform = `scale(${currentScale})`;
+      const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                           e.touches[0].clientY - e.touches[1].clientY);
+      scale = Math.min(Math.max(d / d0, 0.5), 3.5);
+      fresh.style.transform = 'scale(' + scale + ')';
     }
-  }, { passive: false });
-  el.addEventListener('touchend', () => {
-    if (currentScale < 1.05) closeZoom();
-  });
+  }, {passive: false});
+  fresh.addEventListener('touchend', () => {
+    if (scale < 1.1) closeZoom();
+  }, {passive: true});
 }
 </script>
 </body>
