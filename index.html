@@ -42,8 +42,13 @@ img { display:block; }
 .menu-ov { position:fixed; inset:0; z-index:200; pointer-events:none; }
 .menu-ov.open { pointer-events:all; }
 
-/* полупрозрачный overlay только для клика вне панели — без blur */
-.menu-dismiss { position:absolute; inset:0; }
+/* левая часть экрана: лёгкое затемнение без blur */
+.menu-dismiss {
+  position:absolute; inset:0;
+  background:rgba(0,0,0,0);
+  transition:background .7s cubic-bezier(.4,0,.2,1);
+}
+.menu-ov.open .menu-dismiss { background:rgba(0,0,0,.35); }
 
 .menu-panel {
   position:absolute; top:0; right:0; bottom:0;
@@ -116,23 +121,18 @@ img { display:block; }
 }
 
 /* декоративный вектор в топбаре:
-   position:absolute, левый угол, 1/5 экрана по ширине,
-   обрезан clip-path чтобы не мешать кнопкам */
+   всегда присутствует слева, частично виден (обрезан топбаром),
+   при открытом описании — раскрывается на 1/5 ширины экрана */
 .sec-topbar-vec {
   position:absolute; left:0; top:0; bottom:0;
   width:20vw; max-width:200px;
   display:flex; align-items:center;
   pointer-events:none; z-index:0;
-  opacity:0;
+  opacity:0.12;
   transition:opacity .5s ease;
 }
-.sec-topbar-vec img {
-  width:100%; height:100%;
-  object-fit:contain; object-position:left center;
-  /* clip: показываем только левую часть, постепенно раскрывается */
-}
-/* когда описание открыто — вектор появляется */
-.sec-topbar-vec.visible { opacity:1; }
+.sec-topbar-vec img { width:100%; height:100%; object-fit:contain; object-position:left center; }
+.sec-topbar-vec.visible { opacity:0.85; }
 
 .sec-back { position:relative; z-index:1; font-size:13px; font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
 .sec-topbar-right { position:relative; z-index:1; display:flex; align-items:center; gap:28px; flex-shrink:0; }
@@ -159,6 +159,7 @@ img { display:block; }
 .sec-body {
   position:relative; z-index:10;
   flex:1; display:flex; overflow:hidden;
+  min-height:0; /* critical for flex children to scroll */
 }
 
 /* SCROLL — лента артворков */
@@ -169,32 +170,30 @@ img { display:block; }
 }
 @media (max-width:768px) { .sec-scroll { padding:14px 20px 80px; } }
 
-/* DESC PANEL — десктоп: выезжает СПРАВА */
+/* DESC PANEL — всегда справа на десктопе */
 .sec-desc {
-  /* ширина 0 когда закрыта, раскрывается */
   width:0; overflow:hidden; flex-shrink:0;
   transition:width .5s cubic-bezier(.4,0,.2,1);
   background:rgba(0,0,0,.82);
   backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
 }
-.sec-desc.open { width:clamp(240px,30vw,380px); }
+.sec-desc.open { width:clamp(260px,32vw,400px); }
 
 .sec-desc-inner {
-  width:clamp(240px,30vw,380px);
+  width:clamp(260px,32vw,400px);
   padding:20px 24px 24px 20px;
   overflow-y:auto; height:100%;
 }
 .sec-desc-inner p { font-size:9pt; font-weight:300; letter-spacing:.08em; line-height:1.75; color:rgba(255,255,255,.8); text-align:justify; }
 .sec-desc-inner p+p { margin-top:10px; }
 
-/* MOBILE: desc выезжает СНИЗУ */
-@media (max-width:768px) {
+/* ТОЛЬКО на телефонах (не iPad) — desc выезжает снизу */
+@media (max-width:500px) {
   .sec-body { flex-direction:column; }
   .sec-desc {
-    width:100% !important;
-    height:0; overflow:hidden;
+    width:100% !important; height:0;
     transition:height .5s cubic-bezier(.4,0,.2,1);
-    order:-1; /* над лентой */
+    order:-1;
   }
   .sec-desc.open { height:auto; max-height:50vh; }
   .sec-desc-inner { width:100%; height:auto; max-height:50vh; padding:16px 20px 12px; }
