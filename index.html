@@ -11,56 +11,79 @@ button { background:none; border:none; cursor:pointer; font-family:inherit; colo
 a { color:inherit; text-decoration:none; }
 img { display:block; }
 
+/* ── VIEWS ──
+   display:none/flex разделены чтобы flex-direction работала корректно */
 .view { position:fixed; inset:0; display:none; }
 .view.active { display:flex; flex-direction:column; }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════
    HOME
-══════════════════════════════════════ */
+   макет: фото на весь экран,
+   имя слева-сверху, три квадрата справа-сверху
+══════════════════════════════ */
 #view-home { overflow:hidden; }
-.home-bg { position:absolute; inset:0; background:#111; }
+
+.home-bg { position:absolute; inset:0; background:#111; overflow:hidden; }
 .home-bg img { width:100%; height:100%; object-fit:cover; }
-.home-bg-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.2em; color:rgba(255,255,255,.1); text-transform:uppercase; }
+.home-bg-ph {
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; letter-spacing:.2em; color:rgba(255,255,255,.1); text-transform:uppercase;
+}
+
 .home-ui { position:absolute; inset:0; z-index:5; }
 .home-top {
   display:flex; justify-content:space-between; align-items:flex-start;
   padding:28px 32px;
 }
+/* имя — крупнее, как на макете */
 .artist-name {
-  font-size:clamp(15px,1.6vw,22px);
-  font-weight:300; letter-spacing:.22em;
-  line-height:1.3; text-transform:uppercase;
+  font-size:clamp(16px, 1.8vw, 24px);
+  font-weight:300; letter-spacing:.22em; line-height:1.3; text-transform:uppercase;
 }
-/* dots выровнены по верху имени */
-.dots-btn { display:flex; flex-direction:column; gap:5px; padding:2px; margin-top:3px; }
+/* три квадрата */
+.dots-btn { display:flex; flex-direction:column; gap:5px; padding:2px; }
 .dots-btn span { display:block; width:4px; height:4px; background:#fff; }
-.home-upload { position:absolute; bottom:32px; left:50%; transform:translateX(-50%); z-index:10; }
-.home-upload label { display:block; cursor:pointer; font-size:10px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; border:1px solid rgba(255,255,255,.22); padding:9px 22px; background:rgba(0,0,0,.4); white-space:nowrap; color:#fff; }
+
+/* временная кнопка загрузки фото */
+.home-upload {
+  position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+  z-index:10;
+}
+.home-upload label {
+  display:block; cursor:pointer;
+  font-size:10px; font-weight:300; letter-spacing:.2em; text-transform:uppercase;
+  border:1px solid rgba(255,255,255,.22); padding:9px 22px;
+  background:rgba(0,0,0,.4); white-space:nowrap; color:#fff;
+}
+/* скрываем input но оставляем доступным */
 #inp-home { position:absolute; left:-9999px; opacity:0; width:1px; height:1px; }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════
    MENU
    макет desctop_2:
-   — blur + tint ТОЛЬКО на правой панели, не на весь экран
-   — левая часть экрана остаётся видна с фото
-   — панель выезжает справа за 0.7s
-   — пункты вверху, right-align
-   — иконки внизу
-══════════════════════════════════════ */
-.menu-ov { position:fixed; inset:0; z-index:200; pointer-events:none; }
+   blur + tint только на правой панели,
+   слева фото остаётся видно
+   пункты ВВЕРХУ, right-align
+   иконки ВНИЗУ
+══════════════════════════════ */
+.menu-ov {
+  position:fixed; inset:0; z-index:200; pointer-events:none;
+}
 .menu-ov.open { pointer-events:all; }
 
-/* левая часть экрана: лёгкое затемнение без blur */
+/* левая часть — лёгкое затемнение без blur */
 .menu-dismiss {
   position:absolute; inset:0;
   background:rgba(0,0,0,0);
   transition:background .7s cubic-bezier(.4,0,.2,1);
 }
-.menu-ov.open .menu-dismiss { background:rgba(0,0,0,.35); }
+.menu-ov.open .menu-dismiss { background:rgba(0,0,0,.3); }
 
+/* правая панель — blur + tint */
 .menu-panel {
   position:absolute; top:0; right:0; bottom:0;
-  width:clamp(280px,42vw,520px);
+  width:clamp(280px, 42vw, 520px);
   display:flex; flex-direction:column;
   padding:52px 48px 48px 40px;
   backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
@@ -71,33 +94,48 @@ img { display:block; }
 }
 .menu-ov.open .menu-panel { transform:translateX(0); }
 
-@keyframes menuFadeIn {
-  from { opacity:0; transform:translateX(18px); }
+/* анимация появления пунктов */
+@keyframes fadeSlideIn {
+  from { opacity:0; transform:translateX(16px); }
   to   { opacity:1; transform:translateX(0); }
 }
-.menu-ov.open .menu-item,
-.menu-ov.open .menu-sub,
-.menu-ov.open .menu-line,
-.menu-ov.open .menu-icons {
-  animation:menuFadeIn .7s cubic-bezier(.4,0,.2,1) both;
-}
-.menu-ov.open .menu-item:nth-child(1) { animation-delay:.1s; }
-.menu-ov.open .menu-item:nth-child(2) { animation-delay:.18s; }
-.menu-ov.open .menu-item:nth-child(3) { animation-delay:.26s; }
-.menu-ov.open .menu-item:nth-child(4) { animation-delay:.34s; }
-.menu-ov.open .menu-line            { animation-delay:.40s; }
-.menu-ov.open .menu-sub:nth-of-type(1) { animation-delay:.46s; }
-.menu-ov.open .menu-sub:nth-of-type(2) { animation-delay:.52s; }
-.menu-ov.open .menu-icons           { animation-delay:.58s; }
+.menu-ov.open .menu-item { animation:fadeSlideIn .7s cubic-bezier(.4,0,.2,1) both; }
+.menu-ov.open .menu-item:nth-child(1) { animation-delay:.08s; }
+.menu-ov.open .menu-item:nth-child(2) { animation-delay:.15s; }
+.menu-ov.open .menu-item:nth-child(3) { animation-delay:.22s; }
+.menu-ov.open .menu-item:nth-child(4) { animation-delay:.29s; }
+.menu-ov.open .menu-line  { animation:fadeSlideIn .7s .35s cubic-bezier(.4,0,.2,1) both; }
+.menu-ov.open .menu-sub:nth-child(1) { animation:fadeSlideIn .7s .41s cubic-bezier(.4,0,.2,1) both; }
+.menu-ov.open .menu-sub:nth-child(2) { animation:fadeSlideIn .7s .47s cubic-bezier(.4,0,.2,1) both; }
+.menu-ov.open .menu-icons { animation:fadeSlideIn .7s .53s cubic-bezier(.4,0,.2,1) both; }
 
-.menu-nav { display:flex; flex-direction:column; justify-content:flex-start; align-items:flex-end; flex:1; }
-.menu-item { font-size:clamp(13px,1.35vw,16px); font-weight:300; letter-spacing:.3em; text-transform:lowercase; text-align:right; padding:16px 0; line-height:1.3; cursor:pointer; transition:opacity .2s; width:100%; }
+.menu-nav {
+  flex:1; display:flex; flex-direction:column;
+  justify-content:flex-start; /* пункты ВВЕРХУ */
+  align-items:flex-end;
+}
+.menu-item {
+  font-size:clamp(16px, 1.8vw, 22px); font-weight:300;
+  letter-spacing:.3em; text-transform:lowercase;
+  text-align:right; padding:18px 0; line-height:1.3;
+  cursor:pointer; transition:opacity .2s; width:100%;
+}
 .menu-item:hover { opacity:.5; }
+
+/* разделитель: ~25% ширины, тёмный, справа */
 .menu-line { height:1px; background:rgba(255,255,255,.15); width:25%; margin:14px 0 14px auto; }
-.menu-sub { font-size:clamp(11px,1.1vw,13px); font-weight:100; letter-spacing:.3em; text-transform:lowercase; text-align:right; padding:13px 0; cursor:pointer; transition:opacity .2s; width:100%; }
+
+.menu-sub {
+  font-size:clamp(16px, 1.8vw, 22px); font-weight:100;
+  letter-spacing:.3em; text-transform:lowercase;
+  text-align:right; padding:18px 0;
+  cursor:pointer; transition:opacity .2s; width:100%;
+}
 .menu-sub:hover { opacity:.5; }
+
+/* иконки внизу */
 .menu-icons { display:flex; justify-content:flex-end; gap:22px; margin-top:auto; padding-top:32px; }
-.menu-icons a { opacity:.65; transition:opacity .2s; color:#fff; display:flex; align-items:center; }
+.menu-icons a { opacity:.65; transition:opacity .2s; color:#fff; display:flex; }
 .menu-icons a:hover { opacity:1; }
 .menu-icons svg { width:22px; height:22px; }
 
@@ -105,56 +143,73 @@ img { display:block; }
   .menu-panel { width:100%; padding:52px 32px 44px; }
 }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════
    SECTION VIEW
    макет desctop_3 / mobile_3
 
-   ДЕСКТОП:
-   ┌──────────────────────────────────────────┐
-   │ TOPBAR [<назад] [вектор-маска] [хрон][ИМЯ] │
-   ├──────────────────┬───────────────────────┤
-   │ SCROLL (artworks)│ DESC PANEL (→ выезжает)│
-   └──────────────────┴───────────────────────┘
+   Структура flex column:
+   ┌────────────────────────────┐
+   │ topbar  (flex-shrink:0)    │  прозрачный, вектор слева
+   ├──────────────┬─────────────┤
+   │ scroll       │ desc (→)    │  flex:1, overflow scroll
+   └──────────────┴─────────────┘
 
-   MOBILE:
-   ┌──────────────────────────────────────────┐
-   │ TOPBAR [<] [ИМЯ]                         │
-   │         хронология →                     │
-   ├──────────────────────────────────────────┤
-   │ DESC (выезжает ВНИЗ со шторкой)          │
-   ├──────────────────────────────────────────┤
-   │ SCROLL                                   │
-   └──────────────────────────────────────────┘
-══════════════════════════════════════ */
+   Mobile: desc выезжает снизу через max-height
+══════════════════════════════ */
 #view-section { position:relative; background:#0a0a0a; }
 
+/* размытый фон раздела — тонировка светлее чем раньше */
 .sec-bg { position:absolute; inset:0; z-index:0; overflow:hidden; }
-.sec-bg-img { position:absolute; inset:-8%; background:center/cover no-repeat; filter:blur(18px); transform:scale(1.15); }
-.sec-bg-dim { position:absolute; inset:0; background:rgba(0,0,0,.90); }
+.sec-bg-img {
+  position:absolute; inset:-8%;
+  background:center/cover no-repeat;
+  filter:blur(18px); transform:scale(1.15);
+}
+/* уменьшаем тонировку: было .90, теперь .75 */
+.sec-bg-dim { position:absolute; inset:0; background:rgba(0,0,0,.75); }
 
-/* ── TOPBAR — прозрачный как на макете ── */
+/* векторное изображение раздела:
+   desktop — position:absolute в левом углу контентной зоны
+   mobile — обрезается топбаром через overflow:hidden на .sec-topbar */
+.sec-deco {
+  position:absolute; left:0; top:0; z-index:2;
+  width:20vw; height:20vw;
+  max-width:200px; max-height:200px;
+  object-fit:contain; object-position:left top;
+  pointer-events:none;
+  opacity:.18;
+}
+@media (max-width:768px) {
+  .sec-deco {
+    width:50vw; height:50vw;
+    max-width:none; max-height:none;
+    opacity:.12;
+    /* на mobile топбар обрезает верх вектора — это правильно по макету */
+  }
+}
+
+/* топбар — ПРОЗРАЧНЫЙ как на макете,
+   вектор виден сквозь него */
 .sec-topbar {
   position:relative; z-index:20; flex-shrink:0;
   display:flex; align-items:center; justify-content:space-between;
   padding:22px 36px;
   background:transparent;
   overflow:hidden;
-  min-height:64px;
 }
 
-/* декоративный вектор в топбаре:
-   всегда присутствует слева, частично виден (обрезан топбаром),
-   при открытом описании — раскрывается на 1/5 ширины экрана */
+/* декоративный вектор: top-left, 1/5 экрана,
+   слабо виден всегда, ярче при открытом описании */
 .sec-topbar-vec {
   position:absolute; left:0; top:0; bottom:0;
   width:20vw; max-width:200px;
   display:flex; align-items:center;
   pointer-events:none; z-index:0;
-  opacity:0.12;
-  transition:opacity .5s ease;
+  opacity:.12;
+  transition:opacity .6s ease;
 }
 .sec-topbar-vec img { width:100%; height:100%; object-fit:contain; object-position:left center; }
-.sec-topbar-vec.visible { opacity:0.85; }
+.sec-topbar-vec.visible { opacity:.9; }
 
 .sec-back { position:relative; z-index:1; font-size:13px; font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
 .sec-topbar-right { position:relative; z-index:1; display:flex; align-items:center; gap:28px; flex-shrink:0; }
@@ -163,143 +218,172 @@ img { display:block; }
 .sec-titleBtn { font-size:10pt; font-weight:700; letter-spacing:.3em; text-transform:lowercase; transition:opacity .2s; }
 .sec-titleBtn:hover { opacity:.7; }
 
-/* mobile: хронология строкой */
+/* mobile: хронология отдельной строкой */
 .chrono-row {
   display:none; position:relative; z-index:20; flex-shrink:0;
-  justify-content:flex-end; padding:0 36px 12px;
+  justify-content:flex-end; padding:0 20px 10px;
   background:transparent;
 }
 @media (max-width:768px) {
-  .sec-topbar { padding:16px 20px; overflow:hidden; }
+  .sec-topbar { padding:16px 20px; }
   .sec-topbar .sec-chrono { display:none; }
-  .chrono-row { display:flex !important; padding:0 20px 10px; }
+  .chrono-row { display:flex !important; }
   .sec-topbar-vec { width:40vw; max-width:none; }
 }
 
-/* ── BODY: scroll + desc side by side ── */
+/* ── BODY ── */
 .sec-body {
+  position:absolute;
+  top:0; left:0; right:0; bottom:0;
   z-index:10;
-  flex:1;
   display:flex;
-  min-height:0; /* CRITICAL — without this flex child can't scroll */
-  overflow:hidden;
-  position:relative;
+  /* top будет выставлен через JS после рендера топбара */
 }
 
 /* SCROLL */
 .sec-scroll {
   flex:1;
-  min-height:0;
-  overflow-y:auto;
-  overflow-x:hidden;
-  padding:20px 36px 60px;
+  overflow-y:auto; overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
+  padding:16px 36px 80px;
 }
-@media (max-width:768px) { .sec-scroll { padding:14px 20px 80px; } }
+@media (max-width:768px) { .sec-scroll { padding:12px 20px 80px; } }
 
-/* DESC PANEL — справа на десктопе */
+/* DESC PANEL: на десктопе — выезжает СПРАВА через width */
 .sec-desc {
-  width:0; overflow:hidden; flex-shrink:0;
+  flex-shrink:0;
+  width:0; overflow:hidden;
   transition:width .65s cubic-bezier(0.16,1,0.3,1);
-  background:rgba(0,0,0,.82);
+  background:rgba(0,0,0,.84);
   backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
 }
-.sec-desc.open { width:clamp(260px,32vw,400px); }
+.sec-desc.open { width:clamp(260px, 32vw, 400px); }
 
 .sec-desc-inner {
-  width:clamp(260px,32vw,400px);
+  width:clamp(260px, 32vw, 400px);
   padding:20px 24px 24px 20px;
   overflow-y:auto; height:100%;
 }
-.sec-desc-inner p { font-size:9pt; font-weight:300; letter-spacing:.08em; line-height:1.75; color:rgba(255,255,255,.8); text-align:justify; }
+.sec-desc-inner p {
+  font-size:9pt; font-weight:300; letter-spacing:.08em;
+  line-height:1.75; color:rgba(255,255,255,.8); text-align:justify;
+}
 .sec-desc-inner p+p { margin-top:10px; }
 
-/* ТОЛЬКО на телефонах (не iPad) — desc выезжает снизу плавно */
+/* mobile: desc выезжает снизу плавно */
 @media (max-width:500px) {
   .sec-body { flex-direction:column; }
   .sec-desc {
     width:100% !important;
-    max-height:0;
-    overflow:hidden;
-    transition:max-height .55s cubic-bezier(.4,0,.2,1);
+    max-height:0; overflow:hidden;
+    transition:max-height .6s cubic-bezier(0.16,1,0.3,1);
     order:-1;
   }
   .sec-desc.open { max-height:55vh; }
   .sec-desc-inner { width:100%; height:auto; padding:16px 20px 12px; }
 }
 
+/* кнопка закрыть описание (mobile) */
 .desc-close-mob {
   display:none; width:100%; text-align:center;
   padding:6px 0; cursor:pointer; font-size:18px; color:rgba(255,255,255,.3);
-  background:rgba(0,0,0,.82); flex-shrink:0;
+  background:rgba(0,0,0,.84); flex-shrink:0;
 }
 @media (max-width:768px) { .desc-close-mob { display:block; } }
 
 /* ── ARTWORK CARD ──
-   Изображение: не на весь экран, с отступами
-   При открытом описании — сужается ещё
-*/
-.art-card { margin-top:28px; }
+   Структура: carousel (фото) → info (текст)
+   Текст всегда ПОД изображением */
+.art-card { margin-top:32px; }
 
-/* carousel-обёртка */
-.art-carousel { position:relative; overflow:hidden; }
-.art-track { display:flex; transition:transform .4s ease; }
-.art-slide img {
-  /* ширина = 100% контейнера, height auto — не растягиваем */
-  width:100%; display:block; cursor:pointer;
-}
+/* карусель */
+.art-carousel { overflow:hidden; }
+.art-track { display:flex; transition:transform .4s ease; will-change:transform; }
+.art-slide { flex-shrink:0; width:100%; }
+.art-slide img { width:100%; height:auto; display:block; cursor:pointer; }
+
+/* навигационные точки карусели */
 .art-dots { display:flex; gap:5px; margin-top:8px; }
 .art-dot { width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,.25); cursor:pointer; transition:background .2s; }
-.art-dot.on { background:rgba(255,255,255,.8); }
+.art-dot.on { background:rgba(255,255,255,.85); }
 
-/* info под фото */
+/* info — ВСЕГДА под изображением */
 .art-info { margin-top:16px; }
+
+/* название: regular, kern 10%, #eef3f6 */
 .art-title {
-  font-size:clamp(16px,1.6vw,22px);
+  font-size:clamp(18px, 1.8vw, 26px);
   font-weight:400; letter-spacing:.1em; color:#eef3f6; line-height:1.3;
 }
+/* материал + размер: мелкий, #9b9b9b */
 .art-mat {
   margin-top:10px;
-  font-size:clamp(9px,0.8vw,11px);
+  font-size:clamp(10px, 0.85vw, 12px);
   font-weight:400; letter-spacing:.1em; color:#9b9b9b; line-height:1.4;
 }
+/* год: чуть ниже материала */
 .art-year {
   margin-top:5px;
-  font-size:clamp(9px,0.8vw,11px);
+  font-size:clamp(10px, 0.85vw, 12px);
   font-weight:400; letter-spacing:.1em; color:#9b9b9b;
 }
+/* цена */
 .art-price {
-  margin-top:12px;
-  font-size:clamp(13px,1.2vw,16px);
+  margin-top:14px;
+  font-size:clamp(14px, 1.3vw, 18px);
   font-weight:400; letter-spacing:.06em; color:#555;
 }
 
-/* temp upload */
-.art-upload { margin-bottom:4px; }
-.art-upload label { display:inline-block; cursor:pointer; font-size:9px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; border:1px solid rgba(255,255,255,.15); padding:7px 16px; background:rgba(255,255,255,.03); color:#fff; }
+/* временная кнопка загрузки изображения */
+.art-upload { margin-bottom:8px; }
+.art-upload label {
+  display:inline-block; cursor:pointer;
+  font-size:9px; font-weight:300; letter-spacing:.2em; text-transform:uppercase;
+  border:1px solid rgba(255,255,255,.15); padding:7px 16px;
+  background:rgba(255,255,255,.03); color:#fff;
+}
 #inp-art { position:absolute; left:-9999px; opacity:0; width:1px; height:1px; }
 
-/* ══════════════════════════════════════
-   TEXT VIEW
-══════════════════════════════════════ */
+/* ══════════════════════════════
+   TEXT VIEW (bio / statement)
+══════════════════════════════ */
 #view-text { background:#0a0a0a; }
-.text-top { flex-shrink:0; display:flex; align-items:baseline; justify-content:space-between; padding:28px 48px; }
+.text-top {
+  flex-shrink:0; display:flex; align-items:baseline;
+  justify-content:space-between; padding:28px 48px;
+}
 .text-ttl { font-size:13px; font-weight:100; letter-spacing:.3em; text-transform:lowercase; }
-.text-body { flex:1; overflow-y:auto; padding:36px 10vw 60px; }
-.text-body p { font-size:13px; font-weight:300; letter-spacing:.05em; line-height:1.85; color:rgba(255,255,255,.88); text-align:justify; text-indent:2em; }
-@media (max-width:768px) { .text-top { padding:20px 24px; } .text-body { padding:24px 24px 60px; } }
+.text-body { flex:1; min-height:0; overflow-y:auto; padding:36px 10vw 60px; }
+.text-body p {
+  font-size:clamp(14px, 1.1vw, 16px); font-weight:300; letter-spacing:.05em;
+  line-height:1.9; color:rgba(255,255,255,.88);
+  text-align:justify; text-indent:2em;
+}
+@media (max-width:768px) {
+  .text-top { padding:20px 24px; }
+  .text-body { padding:24px 24px 60px; }
+}
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════
    LIGHTBOX
-══════════════════════════════════════ */
+══════════════════════════════ */
 .lb { position:fixed; inset:0; z-index:500; display:none; align-items:center; justify-content:center; }
 .lb.open { display:flex; }
-.lb-bg { position:absolute; inset:0; cursor:pointer; backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); background:rgba(0,0,0,.85); }
+.lb-bg {
+  position:absolute; inset:0; cursor:pointer;
+  backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px);
+  background:rgba(0,0,0,.85);
+}
 .lb-stage { position:relative; z-index:1; }
 .lb-track { display:flex; transition:transform .4s ease; }
 .lb-slide img { max-width:calc(100vw - 80px); max-height:calc(100vh - 80px); object-fit:contain; }
 @media (max-width:768px) { .lb-slide img { max-width:calc(100vw - 48px); } }
-.lb-arr { position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.1); font-size:22px; display:flex; align-items:center; justify-content:center; z-index:2; }
+.lb-arr {
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:40px; height:40px; border-radius:50%;
+  background:rgba(255,255,255,.1); font-size:22px;
+  display:flex; align-items:center; justify-content:center; z-index:2;
+}
 .lb-arr:hover { background:rgba(255,255,255,.25); }
 .lb-prv { left:-52px; } .lb-nxt { right:-52px; }
 @media (max-width:768px) { .lb-prv { left:-28px; } .lb-nxt { right:-28px; } }
@@ -348,19 +432,17 @@ img { display:block; }
     </nav>
     <div class="menu-icons">
       <a href="mailto:eveningoff16@gmail.com" title="email">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="4" width="20" height="16" rx="2"/>
-          <polyline points="2,4 12,13 22,4"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/>
         </svg>
       </a>
       <a href="https://t.me/eveningoff" target="_blank" title="telegram">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
         </svg>
       </a>
       <a href="https://instagram.com/eveningoff" target="_blank" title="instagram">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="2" width="20" height="20" rx="5"/>
           <circle cx="12" cy="12" r="4"/>
           <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
@@ -378,9 +460,7 @@ img { display:block; }
     <div class="sec-bg-dim"></div>
   </div>
 
-  <!-- TOPBAR -->
   <div class="sec-topbar">
-    <!-- вектор в левом углу, обрезан overflow:hidden топбара -->
     <div class="sec-topbar-vec" id="sec-topbar-vec">
       <img id="sec-topbar-vec-img" src="" alt="" onerror="this.style.display='none'">
     </div>
@@ -391,15 +471,13 @@ img { display:block; }
     </div>
   </div>
 
-  <!-- mobile: хронология строкой -->
   <div class="chrono-row">
     <button class="sec-chrono" id="sec-chrono-m">хронология</button>
   </div>
 
-  <!-- body: scroll + desc -->
   <div class="sec-body">
-
-    <!-- лента артворков -->
+    <img class="sec-deco" id="sec-deco" src="" alt=""
+         onerror="this.style.display='none'" style="display:none">
     <div class="sec-scroll" id="sec-scroll">
       <div class="art-upload">
         <label for="inp-art">+ загрузить изображение</label>
@@ -407,13 +485,10 @@ img { display:block; }
       </div>
       <div id="art-list"></div>
     </div>
-
-    <!-- desc panel: десктоп — справа, mobile — сверху над лентой -->
     <div class="sec-desc" id="sec-desc">
       <div class="sec-desc-inner" id="sec-desc-inner"></div>
       <button class="desc-close-mob" id="desc-close">&#94;</button>
     </div>
-
   </div>
 
 </div>
@@ -441,37 +516,69 @@ img { display:block; }
 <script>
 /* ══ DATA ══ */
 const DEMO = [
-  { images:['https://placehold.co/800x600/1a1a1a/555?text=artwork'], title:'«Организация органики»', material:'бумага 200 г/м², сангина', size:'1000 × 1000мм', year:'2026 г.', price:'?0.000₽' },
-  { images:['https://placehold.co/800x1000/1a1a1a/555?text=artwork+2'], title:'«Без названия»', material:'холст, масло', size:'600 × 800мм', year:'2025 г.', price:null }
+  {
+    images:[],
+    title:'«Организация органики»',
+    material:'бумага 200 г/м², сангина',
+    size:'1000 × 1000мм',
+    year:'2026 г.',
+    price:'?0.000₽'
+  },
+  {
+    images:[],
+    title:'«Без названия»',
+    material:'холст, масло',
+    size:'600 × 800мм',
+    year:'2025 г.',
+    price:null
+  }
 ];
+
 const SEC = {
-  branching:{ title:'код ветвления', vec:'assets/puzzle.png',
+  branching:{
+    title:'код ветвления', vec:'assets/puzzle.png',
     desc:'Этот раздел посвящён структурным принципам жизни.\nЯ рассматриваю жизнь как систему связей, в которой каждое действие опирается на предыдущее и формирует последующее.\n\nВ своей работе я обращаюсь к двум способам организации: древовидному и ризоматическому. Первый предполагает иерархию и направленный рост, второй — множественность связей и отсутствие единого центра.\n\nВ реальности эти принципы накладываются друг на друга, формируя сеть пересечений.',
-    arts: DEMO.map(d=>({...d})) },
-  metaphysics:{ title:'метафизика повседневности', vec:'assets/moth_circle.png',
+    arts: DEMO.map(d => ({...d, images:[...d.images]}))
+  },
+  metaphysics:{
+    title:'метафизика повседневности', vec:'assets/moth_circle.png',
     desc:'В этом разделе исследуется скрытое измерение обыденного.\nКаждый предмет, жест, взгляд несёт в себе след более глубоких структур.',
-    arts: DEMO.map(d=>({...d})) },
-  digital:{ title:'цифровые работы', vec:'assets/dragons.png',
+    arts: DEMO.map(d => ({...d, images:[...d.images]}))
+  },
+  digital:{
+    title:'цифровые работы', vec:'assets/dragons.png',
     desc:'Цифровые практики как расширение традиционных. Инструмент меняется — вопрос остаётся прежним.',
-    arts: DEMO.map(d=>({...d})) },
-  jewelry:{ title:'ювелирные изделия', vec:null,
+    arts: DEMO.map(d => ({...d, images:[...d.images]}))
+  },
+  jewelry:{
+    title:'ювелирные изделия', vec:null,
     desc:'Ювелирное ремесло как форма концептуального высказывания.',
-    arts: DEMO.map(d=>({...d})) }
-};
-const PG = {
-  bio:{ title:'bio', text:'Александр Вечеров — художник, работающий на пересечении концептуального реализма и сюрреализма.\n\nОсновные медиумы: живопись, графика, ленд-арт, керамическая скульптура, ювелирное ремесло и текстиль.\n\nУчастник выставок. Работы находятся в частных коллекциях.' },
-  statement:{ title:'artist statement', text:'Я работаю в жанре концептуального реализма с элементами сюрреализма. Этот подход представляется мне наиболее точным инструментом для акцентирования внимания на скрытых механизмах и мистических проявлениях реальности.\n\nТрадиционные техники и материалы привлекают меня своей каноничностью, поскольку позволяют говорить о фундаментальных процессах, опираясь на доступные для восприятия образы.\n\nВ своём творчестве я исследую структуру жизни и принципы её организации.\n\nРабота начинается с идеи, фиксируется в эскизе и продолжается через многократный поиск композиционных решений.\n\nЯ воспринимаю художественную практику как способ фиксации и исследования невидимых связей, формирующих наше существование.' }
+    arts: DEMO.map(d => ({...d, images:[...d.images]}))
+  }
 };
 
-let cur=null, descOpen=false, rev=false, lbArr=[], lbI=0;
+const PG = {
+  bio:{
+    title:'bio',
+    text:'Александр Вечеров — художник, работающий на пересечении концептуального реализма и сюрреализма. Основные медиумы: живопись, графика, ленд-арт, керамическая скульптура, ювелирное ремесло и текстиль.\n\nРодился и работает в России. Исследует структуру жизни, принципы её организации и механизмы роста систем.\n\nУчастник выставок. Работы находятся в частных коллекциях.'
+  },
+  statement:{
+    title:'artist statement',
+    text:'Я работаю в жанре концептуального реализма с элементами сюрреализма. Этот подход представляется мне наиболее точным инструментом для акцентирования внимания на скрытых механизмах и мистических проявлениях реальности.\n\nТрадиционные техники и материалы привлекают меня своей каноничностью, поскольку позволяют говорить о фундаментальных процессах, опираясь на доступные для восприятия образы.\n\nВ своём творчестве я исследую структуру жизни и принципы её организации. Меня занимает то, как жизнь, эволюционируя, формирует ризоматические узлы.\n\nРабота начинается с идеи, фиксируется в эскизе и продолжается через многократный поиск композиционных решений.\n\nЯ воспринимаю художественную практику как способ фиксации и исследования невидимых связей, формирующих наше существование.'
+  }
+};
+
+/* ══ STATE ══ */
+let cur = null, descOpen = false, rev = false, lbArr = [], lbI = 0;
 const isMob = () => window.innerWidth <= 768;
 
+/* ══ VIEWS ══ */
 const show = id => {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + id).classList.add('active');
 };
 
-/* ── HOME ── */
+/* ══ HOME PHOTO ══ */
 document.getElementById('inp-home').addEventListener('change', function() {
   const f = this.files[0]; if (!f) return;
   const url = URL.createObjectURL(f);
@@ -483,13 +590,13 @@ document.getElementById('inp-home').addEventListener('change', function() {
   document.getElementById('sec-bg-img').style.backgroundImage = `url('${url}')`;
 });
 
-/* ── MENU ── */
+/* ══ MENU ══ */
 const mOv = document.getElementById('menu-ov');
 document.getElementById('btn-menu').addEventListener('click', () => mOv.classList.add('open'));
 document.getElementById('menu-dismiss').addEventListener('click', e => {
   if (!e.target.closest('.menu-panel')) mOv.classList.remove('open');
 });
-// свайп вправо — закрыть
+/* свайп вправо — закрыть */
 let swX = null;
 document.getElementById('menu-panel').addEventListener('touchstart', e => { swX = e.touches[0].clientX; }, { passive:true });
 document.getElementById('menu-panel').addEventListener('touchend', e => {
@@ -497,7 +604,6 @@ document.getElementById('menu-panel').addEventListener('touchend', e => {
   if (e.changedTouches[0].clientX - swX > 60) mOv.classList.remove('open');
   swX = null;
 }, { passive:true });
-
 document.querySelectorAll('.menu-item').forEach(el => el.addEventListener('click', () => {
   mOv.classList.remove('open');
   setTimeout(() => openSec(el.dataset.sec), 80);
@@ -507,7 +613,7 @@ document.querySelectorAll('.menu-sub').forEach(el => el.addEventListener('click'
   setTimeout(() => openPg(el.dataset.page), 80);
 }));
 
-/* ── SECTION ── */
+/* ══ SECTION ══ */
 function openSec(key) {
   cur = key; descOpen = false; rev = false;
   const s = SEC[key];
@@ -515,44 +621,64 @@ function openSec(key) {
   document.getElementById('sec-titleBtn').textContent = s.title;
   document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
 
-  // вектор в топбаре
+  /* декоративный вектор в левом углу раздела */
+  const deco = document.getElementById('sec-deco');
+  if (s.vec) { deco.src = s.vec; deco.style.display = 'block'; }
+  else { deco.style.display = 'none'; }
+
+  /* вектор в топбаре (появляется при открытом описании) */
   const vecWrap = document.getElementById('sec-topbar-vec');
   const vecImg  = document.getElementById('sec-topbar-vec-img');
+  vecWrap.classList.remove('visible');
   if (s.vec) { vecImg.src = s.vec; vecImg.style.display = 'block'; }
   else { vecImg.style.display = 'none'; }
-  vecWrap.classList.remove('visible'); // скрыт пока описание закрыто
 
-  // фон
+  /* фон */
   const fi = s.arts[0]?.images[0];
   if (fi) document.getElementById('sec-bg-img').style.backgroundImage = `url('${fi}')`;
 
-  // описание
+  /* описание */
   document.getElementById('sec-desc-inner').innerHTML =
-    s.desc.split('\n\n').map(p => `<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+    s.desc.split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
 
+  /* сброс */
   document.getElementById('sec-desc').classList.remove('open');
   document.getElementById('sec-chrono').classList.remove('on');
   document.getElementById('sec-chrono-m').classList.remove('on');
 
   renderArts();
   show('section');
+  requestAnimationFrame(positionBody);
+}
+
+/* позиционируем .sec-body под топбаром */
+function positionBody() {
+  const topbar = document.getElementById('view-section').querySelector('.sec-topbar');
+  const chronoRow = document.querySelector('.chrono-row');
+  let top = topbar.offsetTop + topbar.offsetHeight;
+  if (chronoRow && getComputedStyle(chronoRow).display !== 'none') {
+    top += chronoRow.offsetHeight;
+  }
+  document.querySelector('.sec-body').style.top = top + 'px';
 }
 
 window.addEventListener('resize', () => {
-  if (cur) document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
+  if (cur) {
+    document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
+    positionBody();
+  }
 });
 
+/* toggle описания */
 function setDesc(open) {
   descOpen = open;
   document.getElementById('sec-desc').classList.toggle('open', open);
-  // вектор появляется вместе с описанием
   document.getElementById('sec-topbar-vec').classList.toggle('visible', open);
 }
-
 document.getElementById('sec-titleBtn').addEventListener('click', () => setDesc(!descOpen));
 document.getElementById('desc-close').addEventListener('click', () => setDesc(false));
 
-// свайп вниз — закрыть desc (mobile)
+/* свайп вниз — закрыть описание (mobile) */
 let dsY = null;
 document.getElementById('sec-desc').addEventListener('touchstart', e => { dsY = e.touches[0].clientY; }, { passive:true });
 document.getElementById('sec-desc').addEventListener('touchend', e => {
@@ -561,6 +687,7 @@ document.getElementById('sec-desc').addEventListener('touchend', e => {
   dsY = null;
 }, { passive:true });
 
+/* хронология */
 function togChrono() {
   rev = !rev;
   document.getElementById('sec-chrono').classList.toggle('on', rev);
@@ -571,30 +698,28 @@ document.getElementById('sec-chrono').addEventListener('click', togChrono);
 document.getElementById('sec-chrono-m').addEventListener('click', togChrono);
 document.getElementById('sec-back').addEventListener('click', () => show('home'));
 
-/* artwork upload */
+/* загрузка изображений в раздел */
 document.getElementById('inp-art').addEventListener('change', function() {
   if (!cur) return;
   const images = Array.from(this.files).map(f => URL.createObjectURL(f));
-  // добавляем как одну карточку с несколькими изображениями (карусель)
-  SEC[cur].arts.push({
-    images,
-    title: null, material: null, size: null, year: null, price: null
-  });
+  SEC[cur].arts.push({ images, title:null, material:null, size:null, year:null, price:null });
   renderArts();
   const fi = SEC[cur].arts[0]?.images[0];
   if (fi) document.getElementById('sec-bg-img').style.backgroundImage = `url('${fi}')`;
   this.value = '';
 });
 
+/* рендер карточек */
 function renderArts() {
   const arr = rev ? [...SEC[cur].arts].reverse() : SEC[cur].arts;
   const list = document.getElementById('art-list');
   list.innerHTML = '';
-  arr.forEach((art, ai) => {
+
+  arr.forEach(art => {
     const card = document.createElement('div');
     card.className = 'art-card';
 
-    // карусель изображений
+    /* 1. ИЗОБРАЖЕНИЕ (карусель) */
     if (art.images?.length) {
       const carousel = document.createElement('div');
       carousel.className = 'art-carousel';
@@ -605,7 +730,6 @@ function renderArts() {
       art.images.forEach((src, si) => {
         const slide = document.createElement('div');
         slide.className = 'art-slide';
-        slide.style.minWidth = '100%';
         const img = document.createElement('img');
         img.src = src;
         img.addEventListener('click', () => openLB(art.images, si));
@@ -614,7 +738,7 @@ function renderArts() {
       });
       carousel.appendChild(track);
 
-      // dots навигация (если > 1 фото)
+      /* точки */
       let dotsEl = null;
       if (art.images.length > 1) {
         dotsEl = document.createElement('div');
@@ -628,16 +752,15 @@ function renderArts() {
         carousel.appendChild(dotsEl);
       }
 
-      // свайп по карусели
-      let tx = null;
-      let curSlide = 0;
+      /* свайп */
+      let tx = null, cs = 0;
       carousel.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive:true });
       carousel.addEventListener('touchend', e => {
         if (tx === null) return;
         const dx = e.changedTouches[0].clientX - tx;
         if (Math.abs(dx) > 40) {
-          curSlide = Math.max(0, Math.min(curSlide + (dx < 0 ? 1 : -1), art.images.length - 1));
-          goArtSlide(track, dotsEl, curSlide);
+          cs = Math.max(0, Math.min(cs + (dx < 0 ? 1 : -1), art.images.length - 1));
+          goArtSlide(track, dotsEl, cs);
         }
         tx = null;
       }, { passive:true });
@@ -645,7 +768,7 @@ function renderArts() {
       card.appendChild(carousel);
     }
 
-    // инфо о работе
+    /* 2. INFO — всегда ПОСЛЕ изображения */
     const info = document.createElement('div');
     info.className = 'art-info';
     if (art.title) {
@@ -654,8 +777,10 @@ function renderArts() {
     }
     if (art.material || art.size) {
       const m = document.createElement('div'); m.className = 'art-mat';
-      let h = ''; if (art.material) h += art.material; if (art.size) h += (art.material ? '<br>' : '') + art.size;
-      m.innerHTML = h; info.appendChild(m);
+      let h = art.material || '';
+      if (art.size) h += (art.material ? '<br>' : '') + art.size;
+      m.innerHTML = h;
+      info.appendChild(m);
     }
     if (art.year) {
       const y = document.createElement('div'); y.className = 'art-year'; y.textContent = art.year;
@@ -671,13 +796,12 @@ function renderArts() {
 }
 
 function goArtSlide(track, dotsEl, idx) {
-  const slides = track.querySelectorAll('.art-slide');
-  const w = slides[0]?.offsetWidth || track.parentElement.offsetWidth;
+  const w = track.parentElement.offsetWidth;
   track.style.transform = `translateX(${-idx * w}px)`;
   if (dotsEl) dotsEl.querySelectorAll('.art-dot').forEach((d, i) => d.classList.toggle('on', i === idx));
 }
 
-/* ── TEXT ── */
+/* ══ TEXT ══ */
 function openPg(key) {
   const p = PG[key];
   document.getElementById('text-ttl').textContent = p.title;
@@ -686,7 +810,7 @@ function openPg(key) {
 }
 document.getElementById('text-back').addEventListener('click', () => show('home'));
 
-/* ── LIGHTBOX ── */
+/* ══ LIGHTBOX ══ */
 function openLB(imgs, idx) {
   lbArr = imgs; lbI = idx;
   const tr = document.getElementById('lb-track'); tr.innerHTML = '';
@@ -697,8 +821,10 @@ function openLB(imgs, idx) {
   });
   const dots = document.getElementById('lb-dots'); dots.innerHTML = '';
   if (imgs.length > 1) imgs.forEach((_, i) => {
-    const d = document.createElement('div'); d.className = 'lb-dot' + (i === 0 ? ' on' : '');
-    d.addEventListener('click', () => goLB(i)); dots.appendChild(d);
+    const d = document.createElement('div');
+    d.className = 'lb-dot' + (i === 0 ? ' on' : '');
+    d.addEventListener('click', () => goLB(i));
+    dots.appendChild(d);
   });
   document.getElementById('lb-prv').style.display = imgs.length > 1 ? '' : 'none';
   document.getElementById('lb-nxt').style.display = imgs.length > 1 ? '' : 'none';
@@ -731,18 +857,17 @@ document.getElementById('lb-stage').addEventListener('touchend', e => {
   ltx = null;
 }, { passive:true });
 
-/* ── PINCH ZOOM (mobile) ── */
+/* ══ PINCH ZOOM (mobile) ══ */
 (function() {
-  let el=null, sc=1, px=0, py=0, ld=0, lx=0, ly=0, lt=0;
+  let el = null, sc = 1, px = 0, py = 0, ld = 0, lx = 0, ly = 0, lt = 0;
   const rst = () => {
     if (!el) return;
-    el.style.transform = ''; el.style.zIndex = ''; el.style.position = '';
+    el.style.transform = ''; el.style.position = ''; el.style.zIndex = '';
     el = null; sc = 1; px = 0; py = 0;
   };
   document.addEventListener('touchstart', e => {
     if (window.innerWidth > 768) return;
-    const t = e.target.closest('.art-slide img');
-    if (!t) return;
+    const t = e.target.closest('.art-slide img'); if (!t) return;
     if (e.touches.length === 2) {
       el = t;
       ld = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
