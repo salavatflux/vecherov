@@ -220,11 +220,13 @@ img { display: block; max-width: 100%; }
   /* display:flex flex-direction:column от .view.active */
 }
 
-/* Размытый фон */
+/* Размытый фон — фиксированный, не скроллится */
 .sec-bg {
-  position: absolute; inset: 0;
+  position: fixed; inset: 0;
   z-index: 0; overflow: hidden;
+  display: none; /* показывается только когда view-section активен */
 }
+#view-section.active .sec-bg { display: block; }
 .sec-bg-img {
   position: absolute; inset: -8%;
   background: center/cover no-repeat;
@@ -302,13 +304,12 @@ img { display: block; max-width: 100%; }
   .sec-topbar-vec { width: 35vw; max-width: none; }
 }
 
-/* Body: занимает оставшееся место, содержит scroll + desc */
+/* Body: занимает оставшееся место */
 .sec-body {
   position: relative; z-index: 10;
-  flex: 1;
+  flex: 1 1 0;
   display: flex;
-  overflow: hidden; /* нужно чтобы desc не выходил за пределы */
-  min-height: 0;   /* критично для flex-скролла */
+  min-height: 0;
 }
 
 /* Декоративный вектор раздела в левом углу body */
@@ -344,15 +345,13 @@ img { display: block; max-width: 100%; }
   .sec-scroll { padding: 12px 20px 80px; }
 }
 
-/* Desc panel — десктоп: выезжает справа */
+/* Desc panel — прозрачная, только текст виден */
 .sec-desc {
   flex-shrink: 0;
   width: 0;
   overflow: hidden;
   transition: width .65s cubic-bezier(0.16, 1, 0.3, 1);
-  background: rgba(0,0,0,.82);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: transparent;
   z-index: 3;
 }
 .sec-desc.open {
@@ -818,10 +817,6 @@ function openSec(key) {
   if (s.vec) { deco.src = s.vec; deco.style.display = 'block'; }
   else { deco.style.display = 'none'; }
 
-  // Фон
-  const fi = s.arts.find(a => a.images.length)?.images[0];
-  if (fi) document.getElementById('sec-bg-img').style.backgroundImage = `url('${fi}')`;
-
   // Описание
   document.getElementById('sec-desc-inner').innerHTML =
     s.desc.split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
@@ -873,8 +868,6 @@ document.getElementById('inp-art').addEventListener('change', function () {
   const images = Array.from(this.files).map(f => URL.createObjectURL(f));
   SEC[cur].arts.push({ images, title: null, material: null, size: null, year: null, price: null });
   renderArts();
-  const fi = SEC[cur].arts.find(a => a.images.length)?.images[0];
-  if (fi) document.getElementById('sec-bg-img').style.backgroundImage = `url('${fi}')`;
   this.value = '';
 });
 
