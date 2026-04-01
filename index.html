@@ -126,21 +126,18 @@ img { display:block; }
    │ SCROLL                                   │
    └──────────────────────────────────────────┘
 ══════════════════════════════════════ */
-#view-section {
-  position:relative; overflow:hidden; background:#0a0a0a;
-}
+#view-section { position:relative; background:#0a0a0a; }
 
 .sec-bg { position:absolute; inset:0; z-index:0; overflow:hidden; }
 .sec-bg-img { position:absolute; inset:-8%; background:center/cover no-repeat; filter:blur(18px); transform:scale(1.15); }
 .sec-bg-dim { position:absolute; inset:0; background:rgba(0,0,0,.90); }
 
-/* ── TOPBAR ── прозрачнее чтобы вектор просвечивал */
+/* ── TOPBAR — прозрачный как на макете ── */
 .sec-topbar {
   position:relative; z-index:20; flex-shrink:0;
   display:flex; align-items:center; justify-content:space-between;
-  padding:20px 36px;
-  background:rgba(0,0,0,.45);
-  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  padding:22px 36px;
+  background:transparent;
   overflow:hidden;
   min-height:64px;
 }
@@ -170,8 +167,7 @@ img { display:block; }
 .chrono-row {
   display:none; position:relative; z-index:20; flex-shrink:0;
   justify-content:flex-end; padding:0 36px 12px;
-  background:rgba(0,0,0,.82);
-  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  background:transparent;
 }
 @media (max-width:768px) {
   .sec-topbar { padding:16px 20px; overflow:hidden; }
@@ -183,27 +179,28 @@ img { display:block; }
 /* ── BODY: scroll + desc side by side ── */
 .sec-body {
   z-index:10;
-  flex:1; display:flex;
+  flex:1;
+  display:flex;
+  min-height:0; /* CRITICAL — without this flex child can't scroll */
   overflow:hidden;
-  min-height:0;
   position:relative;
 }
 
 /* SCROLL */
 .sec-scroll {
   flex:1;
-  overflow-y:scroll; /* scroll not auto — forces scrollable context on iOS */
+  min-height:0;
+  overflow-y:auto;
   overflow-x:hidden;
   padding:20px 36px 60px;
   -webkit-overflow-scrolling:touch;
-  overscroll-behavior:contain;
 }
 @media (max-width:768px) { .sec-scroll { padding:14px 20px 80px; } }
 
-/* DESC PANEL — всегда справа на десктопе */
+/* DESC PANEL — справа на десктопе */
 .sec-desc {
   width:0; overflow:hidden; flex-shrink:0;
-  transition:width .5s cubic-bezier(.4,0,.2,1);
+  transition:width .65s cubic-bezier(0.16,1,0.3,1);
   background:rgba(0,0,0,.82);
   backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
 }
@@ -443,16 +440,23 @@ img { display:block; }
 
 <script>
 /* ══ DATA ══ */
+const DEMO = [
+  { images:['https://placehold.co/800x600/1a1a1a/555?text=artwork'], title:'«Организация органики»', material:'бумага 200 г/м², сангина', size:'1000 × 1000мм', year:'2026 г.', price:'?0.000₽' },
+  { images:['https://placehold.co/800x1000/1a1a1a/555?text=artwork+2'], title:'«Без названия»', material:'холст, масло', size:'600 × 800мм', year:'2025 г.', price:null }
+];
 const SEC = {
   branching:{ title:'код ветвления', vec:'assets/puzzle.png',
     desc:'Этот раздел посвящён структурным принципам жизни.\nЯ рассматриваю жизнь как систему связей, в которой каждое действие опирается на предыдущее и формирует последующее.\n\nВ своей работе я обращаюсь к двум способам организации: древовидному и ризоматическому. Первый предполагает иерархию и направленный рост, второй — множественность связей и отсутствие единого центра.\n\nВ реальности эти принципы накладываются друг на друга, формируя сеть пересечений.',
-    arts:[
-      { images:[], title:'«Организация органики»', material:'бумага 200 г/м², сангина', size:'1000 × 1000мм', year:'2026 г.', price:'?0.000₽' }
-    ]
-  },
-  metaphysics:{ title:'метафизика повседневности', vec:'assets/moth_circle.png', desc:'В этом разделе исследуется скрытое измерение обыденного.\nКаждый предмет, жест, взгляд несёт в себе след более глубоких структур.', arts:[] },
-  digital:{ title:'цифровые работы', vec:'assets/dragons.png', desc:'Цифровые практики как расширение традиционных. Инструмент меняется — вопрос остаётся прежним.', arts:[] },
-  jewelry:{ title:'ювелирные изделия', vec:null, desc:'Ювелирное ремесло как форма концептуального высказывания.', arts:[] }
+    arts: DEMO.map(d=>({...d})) },
+  metaphysics:{ title:'метафизика повседневности', vec:'assets/moth_circle.png',
+    desc:'В этом разделе исследуется скрытое измерение обыденного.\nКаждый предмет, жест, взгляд несёт в себе след более глубоких структур.',
+    arts: DEMO.map(d=>({...d})) },
+  digital:{ title:'цифровые работы', vec:'assets/dragons.png',
+    desc:'Цифровые практики как расширение традиционных. Инструмент меняется — вопрос остаётся прежним.',
+    arts: DEMO.map(d=>({...d})) },
+  jewelry:{ title:'ювелирные изделия', vec:null,
+    desc:'Ювелирное ремесло как форма концептуального высказывания.',
+    arts: DEMO.map(d=>({...d})) }
 };
 const PG = {
   bio:{ title:'bio', text:'Александр Вечеров — художник, работающий на пересечении концептуального реализма и сюрреализма.\n\nОсновные медиумы: живопись, графика, ленд-арт, керамическая скульптура, ювелирное ремесло и текстиль.\n\nУчастник выставок. Работы находятся в частных коллекциях.' },
