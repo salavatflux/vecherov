@@ -11,8 +11,8 @@ button { background:none; border:none; cursor:pointer; font-family:inherit; colo
 a { color:inherit; text-decoration:none; }
 img { display:block; }
 
-.view { position:fixed; inset:0; display:none; flex-direction:column; }
-.view.active { display:flex; }
+.view { position:fixed; inset:0; display:none; }
+.view.active { display:flex; flex-direction:column; }
 
 /* ══════════════════════════════════════
    HOME
@@ -97,9 +97,9 @@ img { display:block; }
 .menu-sub { font-size:clamp(11px,1.1vw,13px); font-weight:100; letter-spacing:.3em; text-transform:lowercase; text-align:right; padding:13px 0; cursor:pointer; transition:opacity .2s; width:100%; }
 .menu-sub:hover { opacity:.5; }
 .menu-icons { display:flex; justify-content:flex-end; gap:22px; margin-top:auto; padding-top:32px; }
-.menu-icons a { opacity:.65; transition:opacity .2s; }
+.menu-icons a { opacity:.65; transition:opacity .2s; color:#fff; display:flex; align-items:center; }
 .menu-icons a:hover { opacity:1; }
-.menu-icons img { width:22px; height:22px; object-fit:contain; filter:invert(1); }
+.menu-icons svg { width:22px; height:22px; }
 
 @media (max-width:768px) {
   .menu-panel { width:100%; padding:52px 32px 44px; }
@@ -126,24 +126,22 @@ img { display:block; }
    │ SCROLL                                   │
    └──────────────────────────────────────────┘
 ══════════════════════════════════════ */
-#view-section { position:relative; overflow:hidden; background:#0a0a0a; }
+#view-section {
+  position:relative; overflow:hidden; background:#0a0a0a;
+}
 
 .sec-bg { position:absolute; inset:0; z-index:0; overflow:hidden; }
 .sec-bg-img { position:absolute; inset:-8%; background:center/cover no-repeat; filter:blur(18px); transform:scale(1.15); }
 .sec-bg-dim { position:absolute; inset:0; background:rgba(0,0,0,.90); }
 
-/* ── TOPBAR ──
-   Содержит: [< назад] | [вектор с маской] | [хронология] [НАЗВАНИЕ]
-   Вектор: position:absolute left, clip-path обрезает его
-   так чтобы он занимал 1/5 ширины топбара
-*/
+/* ── TOPBAR ── прозрачнее чтобы вектор просвечивал */
 .sec-topbar {
   position:relative; z-index:20; flex-shrink:0;
   display:flex; align-items:center; justify-content:space-between;
   padding:20px 36px;
-  background:rgba(0,0,0,.82);
+  background:rgba(0,0,0,.45);
   backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
-  overflow:hidden; /* обрезает вектор */
+  overflow:hidden;
   min-height:64px;
 }
 
@@ -182,18 +180,23 @@ img { display:block; }
   .sec-topbar-vec { width:40vw; max-width:none; }
 }
 
-/* ── BODY: scroll + desc side by side (desktop) ── */
+/* ── BODY: scroll + desc side by side ── */
 .sec-body {
-  position:relative; z-index:10;
-  flex:1; display:flex; overflow:hidden;
-  min-height:0; /* critical for flex children to scroll */
+  z-index:10;
+  flex:1; display:flex;
+  overflow:hidden;
+  min-height:0;
+  position:relative;
 }
 
-/* SCROLL — лента артворков */
+/* SCROLL */
 .sec-scroll {
-  flex:1; overflow-y:auto; overflow-x:hidden;
+  flex:1;
+  overflow-y:scroll; /* scroll not auto — forces scrollable context on iOS */
+  overflow-x:hidden;
   padding:20px 36px 60px;
   -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
 }
 @media (max-width:768px) { .sec-scroll { padding:14px 20px 80px; } }
 
@@ -214,16 +217,18 @@ img { display:block; }
 .sec-desc-inner p { font-size:9pt; font-weight:300; letter-spacing:.08em; line-height:1.75; color:rgba(255,255,255,.8); text-align:justify; }
 .sec-desc-inner p+p { margin-top:10px; }
 
-/* ТОЛЬКО на телефонах (не iPad) — desc выезжает снизу */
+/* ТОЛЬКО на телефонах (не iPad) — desc выезжает снизу плавно */
 @media (max-width:500px) {
   .sec-body { flex-direction:column; }
   .sec-desc {
-    width:100% !important; height:0;
-    transition:height .5s cubic-bezier(.4,0,.2,1);
+    width:100% !important;
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .55s cubic-bezier(.4,0,.2,1);
     order:-1;
   }
-  .sec-desc.open { height:auto; max-height:50vh; }
-  .sec-desc-inner { width:100%; height:auto; max-height:50vh; padding:16px 20px 12px; }
+  .sec-desc.open { max-height:55vh; }
+  .sec-desc-inner { width:100%; height:auto; padding:16px 20px 12px; }
 }
 
 .desc-close-mob {
@@ -251,11 +256,26 @@ img { display:block; }
 .art-dot.on { background:rgba(255,255,255,.8); }
 
 /* info под фото */
-.art-info { margin-top:14px; }
-.art-title { font-size:18px; font-weight:400; letter-spacing:.1em; color:#eef3f6; line-height:1.3; }
-.art-mat { margin-top:8px; font-size:9px; font-weight:400; letter-spacing:.1em; color:#9b9b9b; line-height:1.35; }
-.art-year { margin-top:5px; font-size:9px; font-weight:400; letter-spacing:.1em; color:#9b9b9b; }
-.art-price { margin-top:10px; font-size:15px; font-weight:400; letter-spacing:.06em; color:#2d2d2d; }
+.art-info { margin-top:16px; }
+.art-title {
+  font-size:clamp(16px,1.6vw,22px);
+  font-weight:400; letter-spacing:.1em; color:#eef3f6; line-height:1.3;
+}
+.art-mat {
+  margin-top:10px;
+  font-size:clamp(9px,0.8vw,11px);
+  font-weight:400; letter-spacing:.1em; color:#9b9b9b; line-height:1.4;
+}
+.art-year {
+  margin-top:5px;
+  font-size:clamp(9px,0.8vw,11px);
+  font-weight:400; letter-spacing:.1em; color:#9b9b9b;
+}
+.art-price {
+  margin-top:12px;
+  font-size:clamp(13px,1.2vw,16px);
+  font-weight:400; letter-spacing:.06em; color:#555;
+}
 
 /* temp upload */
 .art-upload { margin-bottom:4px; }
@@ -330,9 +350,25 @@ img { display:block; }
       <div class="menu-sub" data-page="statement">artist statement</div>
     </nav>
     <div class="menu-icons">
-      <a href="mailto:eveningoff16@gmail.com"><img src="assets/mail_icon.png" onerror="this.closest('a').style.display='none'" alt=""></a>
-      <a href="https://t.me/eveningoff" target="_blank"><img src="assets/telegram_icon.png" onerror="this.closest('a').style.display='none'" alt=""></a>
-      <a href="https://instagram.com/eveningoff" target="_blank"><img src="assets/instagram_icon.png" onerror="this.closest('a').style.display='none'" alt=""></a>
+      <a href="mailto:eveningoff16@gmail.com" title="email">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <polyline points="2,4 12,13 22,4"/>
+        </svg>
+      </a>
+      <a href="https://t.me/eveningoff" target="_blank" title="telegram">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </a>
+      <a href="https://instagram.com/eveningoff" target="_blank" title="instagram">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5"/>
+          <circle cx="12" cy="12" r="4"/>
+          <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+        </svg>
+      </a>
     </div>
   </div>
 </div>
