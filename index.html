@@ -117,6 +117,7 @@ img { display:block; max-width:100%; }
 
 @keyframes secFadeIn { from { opacity:0; } to { opacity:1; } }
 #view-section.active { animation: secFadeIn .5s ease both; }
+#view-text.active    { animation: secFadeIn .5s ease both; }
 
 /* Фон раздела — размытая версия фото главной */
 .sec-bg {
@@ -228,10 +229,10 @@ img { display:block; max-width:100%; }
 .art-card { margin-top:32px; position:relative; z-index:2; }
 
 /* Карусель изображений */
-.art-carousel { overflow:hidden; }
+.art-carousel { overflow:hidden; width:100%; }
 .art-track { display:flex; transition:transform .4s ease; will-change:transform; }
 .art-slide { flex-shrink:0; width:100%; }
-.art-slide img { width:100%; height:auto; cursor:pointer; }
+.art-slide img { width:100%; height:auto; cursor:pointer; display:block; }
 .art-dots { display:flex; gap:5px; margin-top:8px; }
 .art-dot { width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,.25); cursor:pointer; transition:background .2s; }
 .art-dot.on { background:rgba(255,255,255,.85); }
@@ -254,7 +255,7 @@ img { display:block; max-width:100%; }
 */
 #view-text { background:#0a0a0a; }
 .text-top { flex-shrink:0; display:flex; align-items:baseline; justify-content:space-between; padding:28px 48px; }
-.text-ttl { font-size:clamp(13px,1.1vw,16px); font-weight:100; letter-spacing:.3em; text-transform:lowercase; }
+.text-ttl { font-size:clamp(13px,1.1vw,16px); font-weight:300; letter-spacing:.3em; text-transform:lowercase; }
 .text-body { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:36px 10vw 60px; min-height:0; }
 .text-body p { font-size:clamp(14px,1.1vw,16px); font-weight:300; letter-spacing:.05em; line-height:1.9; color:rgba(255,255,255,.88); text-align:justify; text-indent:2em; }
 @media (max-width:768px) { .text-top { padding:20px 24px; } .text-body { padding:24px 24px 60px; } }
@@ -508,8 +509,10 @@ function openSec(key) {
   document.getElementById('sec-desc-inner').innerHTML =
     s.desc.split('\n\n').map(p => `<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
 
-  /* сброс */
-  document.getElementById('sec-desc').classList.remove('open');
+  /* описание открыто по умолчанию */
+  document.getElementById('sec-desc').classList.add('open');
+  document.getElementById('sec-topbar-vec').classList.add('show');
+  descOpen = true;
   document.getElementById('sec-chrono').classList.remove('on');
   document.getElementById('sec-chrono-m').classList.remove('on');
   document.getElementById('sec-scroll').scrollTop = 0;
@@ -547,7 +550,17 @@ function togChrono() {
 }
 document.getElementById('sec-chrono').addEventListener('click', togChrono);
 document.getElementById('sec-chrono-m').addEventListener('click', togChrono);
-document.getElementById('sec-back').addEventListener('click', () => show('home'));
+document.getElementById('sec-back').addEventListener('click', () => { mOv.classList.remove('open'); show('home'); });
+
+/* закрыть описание при скролле до конца */
+document.getElementById('sec-scroll').addEventListener('scroll', function() {
+  if (!descOpen) return;
+  if (this.scrollTop + this.clientHeight >= this.scrollHeight - 40) setDesc(false);
+});
+/* закрыть описание при клике/тапе по области ленты */
+document.getElementById('sec-scroll').addEventListener('click', e => {
+  if (descOpen && !e.target.closest('.art-carousel') && !e.target.closest('.art-upload')) setDesc(false);
+});
 
 /* загрузка изображений в раздел — НЕ меняет фон раздела */
 document.getElementById('inp-art').addEventListener('change', function() {
