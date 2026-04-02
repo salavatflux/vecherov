@@ -115,6 +115,9 @@ img { display:block; max-width:100%; }
 */
 #view-section { background:#0a0a0a; overflow:hidden; }
 
+@keyframes secFadeIn { from { opacity:0; } to { opacity:1; } }
+#view-section.active { animation: secFadeIn .5s ease both; }
+
 /* Фон раздела — размытая версия фото главной */
 .sec-bg {
   position:absolute; inset:0; z-index:0; overflow:hidden;
@@ -167,7 +170,7 @@ img { display:block; max-width:100%; }
 
 /* Контейнер scroll + desc — flex row */
 .sec-body {
-  flex:1; display:flex; min-height:0; overflow:hidden;
+  flex:1; display:flex; min-height:0;
   position:relative; z-index:10;
 }
 
@@ -184,7 +187,7 @@ img { display:block; max-width:100%; }
 .sec-desc {
   flex-shrink:0;
   width:0; overflow:hidden;
-  transition:width .65s cubic-bezier(0.16,1,0.3,1);
+  transition:width .45s ease-out;
   z-index:15;
 }
 .sec-desc.open { width:clamp(260px,32vw,400px); }
@@ -549,11 +552,17 @@ document.getElementById('sec-back').addEventListener('click', () => show('home')
 /* загрузка изображений в раздел — НЕ меняет фон раздела */
 document.getElementById('inp-art').addEventListener('change', function() {
   if (!cur) return;
-  Array.from(this.files).forEach(f => {
-    SEC[cur].arts.push({
-      images: [URL.createObjectURL(f)],
-      title: null, material: null, size: null, year: null, price: null
-    });
+  const files = Array.from(this.files);
+  files.forEach(f => {
+    const url = URL.createObjectURL(f);
+    // найти первую карточку без изображения и добавить туда
+    const empty = SEC[cur].arts.find(a => a.images.length === 0);
+    if (empty) {
+      empty.images.push(url);
+    } else {
+      // все карточки уже с фото — создать новую
+      SEC[cur].arts.push({ images:[url], title:null, material:null, size:null, year:null, price:null });
+    }
   });
   renderArts();
   this.value = '';
