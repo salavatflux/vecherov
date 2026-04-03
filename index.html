@@ -11,47 +11,35 @@ button { background:none; border:none; cursor:pointer; font-family:inherit; colo
 a { color:inherit; text-decoration:none; }
 img { display:block; max-width:100%; }
 
-/* ─── VIEWS ───────────────────────────────
-   Каждый экран занимает весь viewport.
-   Скролл только внутри специальных контейнеров.
-*/
+/* ── VIEWS ── */
 .view { position:fixed; inset:0; display:none; }
 .view.active { display:flex; flex-direction:column; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+#view-section.active, #view-text.active { animation:fadeIn .5s ease both; }
 
-/* ─── HOME ────────────────────────────────
-   Макет desctop1/mobile_1:
-   фото на весь экран, имя слева, три квадрата справа
-*/
+/* ══════════════════════════
+   HOME
+══════════════════════════ */
 #view-home { overflow:hidden; }
-
 .home-bg { position:absolute; inset:0; background:#111; }
 .home-bg img { width:100%; height:100%; object-fit:cover; }
 .home-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.2em; color:rgba(255,255,255,.1); text-transform:uppercase; }
-
 .home-ui { position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; }
 .home-top { display:flex; justify-content:space-between; align-items:flex-start; padding:28px 32px; }
-
 .artist-name { font-size:clamp(16px,1.8vw,24px); font-weight:300; letter-spacing:.22em; line-height:1.3; text-transform:uppercase; }
-
 .dots-btn { display:flex; flex-direction:column; gap:5px; padding:2px; }
 .dots-btn span { display:block; width:4px; height:4px; background:#fff; }
-
 .home-upload { position:absolute; bottom:32px; left:50%; transform:translateX(-50%); z-index:10; }
 .home-upload label { display:block; cursor:pointer; font-size:10px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; border:1px solid rgba(255,255,255,.22); padding:9px 22px; background:rgba(0,0,0,.4); white-space:nowrap; color:#fff; }
 #inp-home { display:none; }
 
-/* ─── MENU ────────────────────────────────
-   Макет desctop_2:
-   blur+tint только на панели справа,
-   левая часть с фото остаётся видна.
-   Пункты вверху right-align, иконки внизу.
-*/
+/* ══════════════════════════
+   MENU
+══════════════════════════ */
 .menu-ov { position:fixed; inset:0; z-index:200; pointer-events:none; }
 .menu-ov.open { pointer-events:all; }
-
 .menu-dismiss { position:absolute; inset:0; background:rgba(0,0,0,0); transition:background .7s; }
 .menu-ov.open .menu-dismiss { background:rgba(0,0,0,.3); }
-
 .menu-panel {
   position:absolute; top:0; right:0; bottom:0;
   width:clamp(280px,42vw,520px);
@@ -64,95 +52,49 @@ img { display:block; max-width:100%; }
   will-change:transform;
 }
 .menu-ov.open .menu-panel { transform:translateX(0); }
-
-/* анимация пунктов */
-@keyframes menuIn { from { opacity:0; transform:translateX(14px); } to { opacity:1; transform:translateX(0); } }
-.menu-ov.open .menu-item:nth-child(1) { animation:menuIn .6s .08s both; }
-.menu-ov.open .menu-item:nth-child(2) { animation:menuIn .6s .15s both; }
-.menu-ov.open .menu-item:nth-child(3) { animation:menuIn .6s .22s both; }
-.menu-ov.open .menu-item:nth-child(4) { animation:menuIn .6s .29s both; }
-.menu-ov.open .menu-line             { animation:menuIn .6s .35s both; }
-.menu-ov.open .menu-sub:nth-child(1) { animation:menuIn .6s .41s both; }
-.menu-ov.open .menu-sub:nth-child(2) { animation:menuIn .6s .47s both; }
-.menu-ov.open .menu-icons            { animation:menuIn .6s .53s both; }
-
+@keyframes menuIn { from{opacity:0;transform:translateX(14px)} to{opacity:1;transform:translateX(0)} }
+.menu-ov.open .menu-item:nth-child(1){animation:menuIn .6s .08s both}
+.menu-ov.open .menu-item:nth-child(2){animation:menuIn .6s .15s both}
+.menu-ov.open .menu-item:nth-child(3){animation:menuIn .6s .22s both}
+.menu-ov.open .menu-item:nth-child(4){animation:menuIn .6s .29s both}
+.menu-ov.open .menu-item:nth-child(5){animation:menuIn .6s .36s both}
+.menu-ov.open .menu-item:nth-child(6){animation:menuIn .6s .43s both}
+.menu-ov.open .menu-line{animation:menuIn .6s .48s both}
+.menu-ov.open .menu-sub:nth-child(1){animation:menuIn .6s .53s both}
+.menu-ov.open .menu-sub:nth-child(2){animation:menuIn .6s .58s both}
+.menu-ov.open .menu-icons{animation:menuIn .6s .63s both}
 .menu-nav { flex:1; display:flex; flex-direction:column; justify-content:flex-start; align-items:flex-end; }
-
-.menu-item { font-size:clamp(16px,1.8vw,22px); font-weight:300; letter-spacing:.3em; text-transform:lowercase; text-align:right; padding:18px 0; line-height:1.3; cursor:pointer; transition:opacity .2s; width:100%; }
+.menu-item { font-size:clamp(16px,1.8vw,22px); font-weight:300; letter-spacing:.3em; text-transform:lowercase; text-align:right; padding:16px 0; line-height:1.3; cursor:pointer; transition:opacity .2s; width:100%; }
 .menu-item:hover { opacity:.5; }
-
-.menu-line { height:1px; background:rgba(255,255,255,.15); width:25%; margin:14px 0 14px auto; }
-
-.menu-sub { font-size:clamp(16px,1.8vw,22px); font-weight:100; letter-spacing:.3em; text-transform:lowercase; text-align:right; padding:18px 0; cursor:pointer; transition:opacity .2s; width:100%; }
+.menu-line { height:1px; background:rgba(255,255,255,.15); width:25%; margin:12px 0 12px auto; }
+.menu-sub { font-size:clamp(16px,1.8vw,22px); font-weight:100; letter-spacing:.3em; text-transform:lowercase; text-align:right; padding:16px 0; cursor:pointer; transition:opacity .2s; width:100%; }
 .menu-sub:hover { opacity:.5; }
-
 .menu-icons { display:flex; justify-content:flex-end; gap:22px; margin-top:auto; padding-top:32px; }
 .menu-icons a { opacity:.65; transition:opacity .2s; color:#fff; display:flex; }
 .menu-icons a:hover { opacity:1; }
 .menu-icons svg { width:22px; height:22px; }
+@media(max-width:768px){ .menu-panel{width:100%;padding:52px 32px 44px} }
 
-@media (max-width:768px) { .menu-panel { width:100%; padding:52px 32px 44px; } }
-
-/* ─── SECTION ─────────────────────────────
-   Макет desctop_3 / mobile_3.
-
-   Структура (flex column, высота = viewport):
-   ┌──────────────────────────────────────┐
-   │ topbar  flex-shrink:0                │
-   ├──────────────────────────────────────┤
-   │ scroll  flex:1  overflow-y:auto      │  ← скролл здесь
-   └──────────────────────────────────────┘
-
-   Описание раздела:
-   - десктоп: панель справа, выезжает через width
-   - mobile: выезжает сверху вниз через max-height
-
-   Фон раздела: тёмный (#0a0a0a), поверх него
-   размытое фото главной если оно было загружено.
-
-   Вектор раздела: position:absolute в .sec-scroll,
-   top-left, 20vw, pointer-events:none.
-*/
+/* ══════════════════════════
+   SECTION VIEW
+   topbar (flex-shrink:0)
+   sec-body (flex:1) = sec-scroll + sec-desc (desktop right)
+   sec-deco = position:absolute left top в sec-scroll, opacity .9
+══════════════════════════ */
 #view-section { background:#0a0a0a; overflow:hidden; }
-
-@keyframes secFadeIn { from { opacity:0; } to { opacity:1; } }
-#view-section.active { animation: secFadeIn .5s ease both; }
-#view-text.active    { animation: secFadeIn .5s ease both; }
-
-/* Фон раздела — размытая версия фото главной */
-.sec-bg {
-  position:absolute; inset:0; z-index:0; overflow:hidden;
-  background:#0a0a0a;
-}
-.sec-bg-img {
-  position:absolute; inset:-5%;
-  background-size:cover; background-position:center;
-  filter:blur(20px); transform:scale(1.1);
-  opacity:0; /* показывается только если есть фото */
-  transition:opacity .5s;
-}
+.sec-bg { position:absolute; inset:0; z-index:0; overflow:hidden; background:#0a0a0a; }
+.sec-bg-img { position:absolute; inset:-5%; background-size:cover; background-position:center; filter:blur(20px); transform:scale(1.1); opacity:0; transition:opacity .5s; }
 .sec-bg-img.loaded { opacity:1; }
 .sec-bg-dim { position:absolute; inset:0; background:rgba(0,0,0,.75); }
 
-/* Топбар: прозрачный, вектор частично виден слева */
-.sec-topbar {
-  position:relative; z-index:20; flex-shrink:0;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:22px 36px;
-  overflow:hidden; /* обрезает вектор справа */
-}
-@media (max-width:768px) { .sec-topbar { padding:16px 20px; } }
+/* Топбар */
+.sec-topbar { position:relative; z-index:20; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:22px 36px; overflow:hidden; }
+@media(max-width:768px){ .sec-topbar{padding:16px 20px} }
 
-/* Вектор в топбаре: еле виден, ярче когда описание открыто */
-.sec-topbar-vec {
-  position:absolute; left:0; top:0; bottom:0;
-  width:20vw; max-width:200px;
-  display:flex; align-items:center;
-  pointer-events:none; z-index:0;
-  opacity:.1; transition:opacity .6s;
-}
+/* Вектор в топбаре при открытом описании */
+.sec-topbar-vec { position:absolute; left:0; top:0; bottom:0; width:20vw; max-width:200px; display:flex; align-items:center; pointer-events:none; z-index:0; opacity:0; transition:opacity .45s ease-out; }
 .sec-topbar-vec img { width:100%; height:100%; object-fit:contain; object-position:left center; }
-.sec-topbar-vec.show { opacity:.85; }
+.sec-topbar-vec.show { opacity:.9; }
 
 .sec-back { position:relative; z-index:1; font-size:clamp(12px,1vw,15px); font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
 .sec-right { position:relative; z-index:1; display:flex; align-items:center; gap:28px; flex-shrink:0; }
@@ -163,72 +105,49 @@ img { display:block; max-width:100%; }
 
 /* Mobile: хронология строкой */
 .chrono-row { display:none; position:relative; z-index:20; flex-shrink:0; justify-content:flex-end; padding:0 20px 8px; }
-@media (max-width:768px) {
-  .sec-topbar .sec-chrono { display:none; }
-  .chrono-row { display:flex !important; }
-  .sec-topbar-vec { width:35vw; max-width:none; }
-}
+@media(max-width:768px){ .sec-topbar .sec-chrono{display:none} .chrono-row{display:flex!important} .sec-topbar-vec{width:35vw;max-width:none} }
 
-/* Контейнер scroll + desc — flex row */
-.sec-body {
-  flex:1; display:flex; min-height:0;
-  position:relative; z-index:10;
-}
+/* Body */
+.sec-body { flex:1; display:flex; min-height:0; position:relative; z-index:10; overflow:hidden; }
 
-/* Основная прокручиваемая область */
-.sec-scroll {
-  flex:1; overflow-y:auto; overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  padding:16px 36px 80px;
-  position:relative;
-}
-@media (max-width:768px) { .sec-scroll { padding:12px 20px 80px; } }
+/* Scroll */
+.sec-scroll { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding:16px 36px 80px; position:relative; }
+@media(max-width:768px){ .sec-scroll{padding:12px 20px 80px} }
 
-/* Описание раздела — desktop: выезжает справа в flex */
-.sec-desc {
-  flex-shrink:0;
-  width:0; overflow:hidden;
-  transition:width .45s ease-out;
-  z-index:15;
-}
-.sec-desc.open { width:clamp(260px,32vw,400px); }
-.sec-desc-inner {
-  width:clamp(260px,32vw,400px); height:100%;
-  overflow-y:auto; padding:20px 24px 24px 20px;
-  -webkit-overflow-scrolling:touch;
-}
-.sec-desc-inner p { font-size:9pt; font-weight:300; letter-spacing:.08em; line-height:1.75; color:rgba(255,255,255,.85); text-align:justify; }
-.sec-desc-inner p+p { margin-top:10px; }
-
-/* Mobile: описание сверху */
-@media (max-width:500px) {
-  .sec-body { flex-direction:column; }
-  .sec-desc {
-    width:100% !important; max-height:0;
-    overflow:hidden; flex-shrink:0;
-    transition:max-height .6s cubic-bezier(0.16,1,0.3,1);
-    order:-1;
-  }
-  .sec-desc.open { max-height:50vh; }
-  .sec-desc-inner { width:100%; height:auto; padding:16px 20px 12px; }
-}
-
-.desc-close-mob { display:none; width:100%; text-align:center; padding:6px 0; cursor:pointer; font-size:18px; color:rgba(255,255,255,.3); flex-shrink:0; }
-@media (max-width:768px) { .desc-close-mob { display:block; } }
-
-/* Декоративный вектор раздела */
+/* Декоративный вектор раздела — под кнопкой назад, левый угол */
 .sec-deco {
   position:absolute; left:0; top:0; z-index:1;
   width:20vw; height:20vw; max-width:200px; max-height:200px;
   object-fit:contain; object-position:left top;
-  pointer-events:none; opacity:.15;
+  pointer-events:none; opacity:.9;
 }
-@media (max-width:768px) { .sec-deco { width:50vw; height:50vw; max-width:none; max-height:none; opacity:.12; } }
+@media(max-width:768px){ .sec-deco{width:50vw;height:50vw;max-width:none;max-height:none} }
 
-/* Карточка работы */
+/* Описание раздела — desktop: transform вместо width для плавности */
+.sec-desc {
+  flex-shrink:0; overflow:hidden;
+  width:clamp(260px,32vw,400px);
+  transform:translateX(100%);
+  transition:transform .45s ease-out;
+  z-index:15;
+}
+.sec-desc.open { transform:translateX(0); }
+.sec-desc-inner { width:clamp(260px,32vw,400px); height:100%; overflow-y:auto; padding:20px 24px 24px 20px; -webkit-overflow-scrolling:touch; }
+.sec-desc-inner p { font-size:9pt; font-weight:300; letter-spacing:.08em; line-height:1.75; color:rgba(255,255,255,.85); text-align:justify; }
+.sec-desc-inner p+p { margin-top:10px; }
+
+/* Mobile: описание снизу */
+@media(max-width:768px){
+  .sec-body { flex-direction:column; overflow:visible; }
+  .sec-desc { position:fixed; left:0; right:0; bottom:0; width:100%!important; transform:translateY(100%); transition:transform .45s ease-out; max-height:55vh; }
+  .sec-desc.open { transform:translateY(0); }
+  .sec-desc-inner { width:100%; height:auto; max-height:55vh; padding:16px 20px 12px; }
+}
+.desc-close-mob { display:none; width:100%; text-align:center; padding:6px 0; cursor:pointer; font-size:18px; color:rgba(255,255,255,.3); flex-shrink:0; }
+@media(max-width:768px){ .desc-close-mob{display:block} }
+
+/* Artwork cards */
 .art-card { margin-top:32px; position:relative; z-index:2; }
-
-/* Карусель изображений */
 .art-carousel { overflow:hidden; width:100%; }
 .art-track { display:flex; transition:transform .4s ease; will-change:transform; }
 .art-slide { flex-shrink:0; width:100%; }
@@ -236,45 +155,84 @@ img { display:block; max-width:100%; }
 .art-dots { display:flex; gap:5px; margin-top:8px; }
 .art-dot { width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,.25); cursor:pointer; transition:background .2s; }
 .art-dot.on { background:rgba(255,255,255,.85); }
-
-/* Информация о работе — под изображением */
 .art-info { margin-top:16px; }
 .art-title { font-size:clamp(18px,1.8vw,26px); font-weight:400; letter-spacing:.1em; color:#eef3f6; line-height:1.3; }
 .art-mat { margin-top:10px; font-size:clamp(10px,.85vw,12px); font-weight:400; letter-spacing:.1em; color:#9b9b9b; line-height:1.4; }
 .art-year { margin-top:5px; font-size:clamp(10px,.85vw,12px); font-weight:400; letter-spacing:.1em; color:#9b9b9b; }
 .art-price { margin-top:14px; font-size:clamp(14px,1.3vw,18px); font-weight:400; letter-spacing:.06em; color:#555; }
-
-/* Кнопка загрузки изображений */
 .art-upload { margin-bottom:8px; }
 .art-upload label { display:inline-block; cursor:pointer; font-size:9px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; border:1px solid rgba(255,255,255,.15); padding:7px 16px; background:rgba(255,255,255,.03); color:#fff; }
 #inp-art { display:none; }
 
-/* ─── TEXT VIEW ───────────────────────────
-   Макет desctop_4: [<назад] ... [заголовок]
-   текст: justified, indent, light
-*/
+/* ══════════════════════════
+   TEXT VIEW
+══════════════════════════ */
 #view-text { background:#0a0a0a; }
 .text-top { flex-shrink:0; display:flex; align-items:baseline; justify-content:space-between; padding:28px 48px; }
 .text-ttl { font-size:clamp(13px,1.1vw,16px); font-weight:300; letter-spacing:.3em; text-transform:lowercase; }
 .text-body { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:36px 10vw 60px; min-height:0; }
 .text-body p { font-size:clamp(14px,1.1vw,16px); font-weight:300; letter-spacing:.05em; line-height:1.9; color:rgba(255,255,255,.88); text-align:justify; text-indent:2em; }
-@media (max-width:768px) { .text-top { padding:20px 24px; } .text-body { padding:24px 24px 60px; } }
+@media(max-width:768px){ .text-top{padding:20px 24px} .text-body{padding:24px 24px 60px} }
 
-/* ─── LIGHTBOX ────────────────────────────*/
+/* ══════════════════════════
+   LIGHTBOX
+══════════════════════════ */
 .lb { position:fixed; inset:0; z-index:500; display:none; align-items:center; justify-content:center; }
 .lb.open { display:flex; }
 .lb-bg { position:absolute; inset:0; cursor:pointer; backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); background:rgba(0,0,0,.85); }
 .lb-stage { position:relative; z-index:1; }
 .lb-track { display:flex; transition:transform .4s ease; }
 .lb-slide img { max-width:calc(100vw - 80px); max-height:calc(100vh - 80px); object-fit:contain; }
-@media (max-width:768px) { .lb-slide img { max-width:calc(100vw - 48px); } }
+@media(max-width:768px){ .lb-slide img{max-width:calc(100vw - 48px)} }
 .lb-arr { position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.1); font-size:22px; display:flex; align-items:center; justify-content:center; z-index:2; }
 .lb-arr:hover { background:rgba(255,255,255,.25); }
-.lb-prv { left:-52px; } .lb-nxt { right:-52px; }
-@media (max-width:768px) { .lb-prv { left:-28px; } .lb-nxt { right:-28px; } }
+.lb-prv{left:-52px} .lb-nxt{right:-52px}
+@media(max-width:768px){ .lb-prv{left:-28px} .lb-nxt{right:-28px} }
 .lb-dots { position:absolute; bottom:-28px; left:50%; transform:translateX(-50%); display:flex; gap:6px; }
 .lb-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.3); cursor:pointer; }
 .lb-dot.on { background:rgba(255,255,255,.9); }
+
+/* ══════════════════════════
+   ADMIN PANEL
+══════════════════════════ */
+#view-admin { background:#0a0a0a; overflow:hidden; }
+.admin-top { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:24px 32px; border-bottom:1px solid rgba(255,255,255,.08); }
+.admin-top h1 { font-size:13px; font-weight:300; letter-spacing:.3em; text-transform:uppercase; }
+.admin-body { flex:1; overflow-y:auto; padding:24px 32px 60px; -webkit-overflow-scrolling:touch; min-height:0; }
+
+/* Admin sections */
+.admin-section { border:1px solid rgba(255,255,255,.1); margin-bottom:16px; border-radius:2px; overflow:hidden; }
+.admin-section-head { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(255,255,255,.04); cursor:pointer; }
+.admin-section-head span { font-size:12px; font-weight:300; letter-spacing:.2em; text-transform:lowercase; }
+.admin-section-body { padding:16px; display:none; }
+.admin-section-body.open { display:block; }
+
+/* Admin fields */
+.admin-field { margin-bottom:14px; }
+.admin-field label { display:block; font-size:9px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:6px; }
+.admin-field input, .admin-field textarea {
+  width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12);
+  color:#fff; font-family:inherit; font-size:12px; padding:8px 10px;
+  outline:none; resize:vertical;
+}
+.admin-field input:focus, .admin-field textarea:focus { border-color:rgba(255,255,255,.3); }
+
+.admin-btn { font-size:9px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; border:1px solid rgba(255,255,255,.2); padding:7px 14px; cursor:pointer; color:#fff; transition:background .2s; }
+.admin-btn:hover { background:rgba(255,255,255,.08); }
+.admin-btn.danger { border-color:rgba(255,80,80,.3); color:rgba(255,120,120,.8); }
+.admin-btn.danger:hover { background:rgba(255,80,80,.1); }
+.admin-btn.primary { border-color:rgba(255,255,255,.4); }
+
+/* Admin artworks list */
+.admin-art-item { border:1px solid rgba(255,255,255,.08); padding:12px; margin-bottom:10px; }
+.admin-art-item img { width:80px; height:60px; object-fit:cover; margin-bottom:8px; }
+.admin-art-row { display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; }
+.admin-art-row .admin-field { flex:1; min-width:120px; margin-bottom:0; }
+
+/* Upload area in admin */
+.admin-upload-area { border:1px dashed rgba(255,255,255,.2); padding:20px; text-align:center; cursor:pointer; transition:border-color .2s; margin-bottom:14px; }
+.admin-upload-area:hover { border-color:rgba(255,255,255,.4); }
+.admin-upload-area span { font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); }
 
 ::-webkit-scrollbar { width:2px; }
 ::-webkit-scrollbar-track { background:transparent; }
@@ -290,7 +248,7 @@ img { display:block; max-width:100%; }
   </div>
   <div class="home-ui">
     <div class="home-top">
-      <div class="artist-name">Александр<br>Вечеров</div>
+      <div class="artist-name" id="artist-name-el">Александр<br>Вечеров</div>
       <button class="dots-btn" id="btn-menu">
         <span></span><span></span><span></span>
       </button>
@@ -306,15 +264,7 @@ img { display:block; max-width:100%; }
 <div class="menu-ov" id="menu-ov">
   <div class="menu-dismiss" id="menu-dismiss"></div>
   <div class="menu-panel" id="menu-panel">
-    <nav class="menu-nav">
-      <div class="menu-item" data-sec="branching">код ветвления</div>
-      <div class="menu-item" data-sec="metaphysics">метафизика<br>повседневности</div>
-      <div class="menu-item" data-sec="digital">цифровые работы</div>
-      <div class="menu-item" data-sec="jewelry">ювелирные<br>изделия</div>
-      <div class="menu-line"></div>
-      <div class="menu-sub" data-page="bio">bio</div>
-      <div class="menu-sub" data-page="statement">artist statement</div>
-    </nav>
+    <nav class="menu-nav" id="menu-nav"></nav>
     <div class="menu-icons">
       <a href="mailto:eveningoff16@gmail.com" title="email">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
@@ -331,13 +281,10 @@ img { display:block; max-width:100%; }
 
 <!-- SECTION -->
 <div id="view-section" class="view">
-
   <div class="sec-bg" id="sec-bg">
     <div class="sec-bg-img" id="sec-bg-img"></div>
     <div class="sec-bg-dim"></div>
   </div>
-
-  <!-- Топбар -->
   <div class="sec-topbar">
     <div class="sec-topbar-vec" id="sec-topbar-vec">
       <img id="sec-topbar-vec-img" src="" alt="" onerror="this.style.display='none'">
@@ -348,15 +295,10 @@ img { display:block; max-width:100%; }
       <button class="sec-title-btn" id="sec-title-btn"></button>
     </div>
   </div>
-
-  <!-- Mobile: хронология строкой -->
   <div class="chrono-row">
     <button class="sec-chrono" id="sec-chrono-m">хронология</button>
   </div>
-
-  <!-- Описание раздела + лента работ -->
-  <div class="sec-body">
-    <!-- Прокручиваемая лента работ -->
+  <div class="sec-body" id="sec-body">
     <div class="sec-scroll" id="sec-scroll">
       <img class="sec-deco" id="sec-deco" src="" alt="" onerror="this.style.display='none'" style="display:none">
       <div class="art-upload">
@@ -365,23 +307,29 @@ img { display:block; max-width:100%; }
       </div>
       <div id="art-list"></div>
     </div>
-
-    <!-- Описание раздела — справа -->
     <div class="sec-desc" id="sec-desc">
       <div class="sec-desc-inner" id="sec-desc-inner"></div>
       <button class="desc-close-mob" id="desc-close">&#94;</button>
     </div>
   </div>
-
 </div>
 
 <!-- TEXT -->
 <div id="view-text" class="view">
   <div class="text-top">
-    <button class="sec-back" id="text-back">< назад</button>
+    <button id="text-back" class="sec-back">< назад</button>
     <div class="text-ttl" id="text-ttl"></div>
   </div>
   <div class="text-body" id="text-body"></div>
+</div>
+
+<!-- ADMIN -->
+<div id="view-admin" class="view">
+  <div class="admin-top">
+    <h1>Админ-панель</h1>
+    <button class="admin-btn" id="admin-close">← выйти</button>
+  </div>
+  <div class="admin-body" id="admin-body"></div>
 </div>
 
 <!-- LIGHTBOX -->
@@ -396,123 +344,139 @@ img { display:block; max-width:100%; }
 </div>
 
 <script>
-/* DATA */
-const SEC = {
-  branching: {
-    title: 'код ветвления',
-    vec: 'assets/puzzle.png',
-    desc: 'Этот раздел посвящён структурным принципам жизни.\nЯ рассматриваю жизнь как систему связей, в которой каждое действие опирается на предыдущее и формирует последующее.\n\nВ своей работе я обращаюсь к двум способам организации: древовидному и ризоматическому. Первый предполагает иерархию и направленный рост, второй — множественность связей и отсутствие единого центра.\n\nВ реальности эти принципы накладываются друг на друга, формируя сеть пересечений.',
-    arts: [
-      { images:[], title:'«Организация органики»', material:'бумага 200 г/м², сангина', size:'1000 × 1000мм', year:'2026 г.', price:'?0.000₽' },
-      { images:[], title:'«Без названия»', material:'холст, масло', size:'600 × 800мм', year:'2025 г.', price:null }
-    ]
-  },
-  metaphysics: {
-    title: 'метафизика повседневности', vec: 'assets/moth_circle.png',
-    desc: 'В этом разделе исследуется скрытое измерение обыденного.\nКаждый предмет, жест, взгляд несёт в себе след более глубоких структур.',
-    arts: [
-      { images:[], title:'«Без названия»', material:'бумага, карандаш', size:'400 × 600мм', year:'2025 г.', price:null }
-    ]
-  },
-  digital: {
-    title: 'цифровые работы', vec: 'assets/dragons.png',
-    desc: 'Цифровые практики как расширение традиционных. Инструмент меняется — вопрос остаётся прежним.',
-    arts: []
-  },
-  jewelry: {
-    title: 'ювелирные изделия', vec: null,
-    desc: 'Ювелирное ремесло как форма концептуального высказывания.',
-    arts: []
-  }
+/* ══════════════════════════
+   STATE — единый источник правды
+══════════════════════════ */
+const STATE = {
+  artistName: 'Александр\nВечеров',
+  homePhoto: null,
+  sections: [
+    {
+      id:'branching', title:'код ветвления', vec:null, type:'section',
+      desc:'Этот раздел посвящён структурным принципам жизни.\nЯ рассматриваю жизнь как систему связей, в которой каждое действие опирается на предыдущее и формирует последующее.\n\nВ своей работе я обращаюсь к двум способам организации: древовидному и ризоматическому.\n\nВ реальности эти принципы накладываются друг на друга, формируя сеть пересечений.',
+      arts:[
+        {images:[], title:'«Организация органики»', material:'бумага 200 г/м², сангина', size:'1000 × 1000мм', year:'2026 г.', price:'?0.000₽'},
+        {images:[], title:'«Без названия»', material:'холст, масло', size:'600 × 800мм', year:'2025 г.', price:null}
+      ]
+    },
+    {
+      id:'metaphysics', title:'метафизика повседневности', vec:null, type:'section',
+      desc:'В этом разделе исследуется скрытое измерение обыденного.\nКаждый предмет, жест, взгляд несёт в себе след более глубоких структур.',
+      arts:[{images:[], title:'«Без названия»', material:'бумага, карандаш', size:'400 × 600мм', year:'2025 г.', price:null}]
+    },
+    {
+      id:'digital', title:'цифровые работы', vec:null, type:'section',
+      desc:'Цифровые практики как расширение традиционных. Инструмент меняется — вопрос остаётся прежним.',
+      arts:[]
+    },
+    {
+      id:'jewelry', title:'ювелирные изделия', vec:null, type:'section',
+      desc:'Ювелирное ремесло как форма концептуального высказывания.',
+      arts:[]
+    },
+    {
+      id:'bio', title:'bio', type:'page',
+      text:'Александр Вечеров — художник, работающий на пересечении концептуального реализма и сюрреализма. Основные медиумы: живопись, графика, ленд-арт, керамическая скульптура, ювелирное ремесло и текстиль.\n\nРодился и работает в России. Исследует структуру жизни, принципы её организации и механизмы роста систем.\n\nУчастник выставок. Работы находятся в частных коллекциях.'
+    },
+    {
+      id:'statement', title:'artist statement', type:'page',
+      text:'Я работаю в жанре концептуального реализма с элементами сюрреализма. Этот подход представляется мне наиболее точным инструментом для акцентирования внимания на скрытых механизмах и мистических проявлениях реальности.\n\nТрадиционные техники и материалы привлекают меня своей каноничностью, поскольку позволяют говорить о фундаментальных процессах, опираясь на доступные для восприятия образы.\n\nВ своём творчестве я исследую структуру жизни и принципы её организации. Меня занимает то, как жизнь, эволюционируя, формирует ризоматические узлы.\n\nРабота начинается с идеи, фиксируется в эскизе и продолжается через многократный поиск композиционных решений.\n\nЯ воспринимаю художественную практику как способ фиксации и исследования невидимых связей, формирующих наше существование.'
+    }
+  ]
 };
 
-const PG = {
-  bio: {
-    title: 'bio',
-    text: 'Александр Вечеров — художник, работающий на пересечении концептуального реализма и сюрреализма. Основные медиумы: живопись, графика, ленд-арт, керамическая скульптура, ювелирное ремесло и текстиль.\n\nРодился и работает в России. Исследует структуру жизни, принципы её организации и механизмы роста систем.\n\nУчастник выставок. Работы находятся в частных коллекциях.'
-  },
-  statement: {
-    title: 'artist statement',
-    text: 'Я работаю в жанре концептуального реализма с элементами сюрреализма. Этот подход представляется мне наиболее точным инструментом для акцентирования внимания на скрытых механизмах и мистических проявлениях реальности.\n\nТрадиционные техники и материалы привлекают меня своей каноничностью, поскольку позволяют говорить о фундаментальных процессах, опираясь на доступные для восприятия образы.\n\nВ своём творчестве я исследую структуру жизни и принципы её организации. Меня занимает то, как жизнь, эволюционируя, формирует ризоматические узлы.\n\nРабота начинается с идеи, фиксируется в эскизе и продолжается через многократный поиск композиционных решений.\n\nЯ воспринимаю художественную практику как способ фиксации и исследования невидимых связей, формирующих наше существование.'
-  }
-};
-
-/* STATE */
 let cur = null, descOpen = false, rev = false, lbArr = [], lbI = 0;
 const isMob = () => window.innerWidth <= 768;
 
-/* VIEWS */
+/* ── VIEWS ── */
 function show(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + id).classList.add('active');
 }
 
-/* HOME PHOTO — только для главного экрана */
+/* ── MENU RENDER ── */
+function renderMenu() {
+  const nav = document.getElementById('menu-nav');
+  nav.innerHTML = '';
+  const sections = STATE.sections.filter(s => s.type === 'section');
+  const pages    = STATE.sections.filter(s => s.type === 'page');
+
+  sections.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'menu-item';
+    el.innerHTML = s.title.replace('\n','<br>');
+    el.addEventListener('click', () => { mOv.classList.remove('open'); setTimeout(() => openSec(s.id), 80); });
+    nav.appendChild(el);
+  });
+
+  const line = document.createElement('div');
+  line.className = 'menu-line';
+  nav.appendChild(line);
+
+  pages.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'menu-sub';
+    el.textContent = p.title;
+    el.addEventListener('click', () => { mOv.classList.remove('open'); setTimeout(() => openPage(p.id), 80); });
+    nav.appendChild(el);
+  });
+}
+
+/* ── HOME PHOTO ── */
 document.getElementById('inp-home').addEventListener('change', function() {
   const f = this.files[0]; if (!f) return;
   const url = URL.createObjectURL(f);
-  /* показываем на главном */
+  STATE.homePhoto = url;
   document.getElementById('home-ph').style.display = 'none';
   const bg = document.getElementById('home-bg');
   let img = bg.querySelector('img');
   if (!img) { img = document.createElement('img'); bg.prepend(img); }
   img.src = url;
-  /* фон разделов — та же фотка, размытая */
-  const secBg = document.getElementById('sec-bg-img');
-  secBg.style.backgroundImage = `url('${url}')`;
-  secBg.classList.add('loaded');
+  const sb = document.getElementById('sec-bg-img');
+  sb.style.backgroundImage = `url('${url}')`;
+  sb.classList.add('loaded');
 });
 
-/* MENU */
+/* ── MENU ── */
 const mOv = document.getElementById('menu-ov');
-document.getElementById('btn-menu').addEventListener('click', () => mOv.classList.add('open'));
+document.getElementById('btn-menu').addEventListener('click', () => { renderMenu(); mOv.classList.add('open'); });
 document.getElementById('menu-dismiss').addEventListener('click', e => {
   if (!e.target.closest('.menu-panel')) mOv.classList.remove('open');
 });
-/* свайп вправо закрывает */
 let swX = null;
-document.getElementById('menu-panel').addEventListener('touchstart', e => { swX = e.touches[0].clientX; }, { passive:true });
+document.getElementById('menu-panel').addEventListener('touchstart', e => { swX = e.touches[0].clientX; }, {passive:true});
 document.getElementById('menu-panel').addEventListener('touchend', e => {
   if (swX !== null && e.changedTouches[0].clientX - swX > 60) mOv.classList.remove('open');
   swX = null;
-}, { passive:true });
-document.querySelectorAll('.menu-item').forEach(el => el.addEventListener('click', () => {
-  mOv.classList.remove('open');
-  setTimeout(() => openSec(el.dataset.sec), 80);
-}));
-document.querySelectorAll('.menu-sub').forEach(el => el.addEventListener('click', () => {
-  mOv.classList.remove('open');
-  setTimeout(() => openPg(el.dataset.page), 80);
-}));
+}, {passive:true});
 
-/* SECTION */
-function openSec(key) {
-  cur = key; descOpen = false; rev = false;
-  const s = SEC[key];
+/* ── SECTION ── */
+function openSec(id) {
+  const s = STATE.sections.find(x => x.id === id);
+  if (!s || s.type !== 'section') return;
+  cur = id; rev = false;
 
   document.getElementById('sec-title-btn').textContent = s.title;
   document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
 
-  /* вектор в топбаре */
+  // Вектор
   const tvWrap = document.getElementById('sec-topbar-vec');
-  const tvImg = document.getElementById('sec-topbar-vec-img');
-  tvWrap.classList.remove('show');
-  if (s.vec) { tvImg.src = s.vec; tvImg.style.display = 'block'; }
-  else { tvImg.style.display = 'none'; }
+  const tvImg  = document.getElementById('sec-topbar-vec-img');
+  const deco   = document.getElementById('sec-deco');
+  if (s.vec) {
+    tvImg.src = s.vec; tvImg.style.display = 'block';
+    deco.src = s.vec; deco.style.display = 'block';
+  } else {
+    tvImg.style.display = 'none';
+    deco.style.display = 'none';
+  }
 
-  /* вектор в контенте */
-  const deco = document.getElementById('sec-deco');
-  if (s.vec) { deco.src = s.vec; deco.style.display = 'block'; }
-  else { deco.style.display = 'none'; }
-
-  /* текст описания */
+  // Описание
   document.getElementById('sec-desc-inner').innerHTML =
     s.desc.split('\n\n').map(p => `<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
 
-  /* описание открыто по умолчанию */
-  document.getElementById('sec-desc').classList.add('open');
-  document.getElementById('sec-topbar-vec').classList.add('show');
-  descOpen = true;
+  // Открываем описание по умолчанию
+  setDesc(true);
   document.getElementById('sec-chrono').classList.remove('on');
   document.getElementById('sec-chrono-m').classList.remove('on');
   document.getElementById('sec-scroll').scrollTop = 0;
@@ -525,23 +489,51 @@ window.addEventListener('resize', () => {
   if (cur) document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
 });
 
-/* описание */
 function setDesc(open) {
   descOpen = open;
   document.getElementById('sec-desc').classList.toggle('open', open);
   document.getElementById('sec-topbar-vec').classList.toggle('show', open);
 }
+
+// Клик по названию — toggle описания
 document.getElementById('sec-title-btn').addEventListener('click', () => setDesc(!descOpen));
+
+// Закрыть кнопкой (mobile)
 document.getElementById('desc-close').addEventListener('click', () => setDesc(false));
 
-let dsY = null;
-document.getElementById('sec-desc').addEventListener('touchstart', e => { dsY = e.touches[0].clientY; }, { passive:true });
-document.getElementById('sec-desc').addEventListener('touchend', e => {
-  if (dsY !== null && e.changedTouches[0].clientY - dsY > 50) setDesc(false);
-  dsY = null;
-}, { passive:true });
+// Desktop: клик по области ленты вне изображения/кнопок закрывает описание
+document.getElementById('sec-scroll').addEventListener('click', e => {
+  if (!descOpen || isMob()) return;
+  if (!e.target.closest('.art-carousel') && !e.target.closest('.art-upload') && !e.target.closest('.art-info')) {
+    setDesc(false);
+  }
+});
 
-/* хронология */
+// Desktop: свайп вправо по описанию закрывает
+let dSwX = null;
+document.getElementById('sec-desc').addEventListener('touchstart', e => { dSwX = e.touches[0].clientX; }, {passive:true});
+document.getElementById('sec-desc').addEventListener('touchend', e => {
+  if (dSwX === null) return;
+  const dx = e.changedTouches[0].clientX - dSwX;
+  // Mobile: свайп вниз
+  if (isMob()) {
+    // handled by touchstart/end on sec-desc below
+  } else {
+    if (dx > 60) setDesc(false); // свайп вправо на desktop
+  }
+  dSwX = null;
+}, {passive:true});
+
+// Mobile: свайп вниз по описанию закрывает
+let dSwY = null;
+document.getElementById('sec-desc').addEventListener('touchstart', e => { dSwY = e.touches[0].clientY; }, {passive:true});
+document.getElementById('sec-desc').addEventListener('touchend', e => {
+  if (!isMob() || dSwY === null) return;
+  if (e.changedTouches[0].clientY - dSwY > 50) setDesc(false);
+  dSwY = null;
+}, {passive:true});
+
+// Хронология
 function togChrono() {
   rev = !rev;
   document.getElementById('sec-chrono').classList.toggle('on', rev);
@@ -550,42 +542,27 @@ function togChrono() {
 }
 document.getElementById('sec-chrono').addEventListener('click', togChrono);
 document.getElementById('sec-chrono-m').addEventListener('click', togChrono);
-document.getElementById('sec-back').addEventListener('click', () => { mOv.classList.remove('open'); show('home'); });
 
-/* закрыть описание при скролле до конца */
-document.getElementById('sec-scroll').addEventListener('scroll', function() {
-  if (!descOpen) return;
-  if (this.scrollTop + this.clientHeight >= this.scrollHeight - 40) setDesc(false);
-});
-/* закрыть описание при клике/тапе по области ленты */
-document.getElementById('sec-scroll').addEventListener('click', e => {
-  if (descOpen && !e.target.closest('.art-carousel') && !e.target.closest('.art-upload')) setDesc(false);
-});
+// Назад → открыть меню
+document.getElementById('sec-back').addEventListener('click', () => { renderMenu(); mOv.classList.add('open'); show('home'); });
 
-/* загрузка изображений в раздел — НЕ меняет фон раздела */
+// Загрузка изображений
 document.getElementById('inp-art').addEventListener('change', function() {
   if (!cur) return;
-  const files = Array.from(this.files);
-  files.forEach(f => {
+  const sec = STATE.sections.find(s => s.id === cur);
+  Array.from(this.files).forEach(f => {
     const url = URL.createObjectURL(f);
-    // найти первую карточку без изображения и добавить туда
-    const empty = SEC[cur].arts.find(a => a.images.length === 0);
-    if (empty) {
-      empty.images.push(url);
-    } else {
-      // все карточки уже с фото — создать новую
-      SEC[cur].arts.push({ images:[url], title:null, material:null, size:null, year:null, price:null });
-    }
+    const empty = sec.arts.find(a => a.images.length === 0);
+    if (empty) { empty.images.push(url); }
+    else { sec.arts.push({images:[url], title:null, material:null, size:null, year:null, price:null}); }
   });
   renderArts();
   this.value = '';
 });
 
-/* рендер карточек:
-   1. изображение (карусель)
-   2. информация под изображением */
 function renderArts() {
-  const arr = rev ? [...SEC[cur].arts].reverse() : SEC[cur].arts;
+  const sec = STATE.sections.find(s => s.id === cur);
+  const arr = rev ? [...sec.arts].reverse() : sec.arts;
   const list = document.getElementById('art-list');
   list.innerHTML = '';
 
@@ -593,145 +570,322 @@ function renderArts() {
     const card = document.createElement('div');
     card.className = 'art-card';
 
-    /* изображение */
+    // 1. Изображение
     if (art.images && art.images.length) {
       const carousel = document.createElement('div');
       carousel.className = 'art-carousel';
       const track = document.createElement('div');
       track.className = 'art-track';
-
       art.images.forEach((src, si) => {
-        const slide = document.createElement('div');
-        slide.className = 'art-slide';
-        const img = document.createElement('img');
-        img.src = src;
+        const slide = document.createElement('div'); slide.className = 'art-slide';
+        const img = document.createElement('img'); img.src = src;
         img.addEventListener('click', () => openLB(art.images, si));
-        slide.appendChild(img);
-        track.appendChild(slide);
+        slide.appendChild(img); track.appendChild(slide);
       });
       carousel.appendChild(track);
-
       if (art.images.length > 1) {
-        const dots = document.createElement('div');
-        dots.className = 'art-dots';
+        const dots = document.createElement('div'); dots.className = 'art-dots';
         art.images.forEach((_, i) => {
           const d = document.createElement('div');
-          d.className = 'art-dot' + (i === 0 ? ' on' : '');
+          d.className = 'art-dot' + (i===0?' on':'');
           d.addEventListener('click', () => goCarousel(track, dots, i));
           dots.appendChild(d);
         });
         carousel.appendChild(dots);
       }
-
-      let tx = null, ci = 0;
-      carousel.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive:true });
-      carousel.addEventListener('touchend', e => {
-        if (tx === null) return;
-        const dx = e.changedTouches[0].clientX - tx;
-        if (Math.abs(dx) > 40) {
-          ci = Math.max(0, Math.min(ci + (dx < 0 ? 1 : -1), art.images.length - 1));
-          goCarousel(track, carousel.querySelector('.art-dots'), ci);
-        }
-        tx = null;
-      }, { passive:true });
-
+      let tx=null, ci=0;
+      carousel.addEventListener('touchstart', e=>{tx=e.touches[0].clientX;},{passive:true});
+      carousel.addEventListener('touchend', e=>{
+        if(tx===null)return;
+        const dx=e.changedTouches[0].clientX-tx;
+        if(Math.abs(dx)>40){ci=Math.max(0,Math.min(ci+(dx<0?1:-1),art.images.length-1));goCarousel(track,carousel.querySelector('.art-dots'),ci);}
+        tx=null;
+      },{passive:true});
       card.appendChild(carousel);
     }
 
-    /* информация под изображением */
-    const info = document.createElement('div');
-    info.className = 'art-info';
-    if (art.title) {
-      const t = document.createElement('div'); t.className = 'art-title'; t.textContent = art.title;
-      info.appendChild(t);
+    // 2. Информация под изображением
+    const info = document.createElement('div'); info.className = 'art-info';
+    if (art.title) { const t=document.createElement('div'); t.className='art-title'; t.textContent=art.title; info.appendChild(t); }
+    if (art.material||art.size) {
+      const m=document.createElement('div'); m.className='art-mat';
+      let h=art.material||''; if(art.size) h+=(art.material?'<br>':'')+art.size;
+      m.innerHTML=h; info.appendChild(m);
     }
-    if (art.material || art.size) {
-      const m = document.createElement('div'); m.className = 'art-mat';
-      let h = art.material || ''; if (art.size) h += (art.material ? '<br>' : '') + art.size;
-      m.innerHTML = h; info.appendChild(m);
-    }
-    if (art.year) {
-      const y = document.createElement('div'); y.className = 'art-year'; y.textContent = art.year;
-      info.appendChild(y);
-    }
-    if (art.price) {
-      const p = document.createElement('div'); p.className = 'art-price'; p.textContent = art.price;
-      info.appendChild(p);
-    }
+    if (art.year) { const y=document.createElement('div'); y.className='art-year'; y.textContent=art.year; info.appendChild(y); }
+    if (art.price) { const p=document.createElement('div'); p.className='art-price'; p.textContent=art.price; info.appendChild(p); }
     card.appendChild(info);
     list.appendChild(card);
   });
 }
 
 function goCarousel(track, dotsEl, idx) {
-  track.style.transform = `translateX(${-idx * track.parentElement.offsetWidth}px)`;
-  if (dotsEl) dotsEl.querySelectorAll('.art-dot').forEach((d, i) => d.classList.toggle('on', i === idx));
+  track.style.transform = `translateX(${-idx*track.parentElement.offsetWidth}px)`;
+  if (dotsEl) dotsEl.querySelectorAll('.art-dot').forEach((d,i)=>d.classList.toggle('on',i===idx));
 }
 
-/* TEXT */
-function openPg(key) {
-  const p = PG[key];
+/* ── PAGE (bio/statement) ── */
+function openPage(id) {
+  const p = STATE.sections.find(s => s.id === id);
+  if (!p || p.type !== 'page') return;
   document.getElementById('text-ttl').textContent = p.title;
-  document.getElementById('text-body').innerHTML = p.text.split('\n\n').map(t => `<p>${t}</p>`).join('');
+  document.getElementById('text-body').innerHTML = p.text.split('\n\n').map(t=>`<p>${t}</p>`).join('');
   show('text');
 }
-document.getElementById('text-back').addEventListener('click', () => show('home'));
+document.getElementById('text-back').addEventListener('click', () => { renderMenu(); mOv.classList.add('open'); show('home'); });
 
-/* LIGHTBOX */
+/* ── LIGHTBOX ── */
 function openLB(imgs, idx) {
-  lbArr = imgs; lbI = idx;
-  const tr = document.getElementById('lb-track'); tr.innerHTML = '';
-  imgs.forEach(src => { const s = document.createElement('div'); s.className = 'lb-slide'; const i = document.createElement('img'); i.src = src; s.appendChild(i); tr.appendChild(s); });
-  const dots = document.getElementById('lb-dots'); dots.innerHTML = '';
-  if (imgs.length > 1) imgs.forEach((_, i) => { const d = document.createElement('div'); d.className = 'lb-dot' + (i === 0 ? ' on' : ''); d.addEventListener('click', () => goLB(i)); dots.appendChild(d); });
-  document.getElementById('lb-prv').style.display = imgs.length > 1 ? '' : 'none';
-  document.getElementById('lb-nxt').style.display = imgs.length > 1 ? '' : 'none';
-  updLB();
-  document.getElementById('lb').classList.add('open');
+  lbArr=imgs; lbI=idx;
+  const tr=document.getElementById('lb-track'); tr.innerHTML='';
+  imgs.forEach(src=>{const s=document.createElement('div');s.className='lb-slide';const i=document.createElement('img');i.src=src;s.appendChild(i);tr.appendChild(s);});
+  const dots=document.getElementById('lb-dots'); dots.innerHTML='';
+  if(imgs.length>1) imgs.forEach((_,i)=>{const d=document.createElement('div');d.className='lb-dot'+(i===0?' on':'');d.addEventListener('click',()=>goLB(i));dots.appendChild(d);});
+  document.getElementById('lb-prv').style.display=imgs.length>1?'':'none';
+  document.getElementById('lb-nxt').style.display=imgs.length>1?'':'none';
+  updLB(); document.getElementById('lb').classList.add('open');
 }
-const closeLB = () => document.getElementById('lb').classList.remove('open');
-function goLB(i) { lbI = Math.max(0, Math.min(i, lbArr.length - 1)); updLB(); }
-function updLB() {
-  const sl = document.querySelectorAll('.lb-slide'); if (!sl.length) return;
-  document.getElementById('lb-track').style.transform = `translateX(${-lbI * (sl[0].offsetWidth || window.innerWidth - 80)}px)`;
-  document.querySelectorAll('.lb-dot').forEach((d, i) => d.classList.toggle('on', i === lbI));
+const closeLB=()=>document.getElementById('lb').classList.remove('open');
+function goLB(i){lbI=Math.max(0,Math.min(i,lbArr.length-1));updLB();}
+function updLB(){
+  const sl=document.querySelectorAll('.lb-slide'); if(!sl.length)return;
+  document.getElementById('lb-track').style.transform=`translateX(${-lbI*(sl[0].offsetWidth||window.innerWidth-80)}px)`;
+  document.querySelectorAll('.lb-dot').forEach((d,i)=>d.classList.toggle('on',i===lbI));
 }
-document.getElementById('lb-bg').addEventListener('click', closeLB);
-document.getElementById('lb-prv').addEventListener('click', e => { e.stopPropagation(); goLB(lbI - 1); });
-document.getElementById('lb-nxt').addEventListener('click', e => { e.stopPropagation(); goLB(lbI + 1); });
-document.addEventListener('keydown', e => {
-  if (!document.getElementById('lb').classList.contains('open')) return;
-  if (e.key === 'ArrowLeft') goLB(lbI - 1);
-  if (e.key === 'ArrowRight') goLB(lbI + 1);
-  if (e.key === 'Escape') closeLB();
+document.getElementById('lb-bg').addEventListener('click',closeLB);
+document.getElementById('lb-prv').addEventListener('click',e=>{e.stopPropagation();goLB(lbI-1);});
+document.getElementById('lb-nxt').addEventListener('click',e=>{e.stopPropagation();goLB(lbI+1);});
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('lb').classList.contains('open'))return;
+  if(e.key==='ArrowLeft')goLB(lbI-1);if(e.key==='ArrowRight')goLB(lbI+1);if(e.key==='Escape')closeLB();
 });
-let ltx = null;
-document.getElementById('lb-stage').addEventListener('touchstart', e => { ltx = e.touches[0].clientX; }, { passive:true });
-document.getElementById('lb-stage').addEventListener('touchend', e => {
-  if (ltx === null) return; const dx = e.changedTouches[0].clientX - ltx;
-  if (Math.abs(dx) > 40) dx < 0 ? goLB(lbI + 1) : goLB(lbI - 1); ltx = null;
-}, { passive:true });
+let ltx=null;
+document.getElementById('lb-stage').addEventListener('touchstart',e=>{ltx=e.touches[0].clientX;},{passive:true});
+document.getElementById('lb-stage').addEventListener('touchend',e=>{if(ltx===null)return;const dx=e.changedTouches[0].clientX-ltx;if(Math.abs(dx)>40)dx<0?goLB(lbI+1):goLB(lbI-1);ltx=null;},{passive:true});
 
-/* PINCH ZOOM mobile */
-(function() {
+/* ── PINCH ZOOM ── */
+(function(){
   let el=null,sc=1,px=0,py=0,ld=0,lx=0,ly=0,lt=0;
-  const rst=()=>{ if(!el)return; el.style.transform=''; el.style.position=''; el.style.zIndex=''; el=null; sc=1; px=0; py=0; };
-  document.addEventListener('touchstart', e => {
+  const rst=()=>{if(!el)return;el.style.transform='';el.style.position='';el.style.zIndex='';el=null;sc=1;px=0;py=0;};
+  document.addEventListener('touchstart',e=>{
     if(window.innerWidth>768)return;
-    const t=e.target.closest('.art-slide img'); if(!t)return;
-    if(e.touches.length===2){ el=t; ld=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY); }
-    if(e.touches.length===1){ lx=e.touches[0].clientX; ly=e.touches[0].clientY; }
-    const now=Date.now(); if(now-lt<280&&sc>1)rst(); lt=now;
-  }, {passive:true});
-  document.addEventListener('touchmove', e => {
+    const t=e.target.closest('.art-slide img');if(!t)return;
+    if(e.touches.length===2){el=t;ld=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);}
+    if(e.touches.length===1){lx=e.touches[0].clientX;ly=e.touches[0].clientY;}
+    const now=Date.now();if(now-lt<280&&sc>1)rst();lt=now;
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
     if(!el)return;
-    if(e.touches.length===2){ e.preventDefault(); const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY); sc=Math.max(1,Math.min(sc*(d/ld),4)); ld=d; }
-    else if(e.touches.length===1&&sc>1){ e.preventDefault(); px+=e.touches[0].clientX-lx; py+=e.touches[0].clientY-ly; lx=e.touches[0].clientX; ly=e.touches[0].clientY; }
-    el.style.transform=`scale(${sc}) translate(${px/sc}px,${py/sc}px)`; el.style.transformOrigin='center center'; el.style.position='relative'; el.style.zIndex='30';
-  }, {passive:false});
-  document.addEventListener('touchend', e => { if(!el)return; if(e.touches.length===0&&sc<=1.05)rst(); }, {passive:true});
+    if(e.touches.length===2){e.preventDefault();const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);sc=Math.max(1,Math.min(sc*(d/ld),4));ld=d;}
+    else if(e.touches.length===1&&sc>1){e.preventDefault();px+=e.touches[0].clientX-lx;py+=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}
+    el.style.transform=`scale(${sc}) translate(${px/sc}px,${py/sc}px)`;el.style.transformOrigin='center center';el.style.position='relative';el.style.zIndex='30';
+  },{passive:false});
+  document.addEventListener('touchend',e=>{if(!el)return;if(e.touches.length===0&&sc<=1.05)rst();},{passive:true});
 })();
 
+/* ══════════════════════════
+   ADMIN PANEL
+══════════════════════════ */
+// Открыть: triple tap на имя художника
+let tapCount = 0, tapTimer = null;
+document.getElementById('artist-name-el').addEventListener('click', () => {
+  tapCount++;
+  clearTimeout(tapTimer);
+  tapTimer = setTimeout(() => { tapCount = 0; }, 600);
+  if (tapCount >= 3) { tapCount = 0; openAdmin(); }
+});
+
+document.getElementById('admin-close').addEventListener('click', () => {
+  saveAdmin();
+  renderMenu();
+  show('home');
+});
+
+function openAdmin() {
+  renderAdmin();
+  show('admin');
+}
+
+function renderAdmin() {
+  const body = document.getElementById('admin-body');
+  body.innerHTML = '';
+
+  // ── Фото главной ──
+  const photoSec = adminBlock('Фото главной');
+  const photoBtn = document.createElement('div');
+  photoBtn.innerHTML = `<div class="admin-upload-area" id="admin-home-upload"><span>+ загрузить фото</span></div><input type="file" id="inp-admin-home" accept="image/*" style="display:none">`;
+  photoSec.appendChild(photoBtn);
+  body.appendChild(photoSec);
+  setTimeout(() => {
+    document.getElementById('admin-home-upload').addEventListener('click', () => document.getElementById('inp-admin-home').click());
+    document.getElementById('inp-admin-home').addEventListener('change', function() {
+      const f = this.files[0]; if (!f) return;
+      const url = URL.createObjectURL(f);
+      STATE.homePhoto = url;
+      document.getElementById('home-ph').style.display = 'none';
+      const bg = document.getElementById('home-bg');
+      let img = bg.querySelector('img');
+      if (!img) { img = document.createElement('img'); bg.prepend(img); }
+      img.src = url;
+      document.getElementById('sec-bg-img').style.backgroundImage = `url('${url}')`;
+      document.getElementById('sec-bg-img').classList.add('loaded');
+    });
+  }, 0);
+
+  // ── Разделы ──
+  STATE.sections.forEach((sec, si) => {
+    const block = adminBlock(sec.title || '(без названия)', true);
+    const bodyEl = block.querySelector('.admin-section-body');
+
+    // Название
+    bodyEl.appendChild(adminField('Название', 'text', sec.title, v => { sec.title = v; block.querySelector('.admin-section-head span').textContent = v; }));
+
+    if (sec.type === 'section') {
+      // Описание
+      bodyEl.appendChild(adminField('Описание', 'textarea', sec.desc, v => sec.desc = v));
+
+      // Вектор
+      const vecWrap = document.createElement('div');
+      vecWrap.className = 'admin-field';
+      vecWrap.innerHTML = `<label>Векторное изображение раздела</label>
+        <div class="admin-upload-area" style="margin-bottom:8px"><span>${sec.vec ? '✓ загружено' : '+ загрузить PNG'}</span></div>
+        <input type="file" accept="image/*" style="display:none">`;
+      const vecArea = vecWrap.querySelector('.admin-upload-area');
+      const vecInput = vecWrap.querySelector('input');
+      vecArea.addEventListener('click', () => vecInput.click());
+      vecInput.addEventListener('change', function() {
+        const f = this.files[0]; if (!f) return;
+        sec.vec = URL.createObjectURL(f);
+        vecArea.querySelector('span').textContent = '✓ загружено';
+      });
+      bodyEl.appendChild(vecWrap);
+
+      // Работы
+      const artsLabel = document.createElement('div');
+      artsLabel.innerHTML = '<label style="display:block;font-size:9px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin:16px 0 8px">Работы</label>';
+      bodyEl.appendChild(artsLabel);
+
+      sec.arts.forEach((art, ai) => {
+        const artBlock = document.createElement('div');
+        artBlock.className = 'admin-art-item';
+
+        // Фото работы
+        const imgRow = document.createElement('div');
+        imgRow.style.marginBottom = '8px';
+        if (art.images.length) {
+          const thumb = document.createElement('img');
+          thumb.src = art.images[0]; thumb.style.cssText = 'width:80px;height:60px;object-fit:cover';
+          imgRow.appendChild(thumb);
+        }
+        const imgUpload = document.createElement('label');
+        imgUpload.style.cssText = 'display:inline-block;cursor:pointer;font-size:9px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;border:1px solid rgba(255,255,255,.15);padding:5px 10px;color:#fff;margin-top:4px';
+        imgUpload.textContent = art.images.length ? '+ ещё фото' : '+ фото';
+        const imgInput = document.createElement('input');
+        imgInput.type = 'file'; imgInput.accept = 'image/*'; imgInput.multiple = true; imgInput.style.display = 'none';
+        imgInput.addEventListener('change', function() {
+          Array.from(this.files).forEach(f => art.images.push(URL.createObjectURL(f)));
+          renderAdmin();
+        });
+        imgUpload.appendChild(imgInput);
+        imgRow.appendChild(imgUpload);
+        artBlock.appendChild(imgRow);
+
+        artBlock.appendChild(adminField('Название работы', 'text', art.title, v => art.title = v));
+        artBlock.appendChild(adminField('Материал', 'text', art.material, v => art.material = v));
+        artBlock.appendChild(adminField('Формат', 'text', art.size, v => art.size = v));
+        artBlock.appendChild(adminField('Год', 'text', art.year, v => art.year = v));
+        artBlock.appendChild(adminField('Цена (опционально)', 'text', art.price, v => art.price = v || null));
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'admin-btn danger'; delBtn.textContent = 'удалить работу';
+        delBtn.style.marginTop = '8px';
+        delBtn.addEventListener('click', () => { sec.arts.splice(ai,1); renderAdmin(); });
+        artBlock.appendChild(delBtn);
+        bodyEl.appendChild(artBlock);
+      });
+
+      const addArtBtn = document.createElement('button');
+      addArtBtn.className = 'admin-btn'; addArtBtn.textContent = '+ добавить работу';
+      addArtBtn.style.marginTop = '8px';
+      addArtBtn.addEventListener('click', () => {
+        sec.arts.push({images:[], title:null, material:null, size:null, year:null, price:null});
+        renderAdmin();
+      });
+      bodyEl.appendChild(addArtBtn);
+
+    } else {
+      // Page type
+      bodyEl.appendChild(adminField('Текст', 'textarea', sec.text, v => sec.text = v));
+    }
+
+    // Удалить раздел
+    const delSecBtn = document.createElement('button');
+    delSecBtn.className = 'admin-btn danger'; delSecBtn.textContent = 'удалить раздел';
+    delSecBtn.style.marginTop = '12px';
+    delSecBtn.addEventListener('click', () => { STATE.sections.splice(si,1); renderAdmin(); });
+    bodyEl.appendChild(delSecBtn);
+
+    body.appendChild(block);
+  });
+
+  // ── Добавить раздел ──
+  const addRow = document.createElement('div');
+  addRow.style.cssText = 'display:flex;gap:8px;margin-top:16px;flex-wrap:wrap';
+
+  const addSecBtn = document.createElement('button');
+  addSecBtn.className = 'admin-btn primary'; addSecBtn.textContent = '+ новый раздел';
+  addSecBtn.addEventListener('click', () => {
+    STATE.sections.splice(STATE.sections.length - 2, 0, {
+      id: 'sec_' + Date.now(), title:'новый раздел', vec:null, type:'section',
+      desc:'Описание раздела.', arts:[]
+    });
+    renderAdmin();
+  });
+
+  const addPageBtn = document.createElement('button');
+  addPageBtn.className = 'admin-btn'; addPageBtn.textContent = '+ новая страница';
+  addPageBtn.addEventListener('click', () => {
+    STATE.sections.push({id:'pg_'+Date.now(), title:'новая страница', type:'page', text:''});
+    renderAdmin();
+  });
+
+  addRow.appendChild(addSecBtn);
+  addRow.appendChild(addPageBtn);
+  body.appendChild(addRow);
+}
+
+function adminBlock(title, collapsible=false) {
+  const wrap = document.createElement('div');
+  wrap.className = 'admin-section';
+  const head = document.createElement('div');
+  head.className = 'admin-section-head';
+  head.innerHTML = `<span>${title}</span><span style="opacity:.4;font-size:11px">${collapsible?'▾':''}</span>`;
+  const bodyEl = document.createElement('div');
+  bodyEl.className = 'admin-section-body' + (collapsible ? '' : ' open');
+  if (collapsible) head.addEventListener('click', () => bodyEl.classList.toggle('open'));
+  wrap.appendChild(head); wrap.appendChild(bodyEl);
+  return wrap;
+}
+
+function adminField(label, type, value, onChange) {
+  const wrap = document.createElement('div'); wrap.className = 'admin-field';
+  const lbl = document.createElement('label'); lbl.textContent = label;
+  wrap.appendChild(lbl);
+  const input = type === 'textarea' ? document.createElement('textarea') : document.createElement('input');
+  if (type !== 'textarea') input.type = 'text';
+  input.value = value || '';
+  if (type === 'textarea') input.rows = 4;
+  input.addEventListener('input', () => onChange(input.value));
+  wrap.appendChild(input);
+  return wrap;
+}
+
+function saveAdmin() {
+  // Данные уже в STATE — ничего не нужно сохранять
+}
+
+/* Инициализация */
+renderMenu();
 show('home');
 </script>
 </body>
