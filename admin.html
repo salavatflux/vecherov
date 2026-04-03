@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Александр Вечеров</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; min-height:100%; background:#0a0a0a; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#fff; -webkit-font-smoothing:antialiased; }
+button { background:none; border:none; cursor:pointer; font-family:inherit; color:inherit; }
+a { color:inherit; text-decoration:none; }
+img { display:block; max-width:100%; }
+
+/* ── LOGIN ── */
+#view-login { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+#view-login.hidden, #view-admin.hidden { display:none; }
+#view-admin { display:block; }
+
+.login-box { width:100%; max-width:360px; padding:0 32px; }
+.login-title { font-size:11px; font-weight:300; letter-spacing:.3em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:32px; text-align:center; }
+.login-field { margin-bottom:14px; }
+.login-field input { width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); color:#fff; font-family:inherit; font-size:13px; padding:10px 12px; outline:none; }
+.login-field input:focus { border-color:rgba(255,255,255,.35); }
+.login-btn { width:100%; padding:11px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); color:#fff; font-family:inherit; font-size:10px; font-weight:300; letter-spacing:.25em; text-transform:uppercase; cursor:pointer; transition:background .2s; margin-top:8px; }
+.login-btn:hover { background:rgba(255,255,255,.15); }
+.login-err { font-size:10px; color:rgba(255,120,120,.8); letter-spacing:.1em; margin-top:10px; text-align:center; min-height:16px; }
+
+/* ── ADMIN ── */
+.admin-top { display:flex; align-items:center; justify-content:space-between; padding:24px 32px; border-bottom:1px solid rgba(255,255,255,.08); position:sticky; top:0; background:#0a0a0a; z-index:10; }
+.admin-top h1 { font-size:13px; font-weight:300; letter-spacing:.3em; text-transform:uppercase; }
+.admin-top-btns { display:flex; gap:12px; align-items:center; }
+.admin-body { padding:24px 32px 80px; max-width:900px; }
+
+.admin-section { border:1px solid rgba(255,255,255,.1); margin-bottom:14px; border-radius:2px; }
+.admin-section-head { display:flex; align-items:center; justify-content:space-between; padding:13px 16px; background:rgba(255,255,255,.04); cursor:pointer; user-select:none; }
+.admin-section-head span { font-size:12px; font-weight:300; letter-spacing:.2em; text-transform:lowercase; }
+.admin-section-body { padding:16px; display:none; }
+.admin-section-body.open { display:block; }
+
+.admin-field { margin-bottom:14px; }
+.admin-field label { display:block; font-size:9px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:6px; }
+.admin-field input, .admin-field textarea { width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); color:#fff; font-family:inherit; font-size:12px; padding:8px 10px; outline:none; resize:vertical; }
+.admin-field input:focus, .admin-field textarea:focus { border-color:rgba(255,255,255,.3); }
+
+.admin-btn { font-size:9px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; border:1px solid rgba(255,255,255,.2); padding:7px 14px; cursor:pointer; color:#fff; background:none; transition:background .2s; font-family:inherit; }
+.admin-btn:hover { background:rgba(255,255,255,.08); }
+.admin-btn.danger { border-color:rgba(255,80,80,.3); color:rgba(255,120,120,.8); }
+.admin-btn.danger:hover { background:rgba(255,80,80,.1); }
+.admin-btn.primary { border-color:rgba(255,255,255,.4); background:rgba(255,255,255,.06); }
+
+.admin-art-item { border:1px solid rgba(255,255,255,.08); padding:14px; margin-bottom:10px; }
+.admin-art-thumb { width:80px; height:60px; object-fit:cover; margin-bottom:8px; }
+.admin-art-imgs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; align-items:flex-end; }
+.admin-art-imgs img { width:70px; height:52px; object-fit:cover; }
+.admin-art-imgs .del-img { font-size:8px; color:rgba(255,80,80,.7); cursor:pointer; display:block; text-align:center; margin-top:2px; letter-spacing:.1em; }
+
+.admin-upload-area { border:1px dashed rgba(255,255,255,.2); padding:16px; text-align:center; cursor:pointer; transition:border-color .2s; margin-bottom:12px; }
+.admin-upload-area:hover { border-color:rgba(255,255,255,.4); }
+.admin-upload-area span { font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); }
+
+.upload-progress { font-size:9px; letter-spacing:.15em; color:rgba(255,255,255,.4); margin-top:6px; display:none; }
+
+.admin-divider { height:1px; background:rgba(255,255,255,.08); margin:20px 0; }
+
+.change-pass-form { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); padding:16px; margin-top:16px; }
+.change-pass-form h3 { font-size:9px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:14px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="view-login">
+  <div class="login-box">
+    <div class="login-title">Администратор</div>
+    <div class="login-field">
+      <input type="email" id="login-email" placeholder="email" autocomplete="email">
+    </div>
+    <div class="login-field">
+      <input type="password" id="login-pass" placeholder="пароль" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="login-btn">войти</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="view-admin" class="hidden">
+  <div class="admin-top">
+    <h1>Администратор</h1>
+    <div class="admin-top-btns">
+      <a href="/" class="admin-btn">← сайт</a>
+      <button class="admin-btn" id="save-btn">сохранить</button>
+      <button class="admin-btn danger" id="logout-btn">выйти</button>
+    </div>
+  </div>
+  <div class="admin-body" id="admin-body"></div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+/* ── НАСТРОЙКИ — замени на свои ── */
+const SUPABASE_URL   = 'https://YOUR_PROJECT.supabase.co';
+const SUPABASE_KEY   = 'YOUR_ANON_KEY';
+const CLOUD_NAME     = 'YOUR_CLOUDINARY_CLOUD';
+const CLOUD_PRESET   = 'YOUR_UPLOAD_PRESET'; // unsigned preset
+/* ─────────────────────────────── */
+
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+let STATE = null;
+
+/* ── INIT ── */
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    await loadState();
+    showAdmin();
+  } else {
+    showLogin();
+  }
+}
+
+function showLogin() {
+  document.getElementById('view-login').classList.remove('hidden');
+  document.getElementById('view-admin').classList.add('hidden');
+}
+function showAdmin() {
+  document.getElementById('view-login').classList.add('hidden');
+  document.getElementById('view-admin').classList.remove('hidden');
+  renderAdmin();
+}
+
+/* ── LOGIN ── */
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+  if (!email || !pass) { errEl.textContent = 'введите email и пароль'; return; }
+  document.getElementById('login-btn').textContent = '...';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  document.getElementById('login-btn').textContent = 'войти';
+  if (error) { errEl.textContent = 'неверный email или пароль'; return; }
+  await loadState();
+  showAdmin();
+});
+['login-email','login-pass'].forEach(id =>
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('login-btn').click();
+  })
+);
+
+/* ── LOGOUT ── */
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  showLogin();
+});
+
+/* ── SAVE ── */
+document.getElementById('save-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('save-btn');
+  btn.textContent = 'сохраняю...';
+  await saveState();
+  btn.textContent = 'сохранено ✓';
+  setTimeout(() => btn.textContent = 'сохранить', 2000);
+});
+
+/* ── LOAD / SAVE STATE ── */
+async function loadState() {
+  const { data, error } = await sb.from('portfolio_state').select('data').eq('id', 1).single();
+  if (error || !data) {
+    STATE = defaultState();
+  } else {
+    STATE = JSON.parse(data.data);
+  }
+}
+
+async function saveState() {
+  await sb.from('portfolio_state').upsert({ id: 1, data: JSON.stringify(STATE) });
+}
+
+function defaultState() {
+  return {
+    artistName: 'Александр\nВечеров',
+    homePhoto: null,
+    sections: [
+      { id:'branching', title:'код ветвления', vec:null, type:'section',
+        desc:'Этот раздел посвящён структурным принципам жизни.\nЯ рассматриваю жизнь как систему связей.',
+        arts:[] },
+      { id:'metaphysics', title:'метафизика повседневности', vec:null, type:'section',
+        desc:'В этом разделе исследуется скрытое измерение обыденного.', arts:[] },
+      { id:'digital', title:'цифровые работы', vec:null, type:'section',
+        desc:'Цифровые практики как расширение традиционных.', arts:[] },
+      { id:'jewelry', title:'ювелирные изделия', vec:null, type:'section',
+        desc:'Ювелирное ремесло как форма концептуального высказывания.', arts:[] },
+      { id:'bio', title:'bio', type:'page', text:'О художнике...' },
+      { id:'statement', title:'artist statement', type:'page', text:'Statement...' }
+    ]
+  };
+}
+
+/* ── CLOUDINARY UPLOAD ── */
+async function uploadFile(file, progressEl) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUD_PRESET);
+  if (progressEl) { progressEl.style.display = 'block'; progressEl.textContent = 'загружаю...'; }
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+    method: 'POST', body: fd
+  });
+  const data = await res.json();
+  if (progressEl) progressEl.style.display = 'none';
+  return data.secure_url;
+}
+
+/* ── RENDER ADMIN ── */
+function renderAdmin() {
+  const body = document.getElementById('admin-body');
+  body.innerHTML = '';
+
+  // ── Фото главной ──
+  const homeBlock = makeBlock('Фото главной');
+  const hBody = homeBlock.querySelector('.admin-section-body');
+  if (STATE.homePhoto) {
+    const img = document.createElement('img');
+    img.src = STATE.homePhoto; img.style.cssText = 'max-width:200px;margin-bottom:10px';
+    hBody.appendChild(img);
+  }
+  const hArea = makeUploadArea('+ загрузить фото главной');
+  const hInput = document.createElement('input'); hInput.type='file'; hInput.accept='image/*'; hInput.style.display='none';
+  const hProg = document.createElement('div'); hProg.className='upload-progress';
+  hArea.addEventListener('click', () => hInput.click());
+  hInput.addEventListener('change', async function() {
+    const f = this.files[0]; if (!f) return;
+    const url = await uploadFile(f, hProg);
+    STATE.homePhoto = url;
+    renderAdmin();
+  });
+  hBody.appendChild(hArea); hBody.appendChild(hInput); hBody.appendChild(hProg);
+  body.appendChild(homeBlock);
+
+  // ── Имя художника ──
+  const nameBlock = makeBlock('Имя художника');
+  const nBody = nameBlock.querySelector('.admin-section-body');
+  nBody.appendChild(makeField('Имя (Enter для переноса строки)', 'text', STATE.artistName.replace('\n',' '), v => STATE.artistName = v.replace(' ','\n')));
+  body.appendChild(nameBlock);
+
+  // ── Разделы ──
+  STATE.sections.forEach((sec, si) => {
+    const block = makeBlock(sec.title || '(без названия)', true);
+    const bBody = block.querySelector('.admin-section-body');
+
+    bBody.appendChild(makeField('Название', 'text', sec.title, v => {
+      sec.title = v;
+      block.querySelector('.admin-section-head span').textContent = v;
+    }));
+
+    if (sec.type === 'section') {
+      bBody.appendChild(makeField('Описание раздела', 'textarea', sec.desc, v => sec.desc = v));
+
+      // Вектор
+      const vecF = document.createElement('div'); vecF.className = 'admin-field';
+      vecF.innerHTML = '<label>Векторное изображение (PNG)</label>';
+      if (sec.vec) {
+        const vi = document.createElement('img'); vi.src = sec.vec;
+        vi.style.cssText = 'width:60px;height:60px;object-fit:contain;margin-bottom:8px;opacity:.9'; vecF.appendChild(vi);
+      }
+      const vecArea = makeUploadArea(sec.vec ? '← заменить вектор' : '+ загрузить PNG');
+      const vecInput = document.createElement('input'); vecInput.type='file'; vecInput.accept='image/*'; vecInput.style.display='none';
+      const vecProg = document.createElement('div'); vecProg.className='upload-progress';
+      vecArea.addEventListener('click', () => vecInput.click());
+      vecInput.addEventListener('change', async function() {
+        const f = this.files[0]; if (!f) return;
+        const url = await uploadFile(f, vecProg);
+        sec.vec = url; renderAdmin();
+      });
+      vecF.appendChild(vecArea); vecF.appendChild(vecInput); vecF.appendChild(vecProg);
+      bBody.appendChild(vecF);
+
+      bBody.appendChild(document.createElement('hr')).style.cssText = 'border:none;border-top:1px solid rgba(255,255,255,.06);margin:14px 0';
+
+      // Работы
+      const artsTitle = document.createElement('div');
+      artsTitle.innerHTML = '<label style="display:block;font-size:9px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:10px">Работы</label>';
+      bBody.appendChild(artsTitle);
+
+      sec.arts.forEach((art, ai) => {
+        const artEl = document.createElement('div'); artEl.className = 'admin-art-item';
+
+        // Фотографии
+        const imgsRow = document.createElement('div'); imgsRow.className = 'admin-art-imgs';
+        art.images.forEach((url, ii) => {
+          const wrap = document.createElement('div');
+          const img = document.createElement('img'); img.src = url; img.className = 'admin-art-thumb';
+          const del = document.createElement('span'); del.className = 'del-img'; del.textContent = '✕ удалить';
+          del.addEventListener('click', () => { art.images.splice(ii,1); renderAdmin(); });
+          wrap.appendChild(img); wrap.appendChild(del); imgsRow.appendChild(wrap);
+        });
+        // Добавить фото
+        const addImgArea = makeUploadArea('+ фото');
+        addImgArea.style.cssText = 'padding:10px 14px;display:inline-block;width:auto';
+        const addImgInput = document.createElement('input'); addImgInput.type='file'; addImgInput.accept='image/*'; addImgInput.multiple=true; addImgInput.style.display='none';
+        const addProg = document.createElement('div'); addProg.className='upload-progress';
+        addImgArea.addEventListener('click', () => addImgInput.click());
+        addImgInput.addEventListener('change', async function() {
+          for (const f of Array.from(this.files)) {
+            const url = await uploadFile(f, addProg);
+            art.images.push(url);
+          }
+          renderAdmin();
+        });
+        imgsRow.appendChild(addImgArea); imgsRow.appendChild(addImgInput);
+        artEl.appendChild(imgsRow); artEl.appendChild(addProg);
+
+        artEl.appendChild(makeField('Название работы', 'text', art.title, v => art.title = v || null));
+        artEl.appendChild(makeField('Материал', 'text', art.material, v => art.material = v || null));
+        artEl.appendChild(makeField('Формат', 'text', art.size, v => art.size = v || null));
+        artEl.appendChild(makeField('Год', 'text', art.year, v => art.year = v || null));
+        artEl.appendChild(makeField('Цена (опционально)', 'text', art.price, v => art.price = v || null));
+
+        const delBtn = document.createElement('button'); delBtn.className='admin-btn danger'; delBtn.textContent='удалить работу';
+        delBtn.style.marginTop = '8px';
+        delBtn.addEventListener('click', () => { sec.arts.splice(ai,1); renderAdmin(); });
+        artEl.appendChild(delBtn);
+        bBody.appendChild(artEl);
+      });
+
+      const addArtBtn = document.createElement('button'); addArtBtn.className='admin-btn'; addArtBtn.textContent='+ добавить работу';
+      addArtBtn.style.marginTop='4px';
+      addArtBtn.addEventListener('click', () => {
+        sec.arts.push({images:[], title:null, material:null, size:null, year:null, price:null});
+        renderAdmin();
+      });
+      bBody.appendChild(addArtBtn);
+
+    } else {
+      // Page
+      bBody.appendChild(makeField('Текст страницы', 'textarea', sec.text, v => sec.text = v));
+    }
+
+    const delSecBtn = document.createElement('button'); delSecBtn.className='admin-btn danger'; delSecBtn.textContent='удалить раздел';
+    delSecBtn.style.cssText = 'margin-top:14px';
+    delSecBtn.addEventListener('click', () => { STATE.sections.splice(si,1); renderAdmin(); });
+    bBody.appendChild(delSecBtn);
+    body.appendChild(block);
+  });
+
+  // ── Добавить ──
+  const addRow = document.createElement('div'); addRow.style.cssText='display:flex;gap:10px;margin-top:16px;flex-wrap:wrap';
+  const addSec = document.createElement('button'); addSec.className='admin-btn primary'; addSec.textContent='+ новый раздел';
+  addSec.addEventListener('click', () => {
+    STATE.sections.splice(STATE.sections.length-2, 0, {id:'sec_'+Date.now(), title:'новый раздел', vec:null, type:'section', desc:'', arts:[]});
+    renderAdmin();
+  });
+  const addPg = document.createElement('button'); addPg.className='admin-btn'; addPg.textContent='+ новая страница';
+  addPg.addEventListener('click', () => {
+    STATE.sections.push({id:'pg_'+Date.now(), title:'новая страница', type:'page', text:''});
+    renderAdmin();
+  });
+  addRow.appendChild(addSec); addRow.appendChild(addPg);
+  body.appendChild(addRow);
+
+  // ── Сменить пароль ──
+  const passBlock = makeBlock('Сменить пароль');
+  const pBody = passBlock.querySelector('.admin-section-body');
+  const pForm = document.createElement('div'); pForm.className='change-pass-form';
+  pForm.innerHTML=`
+    <h3>Новый пароль</h3>
+    <div class="admin-field"><input type="password" id="new-pass-1" placeholder="новый пароль"></div>
+    <div class="admin-field"><input type="password" id="new-pass-2" placeholder="повторите пароль"></div>
+    <button class="admin-btn primary" id="change-pass-btn">изменить пароль</button>
+    <div id="pass-msg" style="font-size:10px;margin-top:8px;color:rgba(255,255,255,.5);letter-spacing:.1em"></div>
+  `;
+  pBody.appendChild(pForm);
+  body.appendChild(passBlock);
+
+  setTimeout(() => {
+    document.getElementById('change-pass-btn')?.addEventListener('click', async () => {
+      const p1 = document.getElementById('new-pass-1').value;
+      const p2 = document.getElementById('new-pass-2').value;
+      const msg = document.getElementById('pass-msg');
+      if (!p1 || p1 !== p2) { msg.textContent = 'пароли не совпадают'; return; }
+      if (p1.length < 6) { msg.textContent = 'минимум 6 символов'; return; }
+      const { error } = await sb.auth.updateUser({ password: p1 });
+      msg.textContent = error ? 'ошибка: ' + error.message : 'пароль изменён ✓';
+    });
+  }, 0);
+}
+
+/* ── HELPERS ── */
+function makeBlock(title, collapsible=false) {
+  const wrap = document.createElement('div'); wrap.className='admin-section';
+  const head = document.createElement('div'); head.className='admin-section-head';
+  head.innerHTML=`<span>${title}</span><span style="opacity:.35;font-size:11px">${collapsible?'▾':''}</span>`;
+  const bdy = document.createElement('div'); bdy.className='admin-section-body' + (collapsible?'':' open');
+  if (collapsible) head.addEventListener('click', () => bdy.classList.toggle('open'));
+  wrap.appendChild(head); wrap.appendChild(bdy);
+  return wrap;
+}
+
+function makeField(label, type, value, onChange) {
+  const wrap = document.createElement('div'); wrap.className='admin-field';
+  const lbl = document.createElement('label'); lbl.textContent=label; wrap.appendChild(lbl);
+  const el = type==='textarea' ? document.createElement('textarea') : document.createElement('input');
+  if (type!=='textarea') el.type='text';
+  el.value = value||'';
+  if (type==='textarea') el.rows=4;
+  el.addEventListener('input', () => onChange(el.value));
+  wrap.appendChild(el);
+  return wrap;
+}
+
+function makeUploadArea(text) {
+  const el = document.createElement('div'); el.className='admin-upload-area';
+  el.innerHTML=`<span>${text}</span>`;
+  return el;
+}
+
+init();
+</script>
+</body>
+</html>

@@ -137,12 +137,23 @@ img { display:block; max-width:100%; }
 .sec-desc-inner p { font-size:9pt; font-weight:300; letter-spacing:.08em; line-height:1.75; color:rgba(255,255,255,.85); text-align:justify; }
 .sec-desc-inner p+p { margin-top:10px; }
 
-/* Mobile: описание снизу */
+/* Mobile: описание выезжает ВНИЗ из-под топбара, как его продолжение */
 @media(max-width:768px){
+  #view-section { flex-direction:column; }
   .sec-body { flex-direction:column; overflow:visible; }
-  .sec-desc { position:fixed; left:0; right:0; bottom:0; width:100%!important; transform:translateY(100%); transition:transform .45s ease-out; max-height:55vh; }
-  .sec-desc.open { transform:translateY(0); }
-  .sec-desc-inner { width:100%; height:auto; max-height:55vh; padding:16px 20px 12px; }
+  .sec-desc {
+    position:relative;
+    width:100% !important;
+    transform:none;
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .45s ease-out;
+    will-change:max-height;
+    order:-1; /* сразу под топбаром, над лентой */
+    z-index:20;
+  }
+  .sec-desc.open { max-height:60vh; }
+  .sec-desc-inner { width:100%; height:auto; max-height:60vh; padding:16px 20px 16px; }
 }
 .desc-close-mob { display:none; width:100%; text-align:center; padding:6px 0; cursor:pointer; font-size:18px; color:rgba(255,255,255,.3); flex-shrink:0; }
 @media(max-width:768px){ .desc-close-mob{display:block} }
