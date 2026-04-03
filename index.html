@@ -107,8 +107,8 @@ img { display:block; max-width:100%; }
 .chrono-row { display:none; position:relative; z-index:20; flex-shrink:0; justify-content:flex-end; padding:0 20px 8px; }
 @media(max-width:768px){ .sec-topbar .sec-chrono{display:none} .chrono-row{display:flex!important} .sec-topbar-vec{width:35vw;max-width:none} }
 
-/* Body */
-.sec-body { flex:1; display:flex; min-height:0; position:relative; z-index:10; overflow:hidden; }
+/* Body — overflow:hidden убран чтобы transform анимировался плавно */
+.sec-body { flex:1; display:flex; min-height:0; position:relative; z-index:10; }
 
 /* Scroll */
 .sec-scroll { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding:16px 36px 80px; position:relative; }
@@ -123,12 +123,13 @@ img { display:block; max-width:100%; }
 }
 @media(max-width:768px){ .sec-deco{width:50vw;height:50vw;max-width:none;max-height:none} }
 
-/* Описание раздела — desktop: transform вместо width для плавности */
+/* Описание — плавный transform, никакого влияния на layout */
 .sec-desc {
   flex-shrink:0; overflow:hidden;
   width:clamp(260px,32vw,400px);
   transform:translateX(100%);
-  transition:transform .45s ease-out;
+  transition:transform .4s ease-out;
+  will-change:transform;
   z-index:15;
 }
 .sec-desc.open { transform:translateX(0); }
@@ -191,6 +192,19 @@ img { display:block; max-width:100%; }
 .lb-dots { position:absolute; bottom:-28px; left:50%; transform:translateX(-50%); display:flex; gap:6px; }
 .lb-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.3); cursor:pointer; }
 .lb-dot.on { background:rgba(255,255,255,.9); }
+
+/* ══════════════════════════
+   LOGIN VIEW
+══════════════════════════ */
+#view-login { background:#0a0a0a; align-items:center; justify-content:center; }
+.login-box { width:100%; max-width:360px; padding:0 32px; }
+.login-title { font-size:11px; font-weight:300; letter-spacing:.3em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:32px; text-align:center; }
+.login-field { margin-bottom:14px; }
+.login-field input { width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); color:#fff; font-family:inherit; font-size:13px; padding:10px 12px; outline:none; }
+.login-field input:focus { border-color:rgba(255,255,255,.35); }
+.login-btn { width:100%; padding:11px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); color:#fff; font-family:inherit; font-size:10px; font-weight:300; letter-spacing:.25em; text-transform:uppercase; cursor:pointer; transition:background .2s; margin-top:8px; }
+.login-btn:hover { background:rgba(255,255,255,.15); }
+.login-err { font-size:10px; color:rgba(255,120,120,.8); letter-spacing:.1em; margin-top:10px; text-align:center; min-height:16px; }
 
 /* ══════════════════════════
    ADMIN PANEL
@@ -321,6 +335,21 @@ img { display:block; max-width:100%; }
     <div class="text-ttl" id="text-ttl"></div>
   </div>
   <div class="text-body" id="text-body"></div>
+</div>
+
+<!-- LOGIN -->
+<div id="view-login" class="view">
+  <div class="login-box">
+    <div class="login-title">Администратор</div>
+    <div class="login-field">
+      <input type="email" id="login-email" placeholder="email" autocomplete="email">
+    </div>
+    <div class="login-field">
+      <input type="password" id="login-pass" placeholder="пароль" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="login-btn">войти</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
 </div>
 
 <!-- ADMIN -->
@@ -501,12 +530,14 @@ document.getElementById('sec-title-btn').addEventListener('click', () => setDesc
 // Закрыть кнопкой (mobile)
 document.getElementById('desc-close').addEventListener('click', () => setDesc(false));
 
-// Desktop: клик по области ленты вне изображения/кнопок закрывает описание
+// Desktop: клик по пустому месту ленты закрывает описание
+// (не по картинке, не по тексту, не по кнопкам)
 document.getElementById('sec-scroll').addEventListener('click', e => {
   if (!descOpen || isMob()) return;
-  if (!e.target.closest('.art-carousel') && !e.target.closest('.art-upload') && !e.target.closest('.art-info')) {
-    setDesc(false);
-  }
+  const tag = e.target.tagName.toLowerCase();
+  if (tag === 'img' || tag === 'button' || tag === 'label') return;
+  if (e.target.closest('.art-card') || e.target.closest('.art-upload')) return;
+  setDesc(false);
 });
 
 // Desktop: свайп вправо по описанию закрывает
@@ -686,20 +717,9 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{if(ltx===nul
 /* ══════════════════════════
    ADMIN PANEL
 ══════════════════════════ */
-// Открыть: triple tap на имя художника
-let tapCount = 0, tapTimer = null;
-document.getElementById('artist-name-el').addEventListener('click', () => {
-  tapCount++;
-  clearTimeout(tapTimer);
-  tapTimer = setTimeout(() => { tapCount = 0; }, 600);
-  if (tapCount >= 3) { tapCount = 0; openAdmin(); }
-});
+// Открыть логин: triple tap на имя художника — см. ниже в секции Supabase
 
-document.getElementById('admin-close').addEventListener('click', () => {
-  saveAdmin();
-  renderMenu();
-  show('home');
-});
+// admin-close обрабатывается в секции Supabase ниже
 
 function openAdmin() {
   renderAdmin();
@@ -884,9 +904,138 @@ function saveAdmin() {
   // Данные уже в STATE — ничего не нужно сохранять
 }
 
+/* ══════════════════════════
+   SUPABASE + CLOUDINARY
+   
+   Настройки — заменить на свои:
+   SUPABASE_URL, SUPABASE_ANON_KEY — из проекта Supabase
+   CLOUDINARY_CLOUD — cloud name из Cloudinary
+   CLOUDINARY_PRESET — unsigned upload preset из Cloudinary
+══════════════════════════ */
+const SUPABASE_URL    = 'https://YOUR_PROJECT.supabase.co';
+const SUPABASE_KEY    = 'YOUR_ANON_KEY';
+const CLOUD_NAME      = 'YOUR_CLOUDINARY_CLOUD';
+const CLOUD_PRESET    = 'YOUR_UPLOAD_PRESET'; // unsigned preset
+
+/* Supabase client — подключается через CDN */
+let supabase = null;
+
+async function initSupabase() {
+  if (supabase) return supabase;
+  // Supabase SDK подгружается динамически
+  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+  supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  return supabase;
+}
+
+/* ── Логин ── */
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+
+  if (!email || !pass) { errEl.textContent = 'введите email и пароль'; return; }
+
+  try {
+    const sb = await initSupabase();
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) { errEl.textContent = 'неверный email или пароль'; return; }
+    openAdmin();
+  } catch(e) {
+    errEl.textContent = 'ошибка подключения';
+  }
+});
+
+// Enter в полях логина
+['login-email','login-pass'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('login-btn').click();
+  });
+});
+
+/* ── Выход ── */
+async function logout() {
+  try {
+    const sb = await initSupabase();
+    await sb.auth.signOut();
+  } catch(e) {}
+  renderMenu();
+  show('home');
+}
+
+document.getElementById('admin-close').addEventListener('click', () => {
+  saveAdmin();
+  logout();
+});
+
+/* ── Загрузка файла в Cloudinary ── */
+async function uploadToCloudinary(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUD_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+    method: 'POST', body: fd
+  });
+  const data = await res.json();
+  return data.secure_url; // возвращает постоянный URL
+}
+
+/* ── Сохранить данные в Supabase ── */
+async function saveToSupabase() {
+  try {
+    const sb = await initSupabase();
+    const { error } = await sb.from('portfolio_state').upsert({
+      id: 1,
+      data: JSON.stringify(STATE)
+    });
+    if (error) console.error('Save error:', error);
+  } catch(e) { console.error(e); }
+}
+
+/* ── Загрузить данные из Supabase ── */
+async function loadFromSupabase() {
+  try {
+    const sb = await initSupabase();
+    const { data, error } = await sb.from('portfolio_state').select('data').eq('id', 1).single();
+    if (error || !data) return;
+    const saved = JSON.parse(data.data);
+    // Обновляем STATE сохранёнными данными
+    Object.assign(STATE, saved);
+    renderMenu();
+  } catch(e) { console.error(e); }
+}
+
+/* Переопределяем saveAdmin чтобы сохранял в Supabase */
+function saveAdmin() {
+  saveToSupabase();
+}
+
+/* Проверяем сессию при загрузке */
+async function checkSession() {
+  try {
+    const sb = await initSupabase();
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      // Уже залогинен — можно сразу загрузить данные
+      await loadFromSupabase();
+    }
+  } catch(e) {}
+}
+
+/* Открыть логин вместо прямого открытия админки */
+// Тройной тап по имени теперь открывает логин
+let _tapCount = 0, _tapTimer = null;
+document.getElementById('artist-name-el').addEventListener('click', () => {
+  _tapCount++;
+  clearTimeout(_tapTimer);
+  _tapTimer = setTimeout(() => { _tapCount = 0; }, 600);
+  if (_tapCount >= 3) { _tapCount = 0; show('login'); }
+});
+
 /* Инициализация */
 renderMenu();
-show('home');
+checkSession().then(() => show('home'));
 </script>
 </body>
 </html>
