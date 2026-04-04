@@ -216,7 +216,7 @@ async function uploadFile(file, progressEl) {
 }
 
 /* ── RENDER ADMIN ── */
-function renderAdmin() {
+function renderAdmin(keepOpenId = null) {
   const body = document.getElementById('admin-body');
   body.innerHTML = '';
 
@@ -251,6 +251,8 @@ function renderAdmin() {
   STATE.sections.forEach((sec, si) => {
     const block = makeBlock(sec.title || '(без названия)', true);
     const bBody = block.querySelector('.admin-section-body');
+    // Оставляем секцию открытой если это она
+    if (keepOpenId === sec.id) bBody.classList.add('open');
 
     bBody.appendChild(makeField('Название', 'text', sec.title, v => {
       sec.title = v;
@@ -274,7 +276,7 @@ function renderAdmin() {
       vecInput.addEventListener('change', async function() {
         const f = this.files[0]; if (!f) return;
         const url = await uploadFile(f, vecProg);
-        sec.vec = url; renderAdmin();
+        sec.vec = url; renderAdmin(sec.id);
       });
       vecF.appendChild(vecArea); vecF.appendChild(vecInput); vecF.appendChild(vecProg);
       bBody.appendChild(vecF);
@@ -295,7 +297,7 @@ function renderAdmin() {
           const wrap = document.createElement('div');
           const img = document.createElement('img'); img.src = url; img.className = 'admin-art-thumb';
           const del = document.createElement('span'); del.className = 'del-img'; del.textContent = '✕ удалить';
-          del.addEventListener('click', () => { art.images.splice(ii,1); renderAdmin(); });
+          del.addEventListener('click', () => { art.images.splice(ii,1); renderAdmin(sec.id); });
           wrap.appendChild(img); wrap.appendChild(del); imgsRow.appendChild(wrap);
         });
         // Добавить фото
@@ -309,7 +311,7 @@ function renderAdmin() {
             const url = await uploadFile(f, addProg);
             art.images.push(url);
           }
-          renderAdmin();
+          renderAdmin(sec.id);
         });
         imgsRow.appendChild(addImgArea); imgsRow.appendChild(addImgInput);
         artEl.appendChild(imgsRow); artEl.appendChild(addProg);
@@ -322,7 +324,7 @@ function renderAdmin() {
 
         const delBtn = document.createElement('button'); delBtn.className='admin-btn danger'; delBtn.textContent='удалить работу';
         delBtn.style.marginTop = '8px';
-        delBtn.addEventListener('click', () => { sec.arts.splice(ai,1); renderAdmin(); });
+        delBtn.addEventListener('click', () => { sec.arts.splice(ai,1); renderAdmin(sec.id); });
         artEl.appendChild(delBtn);
         bBody.appendChild(artEl);
       });
@@ -331,7 +333,7 @@ function renderAdmin() {
       addArtBtn.style.marginTop='4px';
       addArtBtn.addEventListener('click', () => {
         sec.arts.push({images:[], title:null, material:null, size:null, year:null, price:null});
-        renderAdmin();
+        renderAdmin(sec.id);
       });
       bBody.appendChild(addArtBtn);
 
