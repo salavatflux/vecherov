@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Александр Вечеров</title>
+<link rel="icon" type="image/png" href="assets/puzzle.png">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { width:100%; min-height:100%; background:#0a0a0a; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#fff; -webkit-font-smoothing:antialiased; }
@@ -99,11 +100,11 @@ img { display:block; max-width:100%; }
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-/* ── НАСТРОЙКИ — замени на свои ── */
-const SUPABASE_URL   = 'https://YOUR_PROJECT.supabase.co';
-const SUPABASE_KEY   = 'YOUR_ANON_KEY';
-const CLOUD_NAME     = 'YOUR_CLOUDINARY_CLOUD';
-const CLOUD_PRESET   = 'YOUR_UPLOAD_PRESET'; // unsigned preset
+/* ── НАСТРОЙКИ ── */
+const SUPABASE_URL   = 'https://wukyzwgsgfvknqigassr.supabase.co';
+const SUPABASE_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1a3l6d2dzZ2Z2a25xaWdhc3NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTQwNDMsImV4cCI6MjA5MDc5MDA0M30.5PIkhguprMyhPqqhRPcYcdEhlatRFHX6FF_YhiYdXhY';
+const CLOUD_NAME     = 'dj1ejvvv0';
+const CLOUD_PRESET   = 'portfolio';
 /* ─────────────────────────────── */
 
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -210,7 +211,8 @@ async function uploadFile(file, progressEl) {
   });
   const data = await res.json();
   if (progressEl) progressEl.style.display = 'none';
-  return data.secure_url;
+  // Вставляем q_auto,f_auto для оптимизации
+  return data.secure_url.replace('/upload/', '/upload/q_auto,f_auto/');
 }
 
 /* ── RENDER ADMIN ── */

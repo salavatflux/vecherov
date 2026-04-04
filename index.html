@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Александр Вечеров</title>
+<link rel="icon" type="image/png" href="assets/puzzle.png">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html, body { width:100%; height:100%; overflow:hidden; background:#0a0a0a; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#fff; -webkit-font-smoothing:antialiased; }
@@ -204,61 +205,6 @@ img { display:block; max-width:100%; }
 .lb-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.3); cursor:pointer; }
 .lb-dot.on { background:rgba(255,255,255,.9); }
 
-/* ══════════════════════════
-   LOGIN VIEW
-══════════════════════════ */
-#view-login { background:#0a0a0a; align-items:center; justify-content:center; }
-.login-box { width:100%; max-width:360px; padding:0 32px; }
-.login-title { font-size:11px; font-weight:300; letter-spacing:.3em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:32px; text-align:center; }
-.login-field { margin-bottom:14px; }
-.login-field input { width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); color:#fff; font-family:inherit; font-size:13px; padding:10px 12px; outline:none; }
-.login-field input:focus { border-color:rgba(255,255,255,.35); }
-.login-btn { width:100%; padding:11px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); color:#fff; font-family:inherit; font-size:10px; font-weight:300; letter-spacing:.25em; text-transform:uppercase; cursor:pointer; transition:background .2s; margin-top:8px; }
-.login-btn:hover { background:rgba(255,255,255,.15); }
-.login-err { font-size:10px; color:rgba(255,120,120,.8); letter-spacing:.1em; margin-top:10px; text-align:center; min-height:16px; }
-
-/* ══════════════════════════
-   ADMIN PANEL
-══════════════════════════ */
-#view-admin { background:#0a0a0a; overflow:hidden; }
-.admin-top { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:24px 32px; border-bottom:1px solid rgba(255,255,255,.08); }
-.admin-top h1 { font-size:13px; font-weight:300; letter-spacing:.3em; text-transform:uppercase; }
-.admin-body { flex:1; overflow-y:auto; padding:24px 32px 60px; -webkit-overflow-scrolling:touch; min-height:0; }
-
-/* Admin sections */
-.admin-section { border:1px solid rgba(255,255,255,.1); margin-bottom:16px; border-radius:2px; overflow:hidden; }
-.admin-section-head { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(255,255,255,.04); cursor:pointer; }
-.admin-section-head span { font-size:12px; font-weight:300; letter-spacing:.2em; text-transform:lowercase; }
-.admin-section-body { padding:16px; display:none; }
-.admin-section-body.open { display:block; }
-
-/* Admin fields */
-.admin-field { margin-bottom:14px; }
-.admin-field label { display:block; font-size:9px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:6px; }
-.admin-field input, .admin-field textarea {
-  width:100%; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12);
-  color:#fff; font-family:inherit; font-size:12px; padding:8px 10px;
-  outline:none; resize:vertical;
-}
-.admin-field input:focus, .admin-field textarea:focus { border-color:rgba(255,255,255,.3); }
-
-.admin-btn { font-size:9px; font-weight:300; letter-spacing:.2em; text-transform:uppercase; border:1px solid rgba(255,255,255,.2); padding:7px 14px; cursor:pointer; color:#fff; transition:background .2s; }
-.admin-btn:hover { background:rgba(255,255,255,.08); }
-.admin-btn.danger { border-color:rgba(255,80,80,.3); color:rgba(255,120,120,.8); }
-.admin-btn.danger:hover { background:rgba(255,80,80,.1); }
-.admin-btn.primary { border-color:rgba(255,255,255,.4); }
-
-/* Admin artworks list */
-.admin-art-item { border:1px solid rgba(255,255,255,.08); padding:12px; margin-bottom:10px; }
-.admin-art-item img { width:80px; height:60px; object-fit:cover; margin-bottom:8px; }
-.admin-art-row { display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; }
-.admin-art-row .admin-field { flex:1; min-width:120px; margin-bottom:0; }
-
-/* Upload area in admin */
-.admin-upload-area { border:1px dashed rgba(255,255,255,.2); padding:20px; text-align:center; cursor:pointer; transition:border-color .2s; margin-bottom:14px; }
-.admin-upload-area:hover { border-color:rgba(255,255,255,.4); }
-.admin-upload-area span { font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); }
-
 ::-webkit-scrollbar { width:2px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:rgba(255,255,255,.12); }
@@ -346,30 +292,6 @@ img { display:block; max-width:100%; }
     <div class="text-ttl" id="text-ttl"></div>
   </div>
   <div class="text-body" id="text-body"></div>
-</div>
-
-<!-- LOGIN -->
-<div id="view-login" class="view">
-  <div class="login-box">
-    <div class="login-title">Администратор</div>
-    <div class="login-field">
-      <input type="email" id="login-email" placeholder="email" autocomplete="email">
-    </div>
-    <div class="login-field">
-      <input type="password" id="login-pass" placeholder="пароль" autocomplete="current-password">
-    </div>
-    <button class="login-btn" id="login-btn">войти</button>
-    <div class="login-err" id="login-err"></div>
-  </div>
-</div>
-
-<!-- ADMIN -->
-<div id="view-admin" class="view">
-  <div class="admin-top">
-    <h1>Админ-панель</h1>
-    <button class="admin-btn" id="admin-close">← выйти</button>
-  </div>
-  <div class="admin-body" id="admin-body"></div>
 </div>
 
 <!-- LIGHTBOX -->
@@ -726,327 +648,51 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{if(ltx===nul
 })();
 
 /* ══════════════════════════
-   ADMIN PANEL
+   SUPABASE — загрузка данных при старте
+   Сайт читает STATE из Supabase (public read).
+   Запись только через admin.html.
 ══════════════════════════ */
-// Открыть логин: triple tap на имя художника — см. ниже в секции Supabase
+const SUPABASE_URL = 'https://wukyzwgsgfvknqigassr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1a3l6d2dzZ2Z2a25xaWdhc3NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTQwNDMsImV4cCI6MjA5MDc5MDA0M30.5PIkhguprMyhPqqhRPcYcdEhlatRFHX6FF_YhiYdXhY';
 
-// admin-close обрабатывается в секции Supabase ниже
-
-function openAdmin() {
-  renderAdmin();
-  show('admin');
-}
-
-function renderAdmin() {
-  const body = document.getElementById('admin-body');
-  body.innerHTML = '';
-
-  // ── Фото главной ──
-  const photoSec = adminBlock('Фото главной');
-  const photoBtn = document.createElement('div');
-  photoBtn.innerHTML = `<div class="admin-upload-area" id="admin-home-upload"><span>+ загрузить фото</span></div><input type="file" id="inp-admin-home" accept="image/*" style="display:none">`;
-  photoSec.appendChild(photoBtn);
-  body.appendChild(photoSec);
-  setTimeout(() => {
-    document.getElementById('admin-home-upload').addEventListener('click', () => document.getElementById('inp-admin-home').click());
-    document.getElementById('inp-admin-home').addEventListener('change', function() {
-      const f = this.files[0]; if (!f) return;
-      const url = URL.createObjectURL(f);
-      STATE.homePhoto = url;
-      document.getElementById('home-ph').style.display = 'none';
-      const bg = document.getElementById('home-bg');
-      let img = bg.querySelector('img');
-      if (!img) { img = document.createElement('img'); bg.prepend(img); }
-      img.src = url;
-      document.getElementById('sec-bg-img').style.backgroundImage = `url('${url}')`;
-      document.getElementById('sec-bg-img').classList.add('loaded');
-    });
-  }, 0);
-
-  // ── Разделы ──
-  STATE.sections.forEach((sec, si) => {
-    const block = adminBlock(sec.title || '(без названия)', true);
-    const bodyEl = block.querySelector('.admin-section-body');
-
-    // Название
-    bodyEl.appendChild(adminField('Название', 'text', sec.title, v => { sec.title = v; block.querySelector('.admin-section-head span').textContent = v; }));
-
-    if (sec.type === 'section') {
-      // Описание
-      bodyEl.appendChild(adminField('Описание', 'textarea', sec.desc, v => sec.desc = v));
-
-      // Вектор
-      const vecWrap = document.createElement('div');
-      vecWrap.className = 'admin-field';
-      vecWrap.innerHTML = `<label>Векторное изображение раздела</label>
-        <div class="admin-upload-area" style="margin-bottom:8px"><span>${sec.vec ? '✓ загружено' : '+ загрузить PNG'}</span></div>
-        <input type="file" accept="image/*" style="display:none">`;
-      const vecArea = vecWrap.querySelector('.admin-upload-area');
-      const vecInput = vecWrap.querySelector('input');
-      vecArea.addEventListener('click', () => vecInput.click());
-      vecInput.addEventListener('change', function() {
-        const f = this.files[0]; if (!f) return;
-        sec.vec = URL.createObjectURL(f);
-        vecArea.querySelector('span').textContent = '✓ загружено';
-      });
-      bodyEl.appendChild(vecWrap);
-
-      // Работы
-      const artsLabel = document.createElement('div');
-      artsLabel.innerHTML = '<label style="display:block;font-size:9px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin:16px 0 8px">Работы</label>';
-      bodyEl.appendChild(artsLabel);
-
-      sec.arts.forEach((art, ai) => {
-        const artBlock = document.createElement('div');
-        artBlock.className = 'admin-art-item';
-
-        // Фото работы
-        const imgRow = document.createElement('div');
-        imgRow.style.marginBottom = '8px';
-        if (art.images.length) {
-          const thumb = document.createElement('img');
-          thumb.src = art.images[0]; thumb.style.cssText = 'width:80px;height:60px;object-fit:cover';
-          imgRow.appendChild(thumb);
-        }
-        const imgUpload = document.createElement('label');
-        imgUpload.style.cssText = 'display:inline-block;cursor:pointer;font-size:9px;font-weight:300;letter-spacing:.2em;text-transform:uppercase;border:1px solid rgba(255,255,255,.15);padding:5px 10px;color:#fff;margin-top:4px';
-        imgUpload.textContent = art.images.length ? '+ ещё фото' : '+ фото';
-        const imgInput = document.createElement('input');
-        imgInput.type = 'file'; imgInput.accept = 'image/*'; imgInput.multiple = true; imgInput.style.display = 'none';
-        imgInput.addEventListener('change', function() {
-          Array.from(this.files).forEach(f => art.images.push(URL.createObjectURL(f)));
-          renderAdmin();
-        });
-        imgUpload.appendChild(imgInput);
-        imgRow.appendChild(imgUpload);
-        artBlock.appendChild(imgRow);
-
-        artBlock.appendChild(adminField('Название работы', 'text', art.title, v => art.title = v));
-        artBlock.appendChild(adminField('Материал', 'text', art.material, v => art.material = v));
-        artBlock.appendChild(adminField('Формат', 'text', art.size, v => art.size = v));
-        artBlock.appendChild(adminField('Год', 'text', art.year, v => art.year = v));
-        artBlock.appendChild(adminField('Цена (опционально)', 'text', art.price, v => art.price = v || null));
-
-        const delBtn = document.createElement('button');
-        delBtn.className = 'admin-btn danger'; delBtn.textContent = 'удалить работу';
-        delBtn.style.marginTop = '8px';
-        delBtn.addEventListener('click', () => { sec.arts.splice(ai,1); renderAdmin(); });
-        artBlock.appendChild(delBtn);
-        bodyEl.appendChild(artBlock);
-      });
-
-      const addArtBtn = document.createElement('button');
-      addArtBtn.className = 'admin-btn'; addArtBtn.textContent = '+ добавить работу';
-      addArtBtn.style.marginTop = '8px';
-      addArtBtn.addEventListener('click', () => {
-        sec.arts.push({images:[], title:null, material:null, size:null, year:null, price:null});
-        renderAdmin();
-      });
-      bodyEl.appendChild(addArtBtn);
-
-    } else {
-      // Page type
-      bodyEl.appendChild(adminField('Текст', 'textarea', sec.text, v => sec.text = v));
+async function loadStateFromSupabase() {
+  try {
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { data, error } = await sb
+      .from('portfolio_state')
+      .select('data')
+      .eq('id', 1)
+      .single();
+    if (!error && data) {
+      const saved = JSON.parse(data.data);
+      Object.assign(STATE, saved);
+      /* обновляем имя художника если изменилось */
+      if (STATE.artistName) {
+        document.getElementById('artist-name-el').innerHTML =
+          STATE.artistName.replace('\n', '<br>');
+      }
+      /* обновляем фото главной */
+      if (STATE.homePhoto) {
+        document.getElementById('home-ph').style.display = 'none';
+        const bg = document.getElementById('home-bg');
+        let img = bg.querySelector('img');
+        if (!img) { img = document.createElement('img'); bg.prepend(img); }
+        img.src = STATE.homePhoto;
+        document.getElementById('sec-bg-img').style.backgroundImage =
+          `url('${STATE.homePhoto}')`;
+        document.getElementById('sec-bg-img').classList.add('loaded');
+      }
+      renderMenu();
     }
-
-    // Удалить раздел
-    const delSecBtn = document.createElement('button');
-    delSecBtn.className = 'admin-btn danger'; delSecBtn.textContent = 'удалить раздел';
-    delSecBtn.style.marginTop = '12px';
-    delSecBtn.addEventListener('click', () => { STATE.sections.splice(si,1); renderAdmin(); });
-    bodyEl.appendChild(delSecBtn);
-
-    body.appendChild(block);
-  });
-
-  // ── Добавить раздел ──
-  const addRow = document.createElement('div');
-  addRow.style.cssText = 'display:flex;gap:8px;margin-top:16px;flex-wrap:wrap';
-
-  const addSecBtn = document.createElement('button');
-  addSecBtn.className = 'admin-btn primary'; addSecBtn.textContent = '+ новый раздел';
-  addSecBtn.addEventListener('click', () => {
-    STATE.sections.splice(STATE.sections.length - 2, 0, {
-      id: 'sec_' + Date.now(), title:'новый раздел', vec:null, type:'section',
-      desc:'Описание раздела.', arts:[]
-    });
-    renderAdmin();
-  });
-
-  const addPageBtn = document.createElement('button');
-  addPageBtn.className = 'admin-btn'; addPageBtn.textContent = '+ новая страница';
-  addPageBtn.addEventListener('click', () => {
-    STATE.sections.push({id:'pg_'+Date.now(), title:'новая страница', type:'page', text:''});
-    renderAdmin();
-  });
-
-  addRow.appendChild(addSecBtn);
-  addRow.appendChild(addPageBtn);
-  body.appendChild(addRow);
+  } catch(e) { console.warn('Supabase load failed:', e); }
 }
-
-function adminBlock(title, collapsible=false) {
-  const wrap = document.createElement('div');
-  wrap.className = 'admin-section';
-  const head = document.createElement('div');
-  head.className = 'admin-section-head';
-  head.innerHTML = `<span>${title}</span><span style="opacity:.4;font-size:11px">${collapsible?'▾':''}</span>`;
-  const bodyEl = document.createElement('div');
-  bodyEl.className = 'admin-section-body' + (collapsible ? '' : ' open');
-  if (collapsible) head.addEventListener('click', () => bodyEl.classList.toggle('open'));
-  wrap.appendChild(head); wrap.appendChild(bodyEl);
-  return wrap;
-}
-
-function adminField(label, type, value, onChange) {
-  const wrap = document.createElement('div'); wrap.className = 'admin-field';
-  const lbl = document.createElement('label'); lbl.textContent = label;
-  wrap.appendChild(lbl);
-  const input = type === 'textarea' ? document.createElement('textarea') : document.createElement('input');
-  if (type !== 'textarea') input.type = 'text';
-  input.value = value || '';
-  if (type === 'textarea') input.rows = 4;
-  input.addEventListener('input', () => onChange(input.value));
-  wrap.appendChild(input);
-  return wrap;
-}
-
-function saveAdmin() {
-  // Данные уже в STATE — ничего не нужно сохранять
-}
-
-/* ══════════════════════════
-   SUPABASE + CLOUDINARY
-   
-   Настройки — заменить на свои:
-   SUPABASE_URL, SUPABASE_ANON_KEY — из проекта Supabase
-   CLOUDINARY_CLOUD — cloud name из Cloudinary
-   CLOUDINARY_PRESET — unsigned upload preset из Cloudinary
-══════════════════════════ */
-const SUPABASE_URL    = 'https://YOUR_PROJECT.supabase.co';
-const SUPABASE_KEY    = 'YOUR_ANON_KEY';
-const CLOUD_NAME      = 'YOUR_CLOUDINARY_CLOUD';
-const CLOUD_PRESET    = 'YOUR_UPLOAD_PRESET'; // unsigned preset
-
-/* Supabase client — подключается через CDN */
-let supabase = null;
-
-async function initSupabase() {
-  if (supabase) return supabase;
-  // Supabase SDK подгружается динамически
-  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-  supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-  return supabase;
-}
-
-/* ── Логин ── */
-document.getElementById('login-btn').addEventListener('click', async () => {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-pass').value;
-  const errEl = document.getElementById('login-err');
-  errEl.textContent = '';
-
-  if (!email || !pass) { errEl.textContent = 'введите email и пароль'; return; }
-
-  try {
-    const sb = await initSupabase();
-    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-    if (error) { errEl.textContent = 'неверный email или пароль'; return; }
-    openAdmin();
-  } catch(e) {
-    errEl.textContent = 'ошибка подключения';
-  }
-});
-
-// Enter в полях логина
-['login-email','login-pass'].forEach(id => {
-  document.getElementById(id).addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('login-btn').click();
-  });
-});
-
-/* ── Выход ── */
-async function logout() {
-  try {
-    const sb = await initSupabase();
-    await sb.auth.signOut();
-  } catch(e) {}
-  renderMenu();
-  show('home');
-}
-
-document.getElementById('admin-close').addEventListener('click', () => {
-  saveAdmin();
-  logout();
-});
-
-/* ── Загрузка файла в Cloudinary ── */
-async function uploadToCloudinary(file) {
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('upload_preset', CLOUD_PRESET);
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-    method: 'POST', body: fd
-  });
-  const data = await res.json();
-  return data.secure_url; // возвращает постоянный URL
-}
-
-/* ── Сохранить данные в Supabase ── */
-async function saveToSupabase() {
-  try {
-    const sb = await initSupabase();
-    const { error } = await sb.from('portfolio_state').upsert({
-      id: 1,
-      data: JSON.stringify(STATE)
-    });
-    if (error) console.error('Save error:', error);
-  } catch(e) { console.error(e); }
-}
-
-/* ── Загрузить данные из Supabase ── */
-async function loadFromSupabase() {
-  try {
-    const sb = await initSupabase();
-    const { data, error } = await sb.from('portfolio_state').select('data').eq('id', 1).single();
-    if (error || !data) return;
-    const saved = JSON.parse(data.data);
-    // Обновляем STATE сохранёнными данными
-    Object.assign(STATE, saved);
-    renderMenu();
-  } catch(e) { console.error(e); }
-}
-
-/* Переопределяем saveAdmin чтобы сохранял в Supabase */
-function saveAdmin() {
-  saveToSupabase();
-}
-
-/* Проверяем сессию при загрузке */
-async function checkSession() {
-  try {
-    const sb = await initSupabase();
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      // Уже залогинен — можно сразу загрузить данные
-      await loadFromSupabase();
-    }
-  } catch(e) {}
-}
-
-/* Открыть логин вместо прямого открытия админки */
-// Тройной тап по имени теперь открывает логин
-let _tapCount = 0, _tapTimer = null;
-document.getElementById('artist-name-el').addEventListener('click', () => {
-  _tapCount++;
-  clearTimeout(_tapTimer);
-  _tapTimer = setTimeout(() => { _tapCount = 0; }, 600);
-  if (_tapCount >= 3) { _tapCount = 0; show('login'); }
-});
 
 /* Инициализация */
 renderMenu();
-checkSession().then(() => show('home'));
+show('home');
+loadStateFromSupabase();
+
 </script>
 </body>
 </html>
