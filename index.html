@@ -17,7 +17,7 @@ img { display:block; max-width:100%; }
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 #view-section.active, #view-text.active { animation:fadeIn .5s ease both; }
 
-/* HOME */
+/* ── HOME ── */
 #view-home { overflow:hidden; }
 .home-bg { position:absolute; inset:0; background:#111; }
 .home-bg img { width:100%; height:100%; object-fit:cover; }
@@ -28,7 +28,7 @@ img { display:block; max-width:100%; }
 .dots-btn { display:flex; flex-direction:column; gap:5px; padding:2px; }
 .dots-btn span { display:block; width:4px; height:4px; background:#fff; }
 
-/* MENU */
+/* ── MENU ── */
 .menu-ov { position:fixed; inset:0; z-index:200; pointer-events:none; }
 .menu-ov.open { pointer-events:all; }
 .menu-dismiss { position:absolute; inset:0; background:rgba(0,0,0,0); transition:background .7s; }
@@ -68,46 +68,43 @@ img { display:block; max-width:100%; }
 .menu-icons svg { width:22px; height:22px; }
 @media(max-width:768px){ .menu-panel{width:100%;padding:52px 32px 44px} }
 
-/* SECTION */
+/* ── SECTION ── */
 #view-section { background:#0a0a0a; overflow:hidden; }
 .sec-bg { position:absolute; inset:0; z-index:0; overflow:hidden; background:#0a0a0a; }
 .sec-bg-img { position:absolute; inset:-5%; background-size:cover; background-position:center; filter:blur(20px); transform:scale(1.1); opacity:0; transition:opacity .5s; }
 .sec-bg-img.loaded { opacity:1; }
 .sec-bg-dim { position:absolute; inset:0; background:rgba(0,0,0,.75); }
 
-/* Топбар — прозрачный, вектор внутри под z-index кнопок */
+/*
+  Топбар: содержит вектор (z-index:0) и кнопки (z-index:1).
+  overflow:hidden обрезает вектор снизу и по бокам.
+
+  Вектор (.sec-vec):
+  — position:absolute, left:-10%, top:-10% (выходит за верхний и левый край)
+  — Desktop: width:20vw, overflow:hidden на топбаре НЕ обрезает снизу
+    (высота топбара > высота вектора — он вписывается)
+    → для этого убираем overflow:hidden на десктопе
+  — Mobile: overflow:hidden на топбаре обрезает снизу (вектор 50vw > высота топбара)
+    При открытом описании (max-height расширяет .sec-topbar через flex) нижняя часть видна
+*/
 .sec-topbar {
   position:relative; z-index:20; flex-shrink:0;
   display:flex; align-items:center; justify-content:space-between;
   padding:22px 36px;
-  overflow:hidden; /* обрезает вектор */
+  /* overflow:hidden только на мобиле — выставляется через медиа */
 }
-@media(max-width:768px){ .sec-topbar{padding:16px 20px} }
+@media(max-width:768px){ .sec-topbar{ padding:16px 20px; overflow:hidden; } }
 
-/*
-  Вектор раздела — ОДИН элемент, живёт в топбаре.
-  z-index:0 — под кнопками (z-index:1).
-  Desktop: 1/5 ширины страницы (20vw), не обрезается.
-  Mobile:  1/2 ширины страницы (50vw), обрезается снизу топбаром.
-           При открытом описании нижняя часть «выезжает» вместе с ним
-           (описание расширяет топбар вниз через max-height).
-  Выходит за края: -10% сверху, -10% слева.
-*/
+/* Вектор: один элемент в топбаре */
 .sec-vec {
   position:absolute;
   left:-10%; top:-10%;
   width:20vw; height:auto;
-  pointer-events:none;
-  z-index:0;
-  opacity:.2;
-  transition:opacity .4s;
-  object-fit:contain;
-  object-position:left top;
+  pointer-events:none; z-index:0;
+  opacity:.2; transition:opacity .4s;
 }
 .sec-vec.show { opacity:.8; }
-@media(max-width:768px){
-  .sec-vec { width:50vw; }
-}
+@media(max-width:768px){ .sec-vec{ width:50vw; } }
 
 .sec-back { position:relative; z-index:1; font-size:clamp(12px,1vw,15px); font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
 .sec-right { position:relative; z-index:1; display:flex; align-items:center; gap:28px; flex-shrink:0; }
@@ -117,15 +114,12 @@ img { display:block; max-width:100%; }
 .sec-title-btn:hover { opacity:.7; }
 
 .chrono-row { display:none; position:relative; z-index:20; flex-shrink:0; justify-content:flex-end; padding:0 20px 8px; }
-@media(max-width:768px){
-  .sec-topbar .sec-chrono{display:none}
-  .chrono-row{display:flex!important}
-}
+@media(max-width:768px){ .sec-topbar .sec-chrono{display:none} .chrono-row{display:flex!important} }
 
 /* Body */
 .sec-body { flex:1; display:flex; min-height:0; position:relative; z-index:10; }
 
-/* Scroll — лента */
+/* Scroll */
 .sec-scroll { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; padding:16px 36px 80px; position:relative; }
 @media(max-width:768px){ .sec-scroll{padding:12px 20px 80px} }
 
@@ -155,46 +149,70 @@ img { display:block; max-width:100%; }
   .sec-desc.open { max-height:60vh; }
   .sec-desc-inner { width:100%; height:auto; max-height:60vh; padding:16px 20px 16px; }
 }
-
 .desc-close-mob { display:none; width:100%; text-align:center; padding:6px 0; cursor:pointer; font-size:18px; color:rgba(255,255,255,.3); flex-shrink:0; }
 @media(max-width:768px){ .desc-close-mob{display:block} }
 
-/* Artwork cards */
+/* Область справа (закрытое описание) — прозрачный оверлей для скролла ленты */
+.sec-desc-proxy {
+  display:none;
+  position:absolute; top:0; right:0; bottom:0;
+  width:clamp(260px,32vw,400px);
+  z-index:14; cursor:default;
+}
+/* показываем только на десктопе когда описание закрыто */
+@media(min-width:769px){ .sec-desc-proxy.active { display:block; } }
+
+/* Artwork */
 .art-card { margin-top:32px; position:relative; z-index:2; }
-
-/* В ленте — только первое фото, клик открывает LB */
 .art-thumb { width:100%; height:auto; display:block; cursor:pointer; }
-
-/* Информация о работе */
 .art-info { margin-top:16px; }
 .art-title { font-size:clamp(18px,1.8vw,26px); font-weight:400; letter-spacing:.1em; color:#eef3f6; line-height:1.3; }
 .art-mat { margin-top:10px; font-size:clamp(10px,.85vw,12px); font-weight:400; letter-spacing:.1em; color:#9b9b9b; line-height:1.4; }
 .art-year { margin-top:5px; font-size:clamp(10px,.85vw,12px); font-weight:400; letter-spacing:.1em; color:#9b9b9b; }
 .art-price { margin-top:14px; font-size:clamp(14px,1.3vw,18px); font-weight:400; letter-spacing:.06em; color:#555; }
 
-/* TEXT */
+/* ── TEXT VIEW (bio / statement) ── */
 #view-text { background:#0a0a0a; }
 .text-top { flex-shrink:0; display:flex; align-items:baseline; justify-content:space-between; padding:28px 48px; }
 .text-ttl { font-size:clamp(13px,1.1vw,16px); font-weight:300; letter-spacing:.3em; text-transform:lowercase; }
 .text-body { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:36px 10vw 60px; min-height:0; }
-.text-body p { font-size:clamp(14px,1.1vw,16px); font-weight:300; letter-spacing:.05em; line-height:1.9; color:rgba(255,255,255,.88); text-align:justify; text-indent:2em; }
+/* Абзацы в обычных страницах */
+.text-body p {
+  font-size:clamp(14px,1.1vw,16px); font-weight:300; letter-spacing:.05em;
+  line-height:1.9; color:rgba(255,255,255,.88); text-align:justify;
+  text-indent:2em; margin-bottom:.5em;
+}
+/* CV — особый тип страницы */
+.cv-section { margin-bottom:32px; }
+.cv-section-title {
+  font-size:clamp(14px,1.1vw,16px); font-weight:500; letter-spacing:.12em;
+  text-transform:uppercase; color:rgba(255,255,255,.9);
+  margin-bottom:12px;
+}
+.cv-section-text {
+  font-size:clamp(13px,1vw,15px); font-weight:400; letter-spacing:.04em;
+  line-height:1.85; color:rgba(255,255,255,.75);
+}
+.cv-section-text p { margin-bottom:.4em; }
 @media(max-width:768px){ .text-top{padding:20px 24px} .text-body{padding:24px 24px 60px} }
 
-/* LIGHTBOX — карусель фрагментов */
+/* ── LIGHTBOX ── */
 .lb { position:fixed; inset:0; z-index:500; display:none; align-items:center; justify-content:center; }
 .lb.open { display:flex; }
+/* Фон — полный клик закрывает */
 .lb-bg { position:absolute; inset:0; cursor:pointer; backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); background:rgba(0,0,0,.88); }
-.lb-stage { position:relative; z-index:1; width:100%; max-width:calc(100vw - 80px); overflow:hidden; }
-/* Трек и слайды — важно: слайды не сжимаются, каждый ровно 100% stage */
+.lb-stage { position:relative; z-index:1; width:100%; max-width:calc(100vw - 80px); }
+/* overflow:hidden на stage — чтобы слайды не торчали */
+.lb-viewport { overflow:hidden; width:100%; }
 .lb-track { display:flex; transition:transform .35s ease; will-change:transform; }
-.lb-slide { flex:0 0 100%; width:100%; display:flex; align-items:center; justify-content:center; }
-.lb-slide img { max-width:100%; max-height:calc(100vh - 120px); object-fit:contain; pointer-events:none; }
+.lb-slide { flex:0 0 100%; width:100%; display:flex; align-items:center; justify-content:center; padding:0 4px; }
+.lb-slide img { max-width:100%; max-height:calc(100vh - 120px); object-fit:contain; pointer-events:none; user-select:none; display:block; }
 .lb-arr {
   position:absolute; top:50%; transform:translateY(-50%);
   width:44px; height:44px; border-radius:50%;
   background:rgba(255,255,255,.12); font-size:24px;
   display:flex; align-items:center; justify-content:center;
-  z-index:2; transition:background .2s;
+  z-index:2; transition:background .2s; cursor:pointer;
 }
 .lb-arr:hover { background:rgba(255,255,255,.28); }
 .lb-prv { left:-56px; } .lb-nxt { right:-56px; }
@@ -251,27 +269,23 @@ img { display:block; max-width:100%; }
     <div class="sec-bg-img" id="sec-bg-img"></div>
     <div class="sec-bg-dim"></div>
   </div>
-
   <div class="sec-topbar" id="sec-topbar">
-    <!-- Вектор: один элемент, z-index:0, за кнопками -->
-    <img class="sec-vec" id="sec-vec" src="" alt=""
-         onerror="this.style.display='none'" style="display:none">
-
+    <img class="sec-vec" id="sec-vec" src="" alt="" onerror="this.style.display='none'" style="display:none">
     <button class="sec-back" id="sec-back">< назад</button>
     <div class="sec-right">
       <button class="sec-chrono" id="sec-chrono">хронология</button>
       <button class="sec-title-btn" id="sec-title-btn"></button>
     </div>
   </div>
-
   <div class="chrono-row">
     <button class="sec-chrono" id="sec-chrono-m">хронология</button>
   </div>
-
   <div class="sec-body">
     <div class="sec-scroll" id="sec-scroll">
       <div id="art-list"></div>
     </div>
+    <!-- Прокси-область справа при закрытом описании — передаёт скролл в ленту -->
+    <div class="sec-desc-proxy" id="sec-desc-proxy"></div>
     <div class="sec-desc" id="sec-desc">
       <div class="sec-desc-inner" id="sec-desc-inner"></div>
       <button class="desc-close-mob" id="desc-close">&#94;</button>
@@ -293,7 +307,9 @@ img { display:block; max-width:100%; }
   <div class="lb-bg" id="lb-bg"></div>
   <div class="lb-stage" id="lb-stage">
     <div class="lb-counter" id="lb-counter"></div>
-    <div class="lb-track" id="lb-track"></div>
+    <div class="lb-viewport">
+      <div class="lb-track" id="lb-track"></div>
+    </div>
     <button class="lb-arr lb-prv" id="lb-prv">&#8249;</button>
     <button class="lb-arr lb-nxt" id="lb-nxt">&#8250;</button>
     <div class="lb-dots" id="lb-dots"></div>
@@ -321,9 +337,16 @@ const STATE = {
     { id:'jewelry', title:'ювелирные изделия', vec:null, type:'section',
       desc:'Ювелирное ремесло как форма концептуального высказывания.', arts:[] },
     { id:'bio', title:'bio', type:'page',
-      text:'Александр Вечеров — художник, работающий на пересечении концептуального реализма и сюрреализма. Основные медиумы: живопись, графика, ленд-арт, керамическая скульптура, ювелирное ремесло и текстиль.\n\nРодился и работает в России. Исследует структуру жизни, принципы её организации и механизмы роста систем.\n\nУчастник выставок. Работы находятся в частных коллекциях.' },
+      text:'Александр Вечеров — художник, работающий на пересечении концептуального реализма и сюрреализма.\n\nОсновные медиумы: живопись, графика, ленд-арт, керамическая скульптура, ювелирное ремесло и текстиль.\n\nРодился и работает в России. Исследует структуру жизни, принципы её организации и механизмы роста систем.\n\nУчастник выставок. Работы находятся в частных коллекциях.' },
     { id:'statement', title:'artist statement', type:'page',
-      text:'Я работаю в жанре концептуального реализма с элементами сюрреализма. Этот подход представляется мне наиболее точным инструментом для акцентирования внимания на скрытых механизмах и мистических проявлениях реальности.\n\nТрадиционные техники и материалы привлекают меня своей каноничностью, поскольку позволяют говорить о фундаментальных процессах, опираясь на доступные для восприятия образы.\n\nВ своём творчестве я исследую структуру жизни и принципы её организации.\n\nЯ воспринимаю художественную практику как способ фиксации и исследования невидимых связей, формирующих наше существование.' }
+      text:'Я работаю в жанре концептуального реализма с элементами сюрреализма.\n\nЭтот подход представляется мне наиболее точным инструментом для акцентирования внимания на скрытых механизмах и мистических проявлениях реальности.\n\nТрадиционные техники и материалы привлекают меня своей каноничностью, поскольку позволяют говорить о фундаментальных процессах, опираясь на доступные для восприятия образы.\n\nВ своём творчестве я исследую структуру жизни и принципы её организации.\n\nЯ воспринимаю художественную практику как способ фиксации и исследования невидимых связей, формирующих наше существование.' },
+    { id:'cv', title:'cv', type:'cv',
+      subsections:[
+        { title:'Образование', text:'2010–2015 — Московский государственный академический художественный институт им. В.И. Сурикова' },
+        { title:'Выставки', text:'2024 — «Ризоматические узлы», галерея XYZ, Москва\n2023 — «Структуры роста», арт-центр Cube, Санкт-Петербург' },
+        { title:'Публикации', text:'Artguide, 2024\nKOTEL magazine, 2023' }
+      ]
+    }
   ]
 };
 
@@ -335,22 +358,22 @@ function show(id) {
   document.getElementById('view-' + id).classList.add('active');
 }
 
-/* MENU */
+/* ── MENU ── */
 function renderMenu() {
   const nav = document.getElementById('menu-nav');
   nav.innerHTML = '';
-  STATE.sections.filter(s=>s.type==='section').forEach(s => {
+  STATE.sections.filter(s => s.type === 'section').forEach(s => {
     const el = document.createElement('div');
     el.className = 'menu-item';
     el.innerHTML = s.title.replace('\n','<br>');
-    el.addEventListener('click', () => { mOv.classList.remove('open'); setTimeout(()=>openSec(s.id),80); });
+    el.addEventListener('click', () => { mOv.classList.remove('open'); setTimeout(()=>openSec(s.id), 80); });
     nav.appendChild(el);
   });
-  const line = document.createElement('div'); line.className='menu-line'; nav.appendChild(line);
-  STATE.sections.filter(s=>s.type==='page').forEach(p => {
+  const line = document.createElement('div'); line.className = 'menu-line'; nav.appendChild(line);
+  STATE.sections.filter(s => s.type !== 'section').forEach(p => {
     const el = document.createElement('div');
     el.className = 'menu-sub'; el.textContent = p.title;
-    el.addEventListener('click', () => { mOv.classList.remove('open'); setTimeout(()=>openPage(p.id),80); });
+    el.addEventListener('click', () => { mOv.classList.remove('open'); setTimeout(()=>openPage(p.id), 80); });
     nav.appendChild(el);
   });
 }
@@ -363,32 +386,26 @@ document.getElementById('menu-dismiss').addEventListener('click', e => {
 let swX = null;
 document.getElementById('menu-panel').addEventListener('touchstart', e=>{ swX=e.touches[0].clientX; },{passive:true});
 document.getElementById('menu-panel').addEventListener('touchend', e=>{
-  if(swX!==null && e.changedTouches[0].clientX-swX>60) mOv.classList.remove('open');
+  if (swX!==null && e.changedTouches[0].clientX-swX>60) mOv.classList.remove('open');
   swX=null;
 },{passive:true});
 
-/* SECTION */
+/* ── SECTION ── */
 function openSec(id) {
   const s = STATE.sections.find(x=>x.id===id);
   if (!s || s.type!=='section') return;
   cur = id; rev = false;
-
   document.getElementById('sec-title-btn').textContent = s.title;
   document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
-
-  /* Один вектор — в топбаре */
   const vec = document.getElementById('sec-vec');
   if (s.vec) { vec.src=s.vec; vec.style.display='block'; }
   else { vec.style.display='none'; }
-
   document.getElementById('sec-desc-inner').innerHTML =
     s.desc.split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
-
   setDesc(true);
   document.getElementById('sec-chrono').classList.remove('on');
   document.getElementById('sec-chrono-m').classList.remove('on');
   document.getElementById('sec-scroll').scrollTop = 0;
-
   renderArts();
   show('section');
 }
@@ -401,12 +418,20 @@ function setDesc(open) {
   descOpen = open;
   document.getElementById('sec-desc').classList.toggle('open', open);
   document.getElementById('sec-vec').classList.toggle('show', open);
+  /* Прокси-область: активна только когда описание закрыто */
+  document.getElementById('sec-desc-proxy').classList.toggle('active', !open);
 }
 
 document.getElementById('sec-title-btn').addEventListener('click', ()=>setDesc(!descOpen));
 document.getElementById('desc-close').addEventListener('click', ()=>setDesc(false));
 
-/* Desktop: клик по пустому месту ленты закрывает описание */
+/* Прокси-область передаёт скролл в ленту */
+document.getElementById('sec-desc-proxy').addEventListener('wheel', e=>{
+  document.getElementById('sec-scroll').scrollTop += e.deltaY;
+}, {passive:true});
+document.getElementById('sec-desc-proxy').addEventListener('click', ()=>{ if(!descOpen) setDesc(false); });
+
+/* Desktop: клик по пустому месту ленты закрывает */
 document.getElementById('sec-scroll').addEventListener('click', e=>{
   if (!descOpen||isMob()) return;
   if (e.target.closest('.art-card')) return;
@@ -422,7 +447,7 @@ document.getElementById('sec-desc').addEventListener('touchend',e=>{
   dSwX=null;
 },{passive:true});
 
-/* Mobile: свайп вниз закрывает описание */
+/* Mobile: свайп вниз по описанию */
 let dSwY=null;
 document.getElementById('sec-desc').addEventListener('touchstart',e=>{dSwY=e.touches[0].clientY;},{passive:true});
 document.getElementById('sec-desc').addEventListener('touchend',e=>{
@@ -431,7 +456,6 @@ document.getElementById('sec-desc').addEventListener('touchend',e=>{
   dSwY=null;
 },{passive:true});
 
-/* Хронология */
 function togChrono(){
   rev=!rev;
   document.getElementById('sec-chrono').classList.toggle('on',rev);
@@ -442,34 +466,20 @@ document.getElementById('sec-chrono').addEventListener('click',togChrono);
 document.getElementById('sec-chrono-m').addEventListener('click',togChrono);
 document.getElementById('sec-back').addEventListener('click',()=>{ renderMenu(); mOv.classList.add('open'); show('home'); });
 
-/* RENDER ARTS
-   В ленте: только первое изображение (превью).
-   Клик по превью → открывает LB со всеми изображениями работы.
-   Карусель в ленте отсутствует — только в LB. */
 function renderArts() {
   const sec = STATE.sections.find(s=>s.id===cur);
   const arr = rev ? [...sec.arts].reverse() : sec.arts;
   const list = document.getElementById('art-list');
   list.innerHTML = '';
-
   arr.forEach(art => {
-    const card = document.createElement('div');
-    card.className = 'art-card';
-
-    /* Превью — только первое фото */
+    const card = document.createElement('div'); card.className='art-card';
     if (art.images && art.images.length) {
-      const img = document.createElement('img');
-      img.className = 'art-thumb';
-      img.src = art.images[0];
+      const img = document.createElement('img'); img.className='art-thumb'; img.src=art.images[0];
       img.addEventListener('click', ()=>openLB(art.images, 0));
       card.appendChild(img);
     }
-
-    /* Информация под фото */
     const info = document.createElement('div'); info.className='art-info';
-    if (art.title) {
-      const t=document.createElement('div'); t.className='art-title'; t.textContent=art.title; info.appendChild(t);
-    }
+    if (art.title) { const t=document.createElement('div'); t.className='art-title'; t.textContent=art.title; info.appendChild(t); }
     if (art.material||art.size) {
       const m=document.createElement('div'); m.className='art-mat';
       let h=art.material||''; if(art.size) h+=(art.material?'<br>':'')+art.size;
@@ -482,19 +492,33 @@ function renderArts() {
   });
 }
 
-/* PAGE */
+/* ── PAGE: bio / statement (обычный текст с абзацами) ── */
+/* ── PAGE: cv (подразделы title+text) ── */
 function openPage(id) {
   const p = STATE.sections.find(s=>s.id===id);
-  if (!p||p.type!=='page') return;
+  if (!p || p.type==='section') return;
   document.getElementById('text-ttl').textContent = p.title;
-  document.getElementById('text-body').innerHTML = p.text.split('\n\n').map(t=>`<p>${t}</p>`).join('');
+  const body = document.getElementById('text-body');
+  body.innerHTML = '';
+
+  if (p.type === 'cv') {
+    /* CV — подразделы */
+    (p.subsections||[]).forEach(sub => {
+      const sec = document.createElement('div'); sec.className='cv-section';
+      const t = document.createElement('div'); t.className='cv-section-title'; t.textContent=sub.title;
+      const d = document.createElement('div'); d.className='cv-section-text';
+      d.innerHTML = sub.text.split('\n').map(l=>`<p>${l}</p>`).join('');
+      sec.appendChild(t); sec.appendChild(d); body.appendChild(sec);
+    });
+  } else {
+    /* Обычная страница — абзацы через \n\n */
+    body.innerHTML = p.text.split('\n\n').map(t=>`<p>${t.replace(/\n/g,'<br>')}</p>`).join('');
+  }
   show('text');
 }
 document.getElementById('text-back').addEventListener('click',()=>{ renderMenu(); mOv.classList.add('open'); show('home'); });
 
-/* LIGHTBOX — карусель всех изображений работы
-   Ключевое: слайды фиксированной ширины stage, track смещается translateX.
-   Ширина берётся от stage.offsetWidth после открытия. */
+/* ── LIGHTBOX ── */
 function openLB(imgs, startIdx) {
   lbArr=imgs; lbI=startIdx;
   const tr=document.getElementById('lb-track'); tr.innerHTML='';
@@ -507,44 +531,104 @@ function openLB(imgs, startIdx) {
   if(imgs.length>1) imgs.forEach((_,i)=>{
     const d=document.createElement('div');
     d.className='lb-dot'+(i===0?' on':'');
-    d.addEventListener('click',()=>goLB(i));
+    d.addEventListener('click',e=>{ e.stopPropagation(); goLB(i); });
     dots.appendChild(d);
   });
   document.getElementById('lb-prv').style.display=imgs.length>1?'':'none';
   document.getElementById('lb-nxt').style.display=imgs.length>1?'':'none';
   document.getElementById('lb').classList.add('open');
-  /* Ждём рендер чтобы получить правильную ширину */
-  requestAnimationFrame(()=>{ requestAnimationFrame(()=>updLB()); });
+  /* Два rAF — гарантируем что DOM отрендерен и ширина известна */
+  requestAnimationFrame(()=>requestAnimationFrame(()=>updLB()));
 }
 
-const closeLB=()=>{ document.getElementById('lb').classList.remove('open'); };
+function closeLB() { document.getElementById('lb').classList.remove('open'); }
+
+/* Закрытие: клик по фону (lb-bg) */
+document.getElementById('lb-bg').addEventListener('click', closeLB);
+
+/* Закрытие: клик по области вне изображения внутри stage тоже закрывает */
+document.getElementById('lb-stage').addEventListener('click', e=>{
+  /* если кликнули не по img и не по кнопкам */
+  if (!e.target.closest('img') && !e.target.closest('.lb-arr') && !e.target.closest('.lb-dot')) {
+    closeLB();
+  }
+});
+
 function goLB(i){ lbI=Math.max(0,Math.min(i,lbArr.length-1)); updLB(); }
+
 function updLB(){
-  const stage=document.getElementById('lb-stage');
-  const w=stage.offsetWidth||window.innerWidth-80;
+  const vp = document.querySelector('.lb-viewport');
+  const w = vp ? vp.offsetWidth : (window.innerWidth-80);
   document.getElementById('lb-track').style.transform=`translateX(${-lbI*w}px)`;
   document.getElementById('lb-counter').textContent=lbArr.length>1?`${lbI+1} / ${lbArr.length}`:'';
   document.querySelectorAll('.lb-dot').forEach((d,i)=>d.classList.toggle('on',i===lbI));
 }
-document.getElementById('lb-bg').addEventListener('click',closeLB);
-document.getElementById('lb-prv').addEventListener('click',e=>{e.stopPropagation();goLB(lbI-1);});
-document.getElementById('lb-nxt').addEventListener('click',e=>{e.stopPropagation();goLB(lbI+1);});
+
+document.getElementById('lb-prv').addEventListener('click',e=>{ e.stopPropagation(); goLB(lbI-1); });
+document.getElementById('lb-nxt').addEventListener('click',e=>{ e.stopPropagation(); goLB(lbI+1); });
+
 document.addEventListener('keydown',e=>{
   if(!document.getElementById('lb').classList.contains('open'))return;
-  if(e.key==='ArrowLeft')goLB(lbI-1);
-  if(e.key==='ArrowRight')goLB(lbI+1);
-  if(e.key==='Escape')closeLB();
+  if(e.key==='ArrowLeft') goLB(lbI-1);
+  if(e.key==='ArrowRight') goLB(lbI+1);
+  if(e.key==='Escape') closeLB();
 });
+
+/* Свайп по LB */
 let ltx=null;
-document.getElementById('lb-stage').addEventListener('touchstart',e=>{ltx=e.touches[0].clientX;},{passive:true});
+document.getElementById('lb-stage').addEventListener('touchstart',e=>{
+  if(e.target.closest('.lb-arr')||e.target.closest('.lb-dot'))return;
+  ltx=e.touches[0].clientX;
+},{passive:true});
 document.getElementById('lb-stage').addEventListener('touchend',e=>{
   if(ltx===null)return;
   const dx=e.changedTouches[0].clientX-ltx;
   if(Math.abs(dx)>40){ dx<0?goLB(lbI+1):goLB(lbI-1); }
+  else if(Math.abs(dx)<8){ /* это тап — закрыть если не на img/кнопках */ }
   ltx=null;
 },{passive:true});
 
-/* SUPABASE */
+/* ── PINCH ZOOM на первом фото в ленте (не конфликтует с LB) ── */
+(function(){
+  let el=null,sc=1,px=0,py=0,ld=0,lx=0,ly=0,lt=0,pinching=false;
+  const rst=()=>{
+    if(!el)return;
+    el.style.transform=''; el.style.position=''; el.style.zIndex='';
+    el=null; sc=1; px=0; py=0; pinching=false;
+  };
+  document.addEventListener('touchstart',e=>{
+    if(window.innerWidth>768||document.getElementById('lb').classList.contains('open'))return;
+    const t=e.target.closest('.art-thumb'); if(!t)return;
+    if(e.touches.length===2){
+      pinching=true; el=t;
+      ld=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);
+    }
+    if(e.touches.length===1){ lx=e.touches[0].clientX; ly=e.touches[0].clientY; }
+    const now=Date.now(); if(now-lt<280&&sc>1)rst(); lt=now;
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!el||!pinching)return;
+    if(e.touches.length===2){
+      e.preventDefault();
+      const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);
+      sc=Math.max(1,Math.min(sc*(d/ld),4)); ld=d;
+    } else if(e.touches.length===1&&sc>1){
+      e.preventDefault();
+      px+=e.touches[0].clientX-lx; py+=e.touches[0].clientY-ly;
+      lx=e.touches[0].clientX; ly=e.touches[0].clientY;
+    }
+    el.style.transform=`scale(${sc}) translate(${px/sc}px,${py/sc}px)`;
+    el.style.transformOrigin='center center';
+    el.style.position='relative'; el.style.zIndex='30';
+  },{passive:false});
+  document.addEventListener('touchend',e=>{
+    if(!el)return;
+    if(e.touches.length===0&&sc<=1.05)rst();
+    if(e.touches.length<2) pinching=false;
+  },{passive:true});
+})();
+
+/* ── SUPABASE ── */
 const SUPABASE_URL='https://wukyzwgsgfvknqigassr.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1a3l6d2dzZ2Z2a25xaWdhc3NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTQwNDMsImV4cCI6MjA5MDc5MDA0M30.5PIkhguprMyhPqqhRPcYcdEhlatRFHX6FF_YhiYdXhY';
 
@@ -569,7 +653,7 @@ async function loadStateFromSupabase(){
       }
       renderMenu();
     }
-  }catch(e){console.warn('Supabase:',e);}
+  }catch(e){ console.warn('Supabase:',e); }
 }
 
 renderMenu();
