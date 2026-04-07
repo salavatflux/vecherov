@@ -70,11 +70,6 @@ img { display:block; max-width:100%; }
 .drag-handle { cursor:grab; padding:0 8px 0 0; opacity:.3; font-size:14px; user-select:none; flex-shrink:0; }
 .drag-handle:active { cursor:grabbing; }
 .dragging { opacity:.4; border:1px dashed rgba(255,255,255,.3)!important; }
-.drag-over { border-top:2px solid rgba(255,255,255,.5)!important; }
-.admin-section-head { gap:8px; }
-
-/* Кнопки порядка работ */
-.art-order-btns { display:flex; gap:4px; margin-bottom:8px; }
 .art-order-btn { font-size:11px; padding:3px 8px; opacity:.5; }
 .art-order-btn:hover { opacity:1; }
 
@@ -230,28 +225,26 @@ async function uploadFile(file, progressEl) {
   return data.secure_url.replace('/upload/', '/upload/q_auto,f_auto/');
 }
 
-/* ── DRAG-AND-DROP для разделов ── */
-let dragSrcIdx = null;
-
-function addDragToSection(block, si) {
-  block.setAttribute('draggable', true);
-  block.addEventListener('dragstart', e => {
-    dragSrcIdx = si;
-    setTimeout(()=>block.classList.add('dragging'), 0);
-    e.dataTransfer.effectAllowed = 'move';
-  });
-  block.addEventListener('dragend', () => block.classList.remove('dragging'));
-  block.addEventListener('dragover', e => { e.preventDefault(); block.classList.add('drag-over'); });
-  block.addEventListener('dragleave', () => block.classList.remove('drag-over'));
-  block.addEventListener('drop', e => {
-    e.preventDefault(); block.classList.remove('drag-over');
-    if (dragSrcIdx === null || dragSrcIdx === si) return;
-    const moved = STATE.sections.splice(dragSrcIdx, 1)[0];
-    const targetIdx = si > dragSrcIdx ? si-1 : si;
-    STATE.sections.splice(targetIdx, 0, moved);
-    dragSrcIdx = null;
-    renderAdmin();
-  });
+/* ── Порядок разделов через кнопки ↑/↓ ── */
+function addOrderBtns(block, si) {
+  const head = block.querySelector('.admin-section-head');
+  const wrap = document.createElement('div');
+  wrap.style.cssText='display:flex;gap:4px;margin-left:auto;flex-shrink:0';
+  if (si > 0) {
+    const up = document.createElement('button');
+    up.className='admin-btn art-order-btn'; up.textContent='↑';
+    up.title='выше'; up.style.padding='2px 8px';
+    up.addEventListener('click', e=>{ e.stopPropagation(); [STATE.sections[si-1],STATE.sections[si]]=[STATE.sections[si],STATE.sections[si-1]]; renderAdmin(); });
+    wrap.appendChild(up);
+  }
+  if (si < STATE.sections.length-1) {
+    const dn = document.createElement('button');
+    dn.className='admin-btn art-order-btn'; dn.textContent='↓';
+    dn.title='ниже'; dn.style.padding='2px 8px';
+    dn.addEventListener('click', e=>{ e.stopPropagation(); [STATE.sections[si],STATE.sections[si+1]]=[STATE.sections[si+1],STATE.sections[si]]; renderAdmin(); });
+    wrap.appendChild(dn);
+  }
+  head.appendChild(wrap);
 }
 
 /* ── RENDER ADMIN ── */
@@ -296,12 +289,8 @@ function renderAdmin(keepOpenId = null) {
     const bBody = block.querySelector('.admin-section-body');
     if (keepOpenId === sec.id) bBody.classList.add('open');
 
-    // Добавляем ручку перетаскивания в заголовок
-    const head = block.querySelector('.admin-section-head');
-    const handle = document.createElement('span'); handle.className='drag-handle'; handle.textContent='⠿';
-    handle.addEventListener('mousedown', e=>e.stopPropagation());
-    head.prepend(handle);
-    addDragToSection(block, si);
+    // Добавляем кнопки ↑/↓ для изменения порядка
+    addOrderBtns(block, si);
 
     bBody.appendChild(makeField('Название', 'text', sec.title, v => {
       sec.title = v;
@@ -311,25 +300,7 @@ function renderAdmin(keepOpenId = null) {
     if (sec.type === 'section') {
       bBody.appendChild(makeField('Описание раздела', 'textarea', sec.desc, v => sec.desc = v));
 
-      // Вектор
-      const vecF = document.createElement('div'); vecF.className = 'admin-field';
-      vecF.innerHTML = '<label>Векторное изображение (PNG)</label>';
-      if (sec.vec) {
-        const vi = document.createElement('img'); vi.src = sec.vec;
-        vi.style.cssText = 'width:60px;height:60px;object-fit:contain;margin-bottom:8px;opacity:.9';
-        vecF.appendChild(vi);
-      }
-      const vecArea = makeUploadArea(sec.vec ? '← заменить вектор' : '+ загрузить PNG');
-      const vecInput = document.createElement('input'); vecInput.type='file'; vecInput.accept='image/*'; vecInput.style.display='none';
-      const vecProg = document.createElement('div'); vecProg.className='upload-progress';
-      vecArea.addEventListener('click', () => vecInput.click());
-      vecInput.addEventListener('change', async function() {
-        const f = this.files[0]; if (!f) return;
-        const url = await uploadFile(f, vecProg);
-        sec.vec = url; renderAdmin(sec.id);
-      });
-      vecF.appendChild(vecArea); vecF.appendChild(vecInput); vecF.appendChild(vecProg);
-      bBody.appendChild(vecF);
+      bBody.appendChild(makeVecField(sec, sec.id));
 
       bBody.appendChild(Object.assign(document.createElement('hr'), {style:'border:none;border-top:1px solid rgba(255,255,255,.06);margin:14px 0'}));
 
@@ -401,8 +372,7 @@ function renderAdmin(keepOpenId = null) {
       });
       bBody.appendChild(addArtBtn);
 
-    } else if (sec.type === 'cv') {
-      // CV — подразделы
+    } else if (sec.type === 'cv') {      // CV — подразделы
       (sec.subsections||[]).forEach((sub, subi) => {
         const subEl = document.createElement('div'); subEl.className='cv-sub-item';
         subEl.appendChild(makeField('Заголовок подраздела', 'text', sub.title, v => sub.title = v));
@@ -423,8 +393,9 @@ function renderAdmin(keepOpenId = null) {
       bBody.appendChild(addSubBtn);
 
     } else {
-      // page
+      // page — текст + опциональный вектор
       bBody.appendChild(makeField('Текст (абзацы разделяются пустой строкой)', 'textarea', sec.text, v => sec.text = v));
+      bBody.appendChild(makeVecField(sec, sec.id));
     }
 
     const delSecBtn = document.createElement('button'); delSecBtn.className='admin-btn danger'; delSecBtn.textContent='удалить раздел';
@@ -511,6 +482,28 @@ function makeUploadArea(text) {
   const el = document.createElement('div'); el.className='admin-upload-area';
   el.innerHTML=`<span>${text}</span>`;
   return el;
+}
+
+/* Поле загрузки вектора — используется и в section, и в page/cv */
+function makeVecField(sec, keepId) {
+  const vecF = document.createElement('div'); vecF.className = 'admin-field';
+  vecF.innerHTML = '<label>Векторное изображение (PNG)</label>';
+  if (sec.vec) {
+    const vi = document.createElement('img'); vi.src = sec.vec;
+    vi.style.cssText = 'width:60px;height:60px;object-fit:contain;margin-bottom:8px;opacity:.9';
+    vecF.appendChild(vi);
+  }
+  const vecArea = makeUploadArea(sec.vec ? '← заменить вектор' : '+ загрузить PNG');
+  const vecInput = document.createElement('input'); vecInput.type='file'; vecInput.accept='image/*'; vecInput.style.display='none';
+  const vecProg = document.createElement('div'); vecProg.className='upload-progress';
+  vecArea.addEventListener('click', () => vecInput.click());
+  vecInput.addEventListener('change', async function() {
+    const f = this.files[0]; if (!f) return;
+    const url = await uploadFile(f, vecProg);
+    sec.vec = url; renderAdmin(keepId);
+  });
+  vecF.appendChild(vecArea); vecF.appendChild(vecInput); vecF.appendChild(vecProg);
+  return vecF;
 }
 
 init();

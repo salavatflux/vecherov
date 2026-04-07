@@ -76,35 +76,43 @@ img { display:block; max-width:100%; }
 .sec-bg-dim { position:absolute; inset:0; background:rgba(0,0,0,.75); }
 
 /*
-  Топбар: содержит вектор (z-index:0) и кнопки (z-index:1).
-  overflow:hidden обрезает вектор снизу и по бокам.
-
-  Вектор (.sec-vec):
-  — position:absolute, left:-10%, top:-10% (выходит за верхний и левый край)
-  — Desktop: width:20vw, overflow:hidden на топбаре НЕ обрезает снизу
-    (высота топбара > высота вектора — он вписывается)
-    → для этого убираем overflow:hidden на десктопе
-  — Mobile: overflow:hidden на топбаре обрезает снизу (вектор 50vw > высота топбара)
-    При открытом описании (max-height расширяет .sec-topbar через flex) нижняя часть видна
+  Топбар — на мобиле overflow:hidden чтобы обрезать вектор снизу.
+  На десктопе без overflow — кнопки не перекрыты.
 */
 .sec-topbar {
   position:relative; z-index:20; flex-shrink:0;
   display:flex; align-items:center; justify-content:space-between;
   padding:22px 36px;
-  /* overflow:hidden только на мобиле — выставляется через медиа */
 }
 @media(max-width:768px){ .sec-topbar{ padding:16px 20px; overflow:hidden; } }
 
-/* Вектор: один элемент в топбаре */
+/*
+  Вектор:
+  Desktop — position:absolute в .sec-scroll (z-index:1, под картинками z-index:2).
+            Левый и верхний края выходят за пределы на 10%.
+            Ширина 20vw. Не обрезается, не наезжает на кнопки.
+  Mobile  — position:absolute в .sec-topbar.
+            Ширина 50vw. Обрезается нижним краем топбара (overflow:hidden).
+            При открытом описании нижняя часть выезжает вместе с .sec-desc (order:-1).
+*/
 .sec-vec {
   position:absolute;
   left:-10%; top:-10%;
-  width:20vw; height:auto;
-  pointer-events:none; z-index:0;
-  opacity:.2; transition:opacity .4s;
+  pointer-events:none;
+  opacity:.2;
+  transition:opacity .4s;
+  z-index:1; /* ниже кнопок (z-index:1 относительно родителя) и ниже карточек (z-index:2) */
 }
 .sec-vec.show { opacity:.8; }
-@media(max-width:768px){ .sec-vec{ width:50vw; } }
+
+/* Desktop: вектор живёт в sec-scroll */
+@media(min-width:769px){
+  .sec-vec { width:20vw; height:auto; }
+}
+/* Mobile: вектор живёт в sec-topbar */
+@media(max-width:768px){
+  .sec-vec { width:50vw; height:auto; }
+}
 
 .sec-back { position:relative; z-index:1; font-size:clamp(12px,1vw,15px); font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
 .sec-right { position:relative; z-index:1; display:flex; align-items:center; gap:28px; flex-shrink:0; }
@@ -397,9 +405,18 @@ function openSec(id) {
   cur = id; rev = false;
   document.getElementById('sec-title-btn').textContent = s.title;
   document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
+
+  /* Вектор: на десктопе — в sec-scroll (не наезжает на кнопки).
+             На мобиле — в sec-topbar (обрезается его нижним краем). */
   const vec = document.getElementById('sec-vec');
+  const vecTarget = isMob()
+    ? document.getElementById('sec-topbar')
+    : document.getElementById('sec-scroll');
+  vecTarget.appendChild(vec); /* перемещаем в нужный контейнер */
+
   if (s.vec) { vec.src=s.vec; vec.style.display='block'; }
   else { vec.style.display='none'; }
+
   document.getElementById('sec-desc-inner').innerHTML =
     s.desc.split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
   setDesc(true);
@@ -411,7 +428,17 @@ function openSec(id) {
 }
 
 window.addEventListener('resize', () => {
-  if (cur) document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
+  if (cur) {
+    document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
+    /* Переставляем вектор при смене ориентации */
+    const vec = document.getElementById('sec-vec');
+    if (vec.style.display !== 'none') {
+      const vecTarget = isMob()
+        ? document.getElementById('sec-topbar')
+        : document.getElementById('sec-scroll');
+      vecTarget.appendChild(vec);
+    }
+  }
 });
 
 function setDesc(open) {
@@ -543,13 +570,12 @@ function openLB(imgs, startIdx) {
 
 function closeLB() { document.getElementById('lb').classList.remove('open'); }
 
-/* Закрытие: клик по фону (lb-bg) */
 document.getElementById('lb-bg').addEventListener('click', closeLB);
 
-/* Закрытие: клик по области вне изображения внутри stage тоже закрывает */
-document.getElementById('lb-stage').addEventListener('click', e=>{
-  /* если кликнули не по img и не по кнопкам */
-  if (!e.target.closest('img') && !e.target.closest('.lb-arr') && !e.target.closest('.lb-dot')) {
+/* stage: клик вне img/кнопок закрывает. Но нужно stopPropagation от кнопок чтобы не всплывало на bg */
+document.getElementById('lb-stage').addEventListener('click', e => {
+  e.stopPropagation(); /* не пускаем на lb-bg */
+  if (!e.target.closest('img') && !e.target.closest('.lb-arr') && !e.target.closest('.lb-dot') && !e.target.closest('.lb-viewport')) {
     closeLB();
   }
 });
@@ -588,45 +614,56 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
   ltx=null;
 },{passive:true});
 
-/* ── PINCH ZOOM на первом фото в ленте (не конфликтует с LB) ── */
+/* ── PINCH ZOOM на первом фото в ленте ──
+   Увеличивается в своих границах, не перекрывает другое.
+   Pan работает при sc>1. Сброс при скролле ленты. */
 (function(){
-  let el=null,sc=1,px=0,py=0,ld=0,lx=0,ly=0,lt=0,pinching=false;
-  const rst=()=>{
-    if(!el)return;
-    el.style.transform=''; el.style.position=''; el.style.zIndex='';
+  let el=null, sc=1, px=0, py=0, ld=0, lx=0, ly=0, pinching=false;
+
+  function rst() {
+    if (!el) return;
+    el.style.transform=''; el.style.cursor='';
     el=null; sc=1; px=0; py=0; pinching=false;
-  };
-  document.addEventListener('touchstart',e=>{
-    if(window.innerWidth>768||document.getElementById('lb').classList.contains('open'))return;
-    const t=e.target.closest('.art-thumb'); if(!t)return;
-    if(e.touches.length===2){
+  }
+
+  document.getElementById('sec-scroll').addEventListener('scroll', rst, {passive:true});
+
+  document.addEventListener('touchstart', e=>{
+    if (window.innerWidth>768 || document.getElementById('lb').classList.contains('open')) return;
+    const t=e.target.closest('.art-thumb'); if(!t) return;
+    if (e.touches.length===2) {
       pinching=true; el=t;
-      ld=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);
+      ld=Math.hypot(e.touches[1].clientX-e.touches[0].clientX, e.touches[1].clientY-e.touches[0].clientY);
+      const rect=t.getBoundingClientRect();
+      const cx=(e.touches[0].clientX+e.touches[1].clientX)/2 - rect.left;
+      const cy=(e.touches[0].clientY+e.touches[1].clientY)/2 - rect.top;
+      t.style.transformOrigin=`${cx}px ${cy}px`;
     }
-    if(e.touches.length===1){ lx=e.touches[0].clientX; ly=e.touches[0].clientY; }
-    const now=Date.now(); if(now-lt<280&&sc>1)rst(); lt=now;
+    if (e.touches.length===1 && sc>1) { lx=e.touches[0].clientX; ly=e.touches[0].clientY; }
   },{passive:true});
-  document.addEventListener('touchmove',e=>{
-    if(!el||!pinching)return;
-    if(e.touches.length===2){
+
+  document.addEventListener('touchmove', e=>{
+    if (!el) return;
+    if (e.touches.length===2 && pinching) {
       e.preventDefault();
-      const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);
-      sc=Math.max(1,Math.min(sc*(d/ld),4)); ld=d;
-    } else if(e.touches.length===1&&sc>1){
+      const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX, e.touches[1].clientY-e.touches[0].clientY);
+      sc=Math.max(1, Math.min(sc*(d/ld), 4)); ld=d;
+      el.style.transform=`scale(${sc}) translate(${px}px,${py}px)`;
+    } else if (e.touches.length===1 && sc>1) {
       e.preventDefault();
-      px+=e.touches[0].clientX-lx; py+=e.touches[0].clientY-ly;
+      px+=(e.touches[0].clientX-lx)/sc;
+      py+=(e.touches[0].clientY-ly)/sc;
       lx=e.touches[0].clientX; ly=e.touches[0].clientY;
+      el.style.transform=`scale(${sc}) translate(${px}px,${py}px)`;
     }
-    el.style.transform=`scale(${sc}) translate(${px/sc}px,${py/sc}px)`;
-    el.style.transformOrigin='center center';
-    el.style.position='relative'; el.style.zIndex='30';
   },{passive:false});
-  document.addEventListener('touchend',e=>{
-    if(!el)return;
-    if(e.touches.length===0&&sc<=1.05)rst();
-    if(e.touches.length<2) pinching=false;
+
+  document.addEventListener('touchend', e=>{
+    if (e.touches.length<2) pinching=false;
+    if (e.touches.length===0 && sc<=1.05) rst();
   },{passive:true});
 })();
+
 
 /* ── SUPABASE ── */
 const SUPABASE_URL='https://wukyzwgsgfvknqigassr.supabase.co';
