@@ -97,21 +97,21 @@ img { display:block; max-width:100%; }
 */
 .sec-vec {
   position:absolute;
-  left:-10%; top:-10%;
+  left:0; top:0;
   pointer-events:none;
   opacity:.1;
   transition:opacity .4s;
-  z-index:1; /* ниже кнопок (z-index:1 относительно родителя) и ниже карточек (z-index:2) */
+  z-index:1;
 }
 .sec-vec.show { opacity:.9; }
 
 /* Desktop: вектор живёт в sec-scroll */
 @media(min-width:769px){
-  .sec-vec { width:20vw; height:auto; top:0; }
+  .sec-vec { width:20vw; height:auto; }
 }
-/* Mobile: вектор живёт в sec-topbar */
+/* Mobile: вектор живёт в sec-topbar, обрезается overflow:hidden снизу */
 @media(max-width:768px){
-  .sec-vec { width:45vw; height:auto; }
+  .sec-vec { width:45vw; height:auto; left:-5%; }
 }
 
 .sec-back { position:relative; z-index:1; font-size:clamp(12px,1vw,15px); font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
@@ -649,6 +649,10 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
   }
 
   document.getElementById('sec-scroll').addEventListener('scroll', rst, {passive:true});
+  /* Сброс зума при касании вне картинки (начало скролла ленты) */
+  document.getElementById('sec-scroll').addEventListener('touchstart', e => {
+    if (el && !e.target.closest('.art-thumb')) rst();
+  }, {passive:true});
 
   document.addEventListener('touchstart', e => {
     if (window.innerWidth > 768 || document.getElementById('lb').classList.contains('open')) return;
