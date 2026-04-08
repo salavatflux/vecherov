@@ -107,11 +107,11 @@ img { display:block; max-width:100%; }
 
 /* Desktop: вектор живёт в sec-scroll */
 @media(min-width:769px){
-  .sec-vec { width:20vw; height:auto; }
+  .sec-vec { width:20vw; height:auto; top:0; }
 }
 /* Mobile: вектор живёт в sec-topbar */
 @media(max-width:768px){
-  .sec-vec { width:50vw; height:auto; }
+  .sec-vec { width:45vw; height:auto; }
 }
 
 .sec-back { position:relative; z-index:1; font-size:clamp(12px,1vw,15px); font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
@@ -417,8 +417,8 @@ function openSec(id) {
     : document.getElementById('sec-scroll');
   vecTarget.appendChild(vec); /* перемещаем в нужный контейнер */
 
-  if (s.vec) { vec.src=s.vec; vec.style.display='block'; }
-  else { vec.style.display='none'; }
+  if (s.vec) { vec.src=s.vec; vec.style.display='block'; vec.classList.add('show'); }
+  else { vec.style.display='none'; vec.classList.remove('show'); }
 
   document.getElementById('sec-desc-inner').innerHTML =
     s.desc.split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
@@ -447,7 +447,6 @@ window.addEventListener('resize', () => {
 function setDesc(open) {
   descOpen = open;
   document.getElementById('sec-desc').classList.toggle('open', open);
-  document.getElementById('sec-vec').classList.toggle('show', open);
   /* Прокси-область: активна только когда описание закрыто */
   document.getElementById('sec-desc-proxy').classList.toggle('active', !open);
 }
@@ -620,14 +619,23 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
 },{passive:true});
 
 /* ── PINCH ZOOM на фото в ленте ──
-   .art-zoom-wrap имеет overflow:hidden + isolation:isolate — img не вылезает за рамку.
-   transform-origin пересчитывается при каждом новом пинче.
-   Pan одним пальцем при sc>1. Плавный сброс при скролле или сведении к sc=1. */
+   transform-origin зафиксирован 50% 50%. Масштаб от центра, пан одним пальцем.
+   clampPan не даёт картинке уйти за края .art-zoom-wrap.
+   Сброс при скролле ленты или сведении пальцев к sc=1. */
 (function(){
-  let el=null, sc=1, px=0, py=0, ld=0, lx=0, ly=0, pinching=false;
+  let el=null, wrap=null, sc=1, px=0, py=0, ld=0, lx=0, ly=0, pinching=false;
+
+  function clampPan() {
+    if (!wrap) return;
+    const maxX = wrap.offsetWidth  * (sc - 1) / (2 * sc);
+    const maxY = wrap.offsetHeight * (sc - 1) / (2 * sc);
+    px = Math.max(-maxX, Math.min(maxX, px));
+    py = Math.max(-maxY, Math.min(maxY, py));
+  }
 
   function applyTransform() {
     if (!el) return;
+    clampPan();
     el.style.transform = `scale(${sc}) translate(${px}px,${py}px)`;
   }
 
@@ -636,8 +644,8 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
     el.style.transition = 'transform .25s ease';
     el.style.transform = 'scale(1) translate(0,0)';
     const _el = el;
-    el = null; sc = 1; px = 0; py = 0; pinching = false; lx = 0; ly = 0;
-    setTimeout(() => { _el.style.transition = ''; _el.style.transformOrigin = '50% 50%'; }, 260);
+    el = null; wrap = null; sc = 1; px = 0; py = 0; pinching = false; lx = 0; ly = 0;
+    setTimeout(() => { _el.style.transition = ''; }, 260);
   }
 
   document.getElementById('sec-scroll').addEventListener('scroll', rst, {passive:true});
@@ -648,27 +656,19 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
     if (!t) return;
 
     if (e.touches.length === 2) {
-      /* Сбрасываем предыдущий элемент если трогаем другой */
       if (el && el !== t) rst();
       pinching = true;
-      el = t;
+      el = t; wrap = t.parentElement;
       t.style.transition = '';
+      t.style.transformOrigin = '50% 50%';
       ld = Math.hypot(
         e.touches[1].clientX - e.touches[0].clientX,
         e.touches[1].clientY - e.touches[0].clientY
       );
-      /* Пересчитываем origin при каждом новом пинче */
-      const rect = t.getBoundingClientRect();
-      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
-      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
-      /* origin задаём в координатах самого элемента до трансформации */
-      t.style.transformOrigin = `${cx}px ${cy}px`;
-      /* Сбрасываем накопленный сдвиг — он был в старой системе координат */
-      px = 0; py = 0;
     }
 
     if (e.touches.length === 1) {
-      if (!el) el = t;
+      if (!el) { el = t; wrap = t.parentElement; }
       if (sc > 1) {
         t.style.transition = '';
         lx = e.touches[0].clientX;
@@ -701,12 +701,8 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
   document.addEventListener('touchend', e => {
     if (e.touches.length < 2) pinching = false;
     if (e.touches.length === 0) {
-      if (sc <= 1.05) {
-        rst();
-      } else {
-        /* Остаёмся в zoom — готовимся к пану */
-        lx = 0; ly = 0;
-      }
+      if (sc <= 1.05) rst();
+      else { lx = 0; ly = 0; }
     }
   }, {passive:true});
 })();
