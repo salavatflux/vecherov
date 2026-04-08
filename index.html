@@ -87,14 +87,15 @@ img { display:block; max-width:100%; }
 
 /*
   #sec-top-area:
-  Desktop — просто сквозной flex-shrink:0, без overflow.
+  Desktop — flex-shrink:0, без overflow. Содержит только топбар и chrono-row.
+            sec-desc JS перемещает в sec-body.
   Mobile  — position:relative + overflow:hidden.
-            Вектор живёт здесь и обрезается снизу этого контейнера.
-            При закрытом описании видна только часть вектора в топбаре.
-            При открытом — нижняя часть вектора выезжает вместе с sec-desc.
+            Содержит топбар + chrono-row + sec-desc.
+            Вектор живёт здесь и обрезается нижним краем.
 */
 #sec-top-area {
   position:relative; flex-shrink:0; z-index:20;
+  display:flex; flex-direction:column;
 }
 @media(max-width:768px){
   #sec-top-area { overflow:hidden; }
@@ -186,7 +187,8 @@ img { display:block; max-width:100%; }
 
 /* Artwork */
 .art-card { margin-top:32px; position:relative; z-index:2; }
-@media(max-width:768px){ .art-card { overflow:hidden; } }
+/* Враппер для зума — overflow:hidden обрезает трансформированный img */
+.art-zoom-wrap { overflow:hidden; width:100%; line-height:0; isolation:isolate; will-change:transform; }
 .art-thumb { width:100%; height:auto; display:block; cursor:pointer; }
 .art-info { margin-top:16px; }
 .art-title { font-size:clamp(18px,1.8vw,26px); font-weight:400; letter-spacing:.1em; color:#eef3f6; line-height:1.3; }
@@ -532,9 +534,12 @@ function renderArts() {
   arr.forEach(art => {
     const card = document.createElement('div'); card.className='art-card';
     if (art.images && art.images.length) {
+      /* Враппер нужен для правильного обрезания зума на iOS */
+      const wrap = document.createElement('div'); wrap.className='art-zoom-wrap';
       const img = document.createElement('img'); img.className='art-thumb'; img.src=art.images[0];
       img.addEventListener('click', ()=>openLB(art.images, 0));
-      card.appendChild(img);
+      wrap.appendChild(img);
+      card.appendChild(wrap);
     }
     const info = document.createElement('div'); info.className='art-info';
     if (art.title) { const t=document.createElement('div'); t.className='art-title'; t.textContent=art.title; info.appendChild(t); }
@@ -645,15 +650,17 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
   ltx=null;
 },{passive:true});
 
-/* ── PINCH ZOOM на первом фото в ленте ──
-   Увеличивается в своих границах, не перекрывает другое.
-   Pan работает при sc>1. Сброс при скролле ленты. */
+/* ── PINCH ZOOM на фото в ленте ──
+   Враппер .art-zoom-wrap имеет overflow:hidden — изображение не вылезает за рамку.
+   Pan работает при sc>1. Сброс при скролле ленты или при разведении пальцев обратно до sc=1. */
 (function(){
   let el=null, sc=1, px=0, py=0, ld=0, lx=0, ly=0, pinching=false;
 
   function rst() {
     if (!el) return;
-    el.style.transform=''; el.style.cursor='';
+    el.style.transition='transform .25s ease';
+    el.style.transform='scale(1) translate(0,0)';
+    setTimeout(()=>{ if(el){ el.style.transition=''; el.style.transformOrigin=''; } }, 260);
     el=null; sc=1; px=0; py=0; pinching=false;
   }
 
@@ -663,14 +670,16 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
     if (window.innerWidth>768 || document.getElementById('lb').classList.contains('open')) return;
     const t=e.target.closest('.art-thumb'); if(!t) return;
     if (e.touches.length===2) {
+      if (el && el!==t) rst(); /* новое изображение — сбросить предыдущее */
       pinching=true; el=t;
       ld=Math.hypot(e.touches[1].clientX-e.touches[0].clientX, e.touches[1].clientY-e.touches[0].clientY);
       const rect=t.getBoundingClientRect();
       const cx=(e.touches[0].clientX+e.touches[1].clientX)/2 - rect.left;
       const cy=(e.touches[0].clientY+e.touches[1].clientY)/2 - rect.top;
+      t.style.transition='';
       t.style.transformOrigin=`${cx}px ${cy}px`;
     }
-    if (e.touches.length===1 && sc>1) { lx=e.touches[0].clientX; ly=e.touches[0].clientY; }
+    if (e.touches.length===1 && sc>1 && el===t) { lx=e.touches[0].clientX; ly=e.touches[0].clientY; }
   },{passive:true});
 
   document.addEventListener('touchmove', e=>{
@@ -691,7 +700,11 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
 
   document.addEventListener('touchend', e=>{
     if (e.touches.length<2) pinching=false;
-    if (e.touches.length===0 && sc<=1.05) rst();
+    /* Сбрасываем как только все пальцы убраны и масштаб вернулся к 1 */
+    if (e.touches.length===0) {
+      if (sc<=1.05) rst();
+      else { lx=0; ly=0; } /* пан-режим: обнуляем стартовую точку */
+    }
   },{passive:true});
 })();
 
