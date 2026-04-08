@@ -76,55 +76,40 @@ img { display:block; max-width:100%; }
 .sec-bg-dim { position:absolute; inset:0; background:rgba(0,0,0,.75); }
 
 /*
-  Топбар — на десктопе без overflow — кнопки не перекрыты.
+  Топбар — на мобиле overflow:hidden чтобы обрезать вектор снизу.
+  На десктопе без overflow — кнопки не перекрыты.
 */
 .sec-topbar {
   position:relative; z-index:20; flex-shrink:0;
   display:flex; align-items:center; justify-content:space-between;
   padding:22px 36px;
 }
-@media(max-width:768px){ .sec-topbar{ padding:16px 20px; } }
-
-/*
-  #sec-top-area:
-  Desktop — flex-shrink:0, без overflow. Содержит только топбар и chrono-row.
-            sec-desc JS перемещает в sec-body.
-  Mobile  — position:relative + overflow:hidden.
-            Содержит топбар + chrono-row + sec-desc.
-            Вектор живёт здесь и обрезается нижним краем.
-*/
-#sec-top-area {
-  position:relative; flex-shrink:0; z-index:20;
-  display:flex; flex-direction:column;
-}
-@media(max-width:768px){
-  #sec-top-area { overflow:hidden; }
-}
+@media(max-width:768px){ .sec-topbar{ padding:16px 20px; overflow:hidden; } }
 
 /*
   Вектор:
   Desktop — position:absolute в .sec-scroll (z-index:1, под картинками z-index:2).
             Левый и верхний края выходят за пределы на 10%.
             Ширина 20vw. Не обрезается, не наезжает на кнопки.
-  Mobile  — position:absolute в #sec-top-area.
-            Ширина 50vw. Обрезается нижним краем #sec-top-area (overflow:hidden).
-            При открытом описании нижний край вектора виден т.к. sec-desc расширяет контейнер.
+  Mobile  — position:absolute в .sec-topbar.
+            Ширина 50vw. Обрезается нижним краем топбара (overflow:hidden).
+            При открытом описании нижняя часть выезжает вместе с .sec-desc (order:-1).
 */
 .sec-vec {
   position:absolute;
   left:-10%; top:-10%;
   pointer-events:none;
-  opacity:.2;
+  opacity:.1;
   transition:opacity .4s;
   z-index:1; /* ниже кнопок (z-index:1 относительно родителя) и ниже карточек (z-index:2) */
 }
-.sec-vec.show { opacity:.8; }
+.sec-vec.show { opacity:.9; }
 
 /* Desktop: вектор живёт в sec-scroll */
 @media(min-width:769px){
   .sec-vec { width:20vw; height:auto; }
 }
-/* Mobile: вектор живёт в #sec-top-area */
+/* Mobile: вектор живёт в sec-topbar */
 @media(max-width:768px){
   .sec-vec { width:50vw; height:auto; }
 }
@@ -167,7 +152,7 @@ img { display:block; max-width:100%; }
     position:relative; width:100%!important;
     transform:none; max-height:0; overflow:hidden;
     transition:max-height .45s ease-out;
-    z-index:20;
+    order:-1; z-index:20;
   }
   .sec-desc.open { max-height:60vh; }
   .sec-desc-inner { width:100%; height:auto; max-height:60vh; padding:16px 20px 16px; }
@@ -187,8 +172,8 @@ img { display:block; max-width:100%; }
 
 /* Artwork */
 .art-card { margin-top:32px; position:relative; z-index:2; }
-/* Враппер для зума — overflow:hidden обрезает трансформированный img */
-.art-zoom-wrap { overflow:hidden; width:100%; line-height:0; isolation:isolate; will-change:transform; }
+/* Враппер для pinch-zoom — overflow:hidden + isolation обрезают трансформированный img во всех браузерах */
+.art-zoom-wrap { overflow:hidden; width:100%; line-height:0; isolation:isolate; }
 .art-thumb { width:100%; height:auto; display:block; cursor:pointer; }
 .art-info { margin-top:16px; }
 .art-title { font-size:clamp(18px,1.8vw,26px); font-weight:400; letter-spacing:.1em; color:#eef3f6; line-height:1.3; }
@@ -294,22 +279,16 @@ img { display:block; max-width:100%; }
     <div class="sec-bg-img" id="sec-bg-img"></div>
     <div class="sec-bg-dim"></div>
   </div>
-  <div id="sec-top-area">
-    <div class="sec-topbar" id="sec-topbar">
-      <img class="sec-vec" id="sec-vec" src="" alt="" onerror="this.style.display='none'" style="display:none">
-      <button class="sec-back" id="sec-back">< назад</button>
-      <div class="sec-right">
-        <button class="sec-chrono" id="sec-chrono">хронология</button>
-        <button class="sec-title-btn" id="sec-title-btn"></button>
-      </div>
+  <div class="sec-topbar" id="sec-topbar">
+    <img class="sec-vec" id="sec-vec" src="" alt="" onerror="this.style.display='none'" style="display:none">
+    <button class="sec-back" id="sec-back">< назад</button>
+    <div class="sec-right">
+      <button class="sec-chrono" id="sec-chrono">хронология</button>
+      <button class="sec-title-btn" id="sec-title-btn"></button>
     </div>
-    <div class="chrono-row">
-      <button class="sec-chrono" id="sec-chrono-m">хронология</button>
-    </div>
-    <div class="sec-desc" id="sec-desc">
-      <div class="sec-desc-inner" id="sec-desc-inner"></div>
-      <button class="desc-close-mob" id="desc-close">&#94;</button>
-    </div>
+  </div>
+  <div class="chrono-row">
+    <button class="sec-chrono" id="sec-chrono-m">хронология</button>
   </div>
   <div class="sec-body">
     <div class="sec-scroll" id="sec-scroll">
@@ -317,6 +296,10 @@ img { display:block; max-width:100%; }
     </div>
     <!-- Прокси-область справа при закрытом описании — передаёт скролл в ленту -->
     <div class="sec-desc-proxy" id="sec-desc-proxy"></div>
+    <div class="sec-desc" id="sec-desc">
+      <div class="sec-desc-inner" id="sec-desc-inner"></div>
+      <button class="desc-close-mob" id="desc-close">&#94;</button>
+    </div>
   </div>
 </div>
 
@@ -426,20 +409,12 @@ function openSec(id) {
   document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
 
   /* Вектор: на десктопе — в sec-scroll (не наезжает на кнопки).
-             На мобиле — в #sec-top-area (обрезается нижним краем контейнера). */
+             На мобиле — в sec-topbar (обрезается его нижним краем). */
   const vec = document.getElementById('sec-vec');
   const vecTarget = isMob()
-    ? document.getElementById('sec-top-area')
+    ? document.getElementById('sec-topbar')
     : document.getElementById('sec-scroll');
   vecTarget.appendChild(vec); /* перемещаем в нужный контейнер */
-
-  /* Описание: на мобиле — в #sec-top-area (ниже топбара, вектор выезжает вместе).
-               На десктопе — в sec-body (выезжает справа). */
-  const desc = document.getElementById('sec-desc');
-  const descTarget = isMob()
-    ? document.getElementById('sec-top-area')
-    : document.getElementById('sec-body');
-  descTarget.appendChild(desc);
 
   if (s.vec) { vec.src=s.vec; vec.style.display='block'; }
   else { vec.style.display='none'; }
@@ -461,16 +436,10 @@ window.addEventListener('resize', () => {
     const vec = document.getElementById('sec-vec');
     if (vec.style.display !== 'none') {
       const vecTarget = isMob()
-        ? document.getElementById('sec-top-area')
+        ? document.getElementById('sec-topbar')
         : document.getElementById('sec-scroll');
       vecTarget.appendChild(vec);
     }
-    /* Переставляем описание при смене ориентации */
-    const desc = document.getElementById('sec-desc');
-    const descTarget = isMob()
-      ? document.getElementById('sec-top-area')
-      : document.getElementById('sec-body');
-    descTarget.appendChild(desc);
   }
 });
 
@@ -534,7 +503,6 @@ function renderArts() {
   arr.forEach(art => {
     const card = document.createElement('div'); card.className='art-card';
     if (art.images && art.images.length) {
-      /* Враппер нужен для правильного обрезания зума на iOS */
       const wrap = document.createElement('div'); wrap.className='art-zoom-wrap';
       const img = document.createElement('img'); img.className='art-thumb'; img.src=art.images[0];
       img.addEventListener('click', ()=>openLB(art.images, 0));
@@ -651,8 +619,8 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
 },{passive:true});
 
 /* ── PINCH ZOOM на фото в ленте ──
-   Враппер .art-zoom-wrap имеет overflow:hidden — изображение не вылезает за рамку.
-   Pan работает при sc>1. Сброс при скролле ленты или при разведении пальцев обратно до sc=1. */
+   .art-zoom-wrap имеет overflow:hidden + isolation:isolate — img не вылезает за рамку.
+   Pan работает при sc>1. Плавный сброс при скролле или сведении пальцев до sc=1. */
 (function(){
   let el=null, sc=1, px=0, py=0, ld=0, lx=0, ly=0, pinching=false;
 
@@ -660,8 +628,8 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
     if (!el) return;
     el.style.transition='transform .25s ease';
     el.style.transform='scale(1) translate(0,0)';
-    setTimeout(()=>{ if(el){ el.style.transition=''; el.style.transformOrigin=''; } }, 260);
-    el=null; sc=1; px=0; py=0; pinching=false;
+    const _el=el; el=null; sc=1; px=0; py=0; pinching=false;
+    setTimeout(()=>{ _el.style.transition=''; _el.style.transformOrigin=''; }, 260);
   }
 
   document.getElementById('sec-scroll').addEventListener('scroll', rst, {passive:true});
@@ -670,13 +638,13 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
     if (window.innerWidth>768 || document.getElementById('lb').classList.contains('open')) return;
     const t=e.target.closest('.art-thumb'); if(!t) return;
     if (e.touches.length===2) {
-      if (el && el!==t) rst(); /* новое изображение — сбросить предыдущее */
+      if (el && el!==t) rst();
       pinching=true; el=t;
+      t.style.transition='';
       ld=Math.hypot(e.touches[1].clientX-e.touches[0].clientX, e.touches[1].clientY-e.touches[0].clientY);
       const rect=t.getBoundingClientRect();
       const cx=(e.touches[0].clientX+e.touches[1].clientX)/2 - rect.left;
       const cy=(e.touches[0].clientY+e.touches[1].clientY)/2 - rect.top;
-      t.style.transition='';
       t.style.transformOrigin=`${cx}px ${cy}px`;
     }
     if (e.touches.length===1 && sc>1 && el===t) { lx=e.touches[0].clientX; ly=e.touches[0].clientY; }
@@ -700,10 +668,9 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
 
   document.addEventListener('touchend', e=>{
     if (e.touches.length<2) pinching=false;
-    /* Сбрасываем как только все пальцы убраны и масштаб вернулся к 1 */
     if (e.touches.length===0) {
       if (sc<=1.05) rst();
-      else { lx=0; ly=0; } /* пан-режим: обнуляем стартовую точку */
+      else { lx=0; ly=0; }
     }
   },{passive:true});
 })();
