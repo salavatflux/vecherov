@@ -147,12 +147,13 @@ img { display:block; max-width:100%; }
 
 /* Mobile: описание выезжает вниз из топбара */
 @media(max-width:768px){
-  .sec-body { flex-direction:column; overflow:visible; }
+  .sec-body { flex-direction:column; overflow:hidden; }
   .sec-desc {
     position:relative; width:100%!important;
     transform:none; max-height:0; overflow:hidden;
     transition:max-height .45s ease-out;
     order:-1; z-index:20;
+    flex-shrink:0;
   }
   .sec-desc.open { max-height:60vh; }
   .sec-desc-inner { width:100%; height:auto; max-height:60vh; padding:16px 20px 16px; }
@@ -280,7 +281,7 @@ img { display:block; max-width:100%; }
     <div class="sec-bg-dim"></div>
   </div>
   <div class="sec-topbar" id="sec-topbar">
-    <img class="sec-vec" id="sec-vec" src="" alt="" onerror="this.style.display='none'" style="display:none">
+    <img class="sec-vec" id="sec-vec" alt="" onerror="this.style.display='none'" style="display:none">
     <button class="sec-back" id="sec-back">< назад</button>
     <div class="sec-right">
       <button class="sec-chrono" id="sec-chrono">хронология</button>
@@ -375,7 +376,7 @@ function renderMenu() {
   STATE.sections.filter(s => s.type === 'section').forEach(s => {
     const el = document.createElement('div');
     el.className = 'menu-item';
-    el.innerHTML = s.title.replace('\n','<br>');
+    el.innerHTML = s.title.split('\n').join('<br>');
     el.addEventListener('click', () => { mOv.classList.remove('open'); setTimeout(()=>openSec(s.id), 80); });
     nav.appendChild(el);
   });
@@ -458,7 +459,7 @@ document.getElementById('desc-close').addEventListener('click', ()=>setDesc(fals
 document.getElementById('sec-desc-proxy').addEventListener('wheel', e=>{
   document.getElementById('sec-scroll').scrollTop += e.deltaY;
 }, {passive:true});
-document.getElementById('sec-desc-proxy').addEventListener('click', ()=>{ if(!descOpen) setDesc(false); });
+document.getElementById('sec-desc-proxy').addEventListener('click', ()=>{ if(descOpen) setDesc(false); });
 
 /* Desktop: клик по пустому месту ленты закрывает */
 document.getElementById('sec-scroll').addEventListener('click', e=>{
@@ -614,65 +615,100 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
   if(ltx===null)return;
   const dx=e.changedTouches[0].clientX-ltx;
   if(Math.abs(dx)>40){ dx<0?goLB(lbI+1):goLB(lbI-1); }
-  else if(Math.abs(dx)<8){ /* это тап — закрыть если не на img/кнопках */ }
+  else if(Math.abs(dx)<8 && !e.target.closest('img') && !e.target.closest('.lb-arr') && !e.target.closest('.lb-dot')){ closeLB(); }
   ltx=null;
 },{passive:true});
 
 /* ── PINCH ZOOM на фото в ленте ──
    .art-zoom-wrap имеет overflow:hidden + isolation:isolate — img не вылезает за рамку.
-   Pan работает при sc>1. Плавный сброс при скролле или сведении пальцев до sc=1. */
+   transform-origin пересчитывается при каждом новом пинче.
+   Pan одним пальцем при sc>1. Плавный сброс при скролле или сведении к sc=1. */
 (function(){
   let el=null, sc=1, px=0, py=0, ld=0, lx=0, ly=0, pinching=false;
 
+  function applyTransform() {
+    if (!el) return;
+    el.style.transform = `scale(${sc}) translate(${px}px,${py}px)`;
+  }
+
   function rst() {
     if (!el) return;
-    el.style.transition='transform .25s ease';
-    el.style.transform='scale(1) translate(0,0)';
-    const _el=el; el=null; sc=1; px=0; py=0; pinching=false;
-    setTimeout(()=>{ _el.style.transition=''; _el.style.transformOrigin=''; }, 260);
+    el.style.transition = 'transform .25s ease';
+    el.style.transform = 'scale(1) translate(0,0)';
+    const _el = el;
+    el = null; sc = 1; px = 0; py = 0; pinching = false; lx = 0; ly = 0;
+    setTimeout(() => { _el.style.transition = ''; _el.style.transformOrigin = '50% 50%'; }, 260);
   }
 
   document.getElementById('sec-scroll').addEventListener('scroll', rst, {passive:true});
 
-  document.addEventListener('touchstart', e=>{
-    if (window.innerWidth>768 || document.getElementById('lb').classList.contains('open')) return;
-    const t=e.target.closest('.art-thumb'); if(!t) return;
-    if (e.touches.length===2) {
-      if (el && el!==t) rst();
-      pinching=true; el=t;
-      t.style.transition='';
-      ld=Math.hypot(e.touches[1].clientX-e.touches[0].clientX, e.touches[1].clientY-e.touches[0].clientY);
-      const rect=t.getBoundingClientRect();
-      const cx=(e.touches[0].clientX+e.touches[1].clientX)/2 - rect.left;
-      const cy=(e.touches[0].clientY+e.touches[1].clientY)/2 - rect.top;
-      t.style.transformOrigin=`${cx}px ${cy}px`;
-    }
-    if (e.touches.length===1 && sc>1 && el===t) { lx=e.touches[0].clientX; ly=e.touches[0].clientY; }
-  },{passive:true});
+  document.addEventListener('touchstart', e => {
+    if (window.innerWidth > 768 || document.getElementById('lb').classList.contains('open')) return;
+    const t = e.target.closest('.art-thumb');
+    if (!t) return;
 
-  document.addEventListener('touchmove', e=>{
+    if (e.touches.length === 2) {
+      /* Сбрасываем предыдущий элемент если трогаем другой */
+      if (el && el !== t) rst();
+      pinching = true;
+      el = t;
+      t.style.transition = '';
+      ld = Math.hypot(
+        e.touches[1].clientX - e.touches[0].clientX,
+        e.touches[1].clientY - e.touches[0].clientY
+      );
+      /* Пересчитываем origin при каждом новом пинче */
+      const rect = t.getBoundingClientRect();
+      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+      /* origin задаём в координатах самого элемента до трансформации */
+      t.style.transformOrigin = `${cx}px ${cy}px`;
+      /* Сбрасываем накопленный сдвиг — он был в старой системе координат */
+      px = 0; py = 0;
+    }
+
+    if (e.touches.length === 1) {
+      if (!el) el = t;
+      if (sc > 1) {
+        t.style.transition = '';
+        lx = e.touches[0].clientX;
+        ly = e.touches[0].clientY;
+      }
+    }
+  }, {passive:true});
+
+  document.addEventListener('touchmove', e => {
     if (!el) return;
-    if (e.touches.length===2 && pinching) {
+    if (e.touches.length === 2 && pinching) {
       e.preventDefault();
-      const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX, e.touches[1].clientY-e.touches[0].clientY);
-      sc=Math.max(1, Math.min(sc*(d/ld), 4)); ld=d;
-      el.style.transform=`scale(${sc}) translate(${px}px,${py}px)`;
-    } else if (e.touches.length===1 && sc>1) {
+      const d = Math.hypot(
+        e.touches[1].clientX - e.touches[0].clientX,
+        e.touches[1].clientY - e.touches[0].clientY
+      );
+      sc = Math.max(1, Math.min(sc * (d / ld), 4));
+      ld = d;
+      applyTransform();
+    } else if (e.touches.length === 1 && sc > 1) {
       e.preventDefault();
-      px+=(e.touches[0].clientX-lx)/sc;
-      py+=(e.touches[0].clientY-ly)/sc;
-      lx=e.touches[0].clientX; ly=e.touches[0].clientY;
-      el.style.transform=`scale(${sc}) translate(${px}px,${py}px)`;
+      px += (e.touches[0].clientX - lx) / sc;
+      py += (e.touches[0].clientY - ly) / sc;
+      lx = e.touches[0].clientX;
+      ly = e.touches[0].clientY;
+      applyTransform();
     }
-  },{passive:false});
+  }, {passive:false});
 
-  document.addEventListener('touchend', e=>{
-    if (e.touches.length<2) pinching=false;
-    if (e.touches.length===0) {
-      if (sc<=1.05) rst();
-      else { lx=0; ly=0; }
+  document.addEventListener('touchend', e => {
+    if (e.touches.length < 2) pinching = false;
+    if (e.touches.length === 0) {
+      if (sc <= 1.05) {
+        rst();
+      } else {
+        /* Остаёмся в zoom — готовимся к пану */
+        lx = 0; ly = 0;
+      }
     }
-  },{passive:true});
+  }, {passive:true});
 })();
 
 
