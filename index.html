@@ -76,24 +76,38 @@ img { display:block; max-width:100%; }
 .sec-bg-dim { position:absolute; inset:0; background:rgba(0,0,0,.75); }
 
 /*
-  Топбар — на мобиле overflow:hidden чтобы обрезать вектор снизу.
-  На десктопе без overflow — кнопки не перекрыты.
+  Топбар — на десктопе без overflow — кнопки не перекрыты.
 */
 .sec-topbar {
   position:relative; z-index:20; flex-shrink:0;
   display:flex; align-items:center; justify-content:space-between;
   padding:22px 36px;
 }
-@media(max-width:768px){ .sec-topbar{ padding:16px 20px; overflow:hidden; } }
+@media(max-width:768px){ .sec-topbar{ padding:16px 20px; } }
+
+/*
+  #sec-top-area:
+  Desktop — просто сквозной flex-shrink:0, без overflow.
+  Mobile  — position:relative + overflow:hidden.
+            Вектор живёт здесь и обрезается снизу этого контейнера.
+            При закрытом описании видна только часть вектора в топбаре.
+            При открытом — нижняя часть вектора выезжает вместе с sec-desc.
+*/
+#sec-top-area {
+  position:relative; flex-shrink:0; z-index:20;
+}
+@media(max-width:768px){
+  #sec-top-area { overflow:hidden; }
+}
 
 /*
   Вектор:
   Desktop — position:absolute в .sec-scroll (z-index:1, под картинками z-index:2).
             Левый и верхний края выходят за пределы на 10%.
             Ширина 20vw. Не обрезается, не наезжает на кнопки.
-  Mobile  — position:absolute в .sec-topbar.
-            Ширина 50vw. Обрезается нижним краем топбара (overflow:hidden).
-            При открытом описании нижняя часть выезжает вместе с .sec-desc (order:-1).
+  Mobile  — position:absolute в #sec-top-area.
+            Ширина 50vw. Обрезается нижним краем #sec-top-area (overflow:hidden).
+            При открытом описании нижний край вектора виден т.к. sec-desc расширяет контейнер.
 */
 .sec-vec {
   position:absolute;
@@ -109,7 +123,7 @@ img { display:block; max-width:100%; }
 @media(min-width:769px){
   .sec-vec { width:20vw; height:auto; }
 }
-/* Mobile: вектор живёт в sec-topbar */
+/* Mobile: вектор живёт в #sec-top-area */
 @media(max-width:768px){
   .sec-vec { width:50vw; height:auto; }
 }
@@ -152,7 +166,7 @@ img { display:block; max-width:100%; }
     position:relative; width:100%!important;
     transform:none; max-height:0; overflow:hidden;
     transition:max-height .45s ease-out;
-    order:-1; z-index:20;
+    z-index:20;
   }
   .sec-desc.open { max-height:60vh; }
   .sec-desc-inner { width:100%; height:auto; max-height:60vh; padding:16px 20px 16px; }
@@ -172,6 +186,7 @@ img { display:block; max-width:100%; }
 
 /* Artwork */
 .art-card { margin-top:32px; position:relative; z-index:2; }
+@media(max-width:768px){ .art-card { overflow:hidden; } }
 .art-thumb { width:100%; height:auto; display:block; cursor:pointer; }
 .art-info { margin-top:16px; }
 .art-title { font-size:clamp(18px,1.8vw,26px); font-weight:400; letter-spacing:.1em; color:#eef3f6; line-height:1.3; }
@@ -277,16 +292,22 @@ img { display:block; max-width:100%; }
     <div class="sec-bg-img" id="sec-bg-img"></div>
     <div class="sec-bg-dim"></div>
   </div>
-  <div class="sec-topbar" id="sec-topbar">
-    <img class="sec-vec" id="sec-vec" src="" alt="" onerror="this.style.display='none'" style="display:none">
-    <button class="sec-back" id="sec-back">< назад</button>
-    <div class="sec-right">
-      <button class="sec-chrono" id="sec-chrono">хронология</button>
-      <button class="sec-title-btn" id="sec-title-btn"></button>
+  <div id="sec-top-area">
+    <div class="sec-topbar" id="sec-topbar">
+      <img class="sec-vec" id="sec-vec" src="" alt="" onerror="this.style.display='none'" style="display:none">
+      <button class="sec-back" id="sec-back">< назад</button>
+      <div class="sec-right">
+        <button class="sec-chrono" id="sec-chrono">хронология</button>
+        <button class="sec-title-btn" id="sec-title-btn"></button>
+      </div>
     </div>
-  </div>
-  <div class="chrono-row">
-    <button class="sec-chrono" id="sec-chrono-m">хронология</button>
+    <div class="chrono-row">
+      <button class="sec-chrono" id="sec-chrono-m">хронология</button>
+    </div>
+    <div class="sec-desc" id="sec-desc">
+      <div class="sec-desc-inner" id="sec-desc-inner"></div>
+      <button class="desc-close-mob" id="desc-close">&#94;</button>
+    </div>
   </div>
   <div class="sec-body">
     <div class="sec-scroll" id="sec-scroll">
@@ -294,10 +315,6 @@ img { display:block; max-width:100%; }
     </div>
     <!-- Прокси-область справа при закрытом описании — передаёт скролл в ленту -->
     <div class="sec-desc-proxy" id="sec-desc-proxy"></div>
-    <div class="sec-desc" id="sec-desc">
-      <div class="sec-desc-inner" id="sec-desc-inner"></div>
-      <button class="desc-close-mob" id="desc-close">&#94;</button>
-    </div>
   </div>
 </div>
 
@@ -407,12 +424,20 @@ function openSec(id) {
   document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
 
   /* Вектор: на десктопе — в sec-scroll (не наезжает на кнопки).
-             На мобиле — в sec-topbar (обрезается его нижним краем). */
+             На мобиле — в #sec-top-area (обрезается нижним краем контейнера). */
   const vec = document.getElementById('sec-vec');
   const vecTarget = isMob()
-    ? document.getElementById('sec-topbar')
+    ? document.getElementById('sec-top-area')
     : document.getElementById('sec-scroll');
   vecTarget.appendChild(vec); /* перемещаем в нужный контейнер */
+
+  /* Описание: на мобиле — в #sec-top-area (ниже топбара, вектор выезжает вместе).
+               На десктопе — в sec-body (выезжает справа). */
+  const desc = document.getElementById('sec-desc');
+  const descTarget = isMob()
+    ? document.getElementById('sec-top-area')
+    : document.getElementById('sec-body');
+  descTarget.appendChild(desc);
 
   if (s.vec) { vec.src=s.vec; vec.style.display='block'; }
   else { vec.style.display='none'; }
@@ -434,10 +459,16 @@ window.addEventListener('resize', () => {
     const vec = document.getElementById('sec-vec');
     if (vec.style.display !== 'none') {
       const vecTarget = isMob()
-        ? document.getElementById('sec-topbar')
+        ? document.getElementById('sec-top-area')
         : document.getElementById('sec-scroll');
       vecTarget.appendChild(vec);
     }
+    /* Переставляем описание при смене ориентации */
+    const desc = document.getElementById('sec-desc');
+    const descTarget = isMob()
+      ? document.getElementById('sec-top-area')
+      : document.getElementById('sec-body');
+    descTarget.appendChild(desc);
   }
 });
 
