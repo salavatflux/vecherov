@@ -261,7 +261,7 @@ img { display:block; max-width:100%; }
   <div class="menu-panel" id="menu-panel">
     <nav class="menu-nav" id="menu-nav"></nav>
     <div class="menu-icons">
-      <a href="mailto:eveningoff16@gmail.com" title="email">
+      <a href="/cdn-cgi/l/email-protection#345142515a5d5a535b52520502745359555d581a575b59" title="email">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
       </a>
       <a href="https://t.me/eveningoff" target="_blank" title="telegram">
@@ -327,7 +327,7 @@ img { display:block; max-width:100%; }
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const STATE = {
   artistName: 'Александр\nВечеров',
   homePhoto: null,
@@ -494,6 +494,17 @@ function togChrono(){
 document.getElementById('sec-chrono').addEventListener('click',togChrono);
 document.getElementById('sec-chrono-m').addEventListener('click',togChrono);
 document.getElementById('sec-back').addEventListener('click',()=>{ renderMenu(); mOv.classList.add('open'); show('home'); });
+
+/* Свайп вправо по ленте — открывает меню */
+let secSwX=null, secSwY=null;
+document.getElementById('sec-scroll').addEventListener('touchstart',e=>{ secSwX=e.touches[0].clientX; secSwY=e.touches[0].clientY; },{passive:true});
+document.getElementById('sec-scroll').addEventListener('touchend',e=>{
+  if(secSwX===null)return;
+  const dx=e.changedTouches[0].clientX-secSwX;
+  const dy=Math.abs(e.changedTouches[0].clientY-secSwY);
+  if(dx>80&&dy<50){ renderMenu(); mOv.classList.add('open'); show('home'); }
+  secSwX=null; secSwY=null;
+},{passive:true});
 
 function renderArts() {
   const sec = STATE.sections.find(s=>s.id===cur);
