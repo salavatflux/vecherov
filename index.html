@@ -101,17 +101,19 @@ img { display:block; max-width:100%; }
   pointer-events:none;
   opacity:.2;
   transition:opacity .4s;
-  z-index:1; /* ниже кнопок (z-index:1 относительно родителя) и ниже карточек (z-index:2) */
+  z-index:1;
 }
 .sec-vec.show { opacity:.8; }
 
-/* Desktop: вектор живёт в sec-scroll */
+/* Desktop: вектор в sec-scroll, мобильный скрыт */
 @media(min-width:769px){
-  .sec-vec { width:20vw; height:auto; }
+  .sec-vec-desk { width:20vw; height:auto; }
+  .sec-vec-mob  { display:none!important; }
 }
-/* Mobile: вектор живёт в sec-topbar */
+/* Mobile: вектор в sec-topbar, десктопный скрыт */
 @media(max-width:768px){
-  .sec-vec { width:50vw; height:auto; }
+  .sec-vec-mob  { width:50vw; height:auto; }
+  .sec-vec-desk { display:none!important; }
 }
 
 .sec-back { position:relative; z-index:1; font-size:clamp(12px,1vw,15px); font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
@@ -278,7 +280,7 @@ img { display:block; max-width:100%; }
     <div class="sec-bg-dim"></div>
   </div>
   <div class="sec-topbar" id="sec-topbar">
-    <img class="sec-vec" id="sec-vec" alt="" style="display:none">
+    <img class="sec-vec sec-vec-mob" id="sec-vec-mob" alt="" style="display:none">
     <button class="sec-back" id="sec-back">< назад</button>
     <div class="sec-right">
       <button class="sec-chrono" id="sec-chrono">хронология</button>
@@ -290,6 +292,7 @@ img { display:block; max-width:100%; }
   </div>
   <div class="sec-body">
     <div class="sec-scroll" id="sec-scroll">
+      <img class="sec-vec sec-vec-desk" id="sec-vec-desk" alt="" style="display:none">
       <div id="art-list"></div>
     </div>
     <!-- Прокси-область справа при закрытом описании — передаёт скролл в ленту -->
@@ -406,16 +409,10 @@ function openSec(id) {
   document.getElementById('sec-title-btn').textContent = s.title;
   document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
 
-  /* Вектор: на десктопе — в sec-scroll (не наезжает на кнопки).
-             На мобиле — в sec-topbar (обрезается его нижним краем). */
-  const vec = document.getElementById('sec-vec');
-  const vecTarget = isMob()
-    ? document.getElementById('sec-topbar')
-    : document.getElementById('sec-scroll');
-  vecTarget.appendChild(vec); /* перемещаем в нужный контейнер */
-
-  if (s.vec) { vec.src=s.vec; vec.style.display='block'; }
-  else { vec.style.display='none'; }
+  /* Вектор: два статичных элемента — mob в топбаре, desk в скролле. CSS скрывает ненужный. */
+  const vecs = [document.getElementById('sec-vec-mob'), document.getElementById('sec-vec-desk')];
+  if (s.vec) { vecs.forEach(v=>{ v.src=s.vec; v.style.display='block'; }); }
+  else { vecs.forEach(v=>{ v.style.display='none'; }); }
 
   document.getElementById('sec-desc-inner').innerHTML =
     s.desc.split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
@@ -430,21 +427,13 @@ function openSec(id) {
 window.addEventListener('resize', () => {
   if (cur) {
     document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
-    /* Переставляем вектор при смене ориентации */
-    const vec = document.getElementById('sec-vec');
-    if (vec.style.display !== 'none') {
-      const vecTarget = isMob()
-        ? document.getElementById('sec-topbar')
-        : document.getElementById('sec-scroll');
-      vecTarget.appendChild(vec);
-    }
   }
 });
 
 function setDesc(open) {
   descOpen = open;
   document.getElementById('sec-desc').classList.toggle('open', open);
-  document.getElementById('sec-vec').classList.toggle('show', open);
+  document.querySelectorAll('.sec-vec').forEach(v=>v.classList.toggle('show', open));
   /* Прокси-область: активна только когда описание закрыто */
   document.getElementById('sec-desc-proxy').classList.toggle('active', !open);
 }
