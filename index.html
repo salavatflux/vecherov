@@ -97,21 +97,21 @@ img { display:block; max-width:100%; }
 */
 .sec-vec {
   position:absolute;
-  left:0; top:0;
+  left:-10%; top:-10%;
   pointer-events:none;
-  opacity:.1;
+  opacity:.2;
   transition:opacity .4s;
-  z-index:1;
+  z-index:1; /* ниже кнопок (z-index:1 относительно родителя) и ниже карточек (z-index:2) */
 }
-.sec-vec.show { opacity:.9; }
+.sec-vec.show { opacity:.8; }
 
 /* Desktop: вектор живёт в sec-scroll */
 @media(min-width:769px){
   .sec-vec { width:20vw; height:auto; }
 }
-/* Mobile: вектор живёт в sec-topbar, обрезается overflow:hidden снизу */
+/* Mobile: вектор живёт в sec-topbar */
 @media(max-width:768px){
-  .sec-vec { width:45vw; height:auto; left:-5%; }
+  .sec-vec { width:50vw; height:auto; }
 }
 
 .sec-back { position:relative; z-index:1; font-size:clamp(12px,1vw,15px); font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
@@ -147,13 +147,12 @@ img { display:block; max-width:100%; }
 
 /* Mobile: описание выезжает вниз из топбара */
 @media(max-width:768px){
-  .sec-body { flex-direction:column; overflow:hidden; }
+  .sec-body { flex-direction:column; overflow:visible; }
   .sec-desc {
     position:relative; width:100%!important;
     transform:none; max-height:0; overflow:hidden;
     transition:max-height .45s ease-out;
     order:-1; z-index:20;
-    flex-shrink:0;
   }
   .sec-desc.open { max-height:60vh; }
   .sec-desc-inner { width:100%; height:auto; max-height:60vh; padding:16px 20px 16px; }
@@ -173,8 +172,6 @@ img { display:block; max-width:100%; }
 
 /* Artwork */
 .art-card { margin-top:32px; position:relative; z-index:2; }
-/* Враппер для pinch-zoom — overflow:hidden + isolation обрезают трансформированный img во всех браузерах */
-.art-zoom-wrap { overflow:hidden; width:100%; line-height:0; isolation:isolate; }
 .art-thumb { width:100%; height:auto; display:block; cursor:pointer; }
 .art-info { margin-top:16px; }
 .art-title { font-size:clamp(18px,1.8vw,26px); font-weight:400; letter-spacing:.1em; color:#eef3f6; line-height:1.3; }
@@ -281,7 +278,7 @@ img { display:block; max-width:100%; }
     <div class="sec-bg-dim"></div>
   </div>
   <div class="sec-topbar" id="sec-topbar">
-    <img class="sec-vec" id="sec-vec" alt="" onerror="this.style.display='none'" style="display:none">
+    <img class="sec-vec" id="sec-vec" alt="" style="display:none">
     <button class="sec-back" id="sec-back">< назад</button>
     <div class="sec-right">
       <button class="sec-chrono" id="sec-chrono">хронология</button>
@@ -335,7 +332,7 @@ const STATE = {
     { id:'branching', title:'код ветвления', vec:null, type:'section',
       desc:'Этот раздел посвящён структурным принципам жизни.\nЯ рассматриваю жизнь как систему связей, в которой каждое действие опирается на предыдущее и формирует последующее.\n\nВ своей работе я обращаюсь к двум способам организации: древовидному и ризоматическому.\n\nВ реальности эти принципы накладываются друг на друга, формируя сеть пересечений.',
       arts:[
-        {images:[], title:'«Организация органики»', material:'бумага 200 г/м², сангина', size:'1000 × 1000мм', year:'2026 г.', price:'?0.000₽'},
+        {images:[], title:'«Организация органики»', material:'бумага 200 г/м², сангина', size:'1000 × 1000мм', year:'2026 г.', price:null},
         {images:[], title:'«Без названия»', material:'холст, масло', size:'600 × 800мм', year:'2025 г.', price:null}
       ]
     },
@@ -376,7 +373,7 @@ function renderMenu() {
   STATE.sections.filter(s => s.type === 'section').forEach(s => {
     const el = document.createElement('div');
     el.className = 'menu-item';
-    el.innerHTML = s.title.split('\n').join('<br>');
+    el.innerHTML = s.title.replace('\n','<br>');
     el.addEventListener('click', () => { mOv.classList.remove('open'); setTimeout(()=>openSec(s.id), 80); });
     nav.appendChild(el);
   });
@@ -417,8 +414,8 @@ function openSec(id) {
     : document.getElementById('sec-scroll');
   vecTarget.appendChild(vec); /* перемещаем в нужный контейнер */
 
-  if (s.vec) { vec.src=s.vec; vec.style.display='block'; vec.classList.add('show'); }
-  else { vec.style.display='none'; vec.classList.remove('show'); }
+  if (s.vec) { vec.src=s.vec; vec.style.display='block'; }
+  else { vec.style.display='none'; }
 
   document.getElementById('sec-desc-inner').innerHTML =
     s.desc.split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
@@ -447,6 +444,7 @@ window.addEventListener('resize', () => {
 function setDesc(open) {
   descOpen = open;
   document.getElementById('sec-desc').classList.toggle('open', open);
+  document.getElementById('sec-vec').classList.toggle('show', open);
   /* Прокси-область: активна только когда описание закрыто */
   document.getElementById('sec-desc-proxy').classList.toggle('active', !open);
 }
@@ -503,11 +501,11 @@ function renderArts() {
   arr.forEach(art => {
     const card = document.createElement('div'); card.className='art-card';
     if (art.images && art.images.length) {
-      const wrap = document.createElement('div'); wrap.className='art-zoom-wrap';
-      const img = document.createElement('img'); img.className='art-thumb'; img.src=art.images[0];
+      const img = document.createElement('img'); img.className='art-thumb'; img.loading='lazy';
+      const w = Math.round(Math.min(window.innerWidth, 900));
+      img.src = art.images[0].replace('q_auto,f_auto', `w_${w},q_auto,f_auto`);
       img.addEventListener('click', ()=>openLB(art.images, 0));
-      wrap.appendChild(img);
-      card.appendChild(wrap);
+      card.appendChild(img);
     }
     const info = document.createElement('div'); info.className='art-info';
     if (art.title) { const t=document.createElement('div'); t.className='art-title'; t.textContent=art.title; info.appendChild(t); }
@@ -614,101 +612,58 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
   if(ltx===null)return;
   const dx=e.changedTouches[0].clientX-ltx;
   if(Math.abs(dx)>40){ dx<0?goLB(lbI+1):goLB(lbI-1); }
-  else if(Math.abs(dx)<8 && !e.target.closest('img') && !e.target.closest('.lb-arr') && !e.target.closest('.lb-dot')){ closeLB(); }
+  else if(Math.abs(dx)<8){ closeLB(); }
   ltx=null;
 },{passive:true});
 
-/* ── PINCH ZOOM на фото в ленте ──
-   transform-origin зафиксирован 50% 50%. Масштаб от центра, пан одним пальцем.
-   clampPan не даёт картинке уйти за края .art-zoom-wrap.
-   Сброс при скролле ленты или сведении пальцев к sc=1. */
+/* ── PINCH ZOOM на первом фото в ленте ──
+   Увеличивается в своих границах, не перекрывает другое.
+   Pan работает при sc>1. Сброс при скролле ленты. */
 (function(){
-  let el=null, wrap=null, sc=1, px=0, py=0, ld=0, lx=0, ly=0, pinching=false;
-
-  function clampPan() {
-    if (!wrap) return;
-    const maxX = wrap.offsetWidth  * (sc - 1) / (2 * sc);
-    const maxY = wrap.offsetHeight * (sc - 1) / (2 * sc);
-    px = Math.max(-maxX, Math.min(maxX, px));
-    py = Math.max(-maxY, Math.min(maxY, py));
-  }
-
-  function applyTransform() {
-    if (!el) return;
-    clampPan();
-    el.style.transform = `scale(${sc}) translate(${px}px,${py}px)`;
-  }
+  let el=null, sc=1, px=0, py=0, ld=0, lx=0, ly=0, pinching=false;
 
   function rst() {
     if (!el) return;
-    el.style.transition = 'transform .25s ease';
-    el.style.transform = 'scale(1) translate(0,0)';
-    const _el = el;
-    el = null; wrap = null; sc = 1; px = 0; py = 0; pinching = false; lx = 0; ly = 0;
-    setTimeout(() => { _el.style.transition = ''; }, 260);
+    el.style.transform=''; el.style.cursor='';
+    el=null; sc=1; px=0; py=0; pinching=false;
   }
 
   document.getElementById('sec-scroll').addEventListener('scroll', rst, {passive:true});
-  /* Сброс зума при касании вне картинки (начало скролла ленты) */
-  document.getElementById('sec-scroll').addEventListener('touchstart', e => {
-    if (el && !e.target.closest('.art-thumb')) rst();
-  }, {passive:true});
 
-  document.addEventListener('touchstart', e => {
-    if (window.innerWidth > 768 || document.getElementById('lb').classList.contains('open')) return;
-    const t = e.target.closest('.art-thumb');
-    if (!t) return;
-
-    if (e.touches.length === 2) {
-      if (el && el !== t) rst();
-      pinching = true;
-      el = t; wrap = t.parentElement;
-      t.style.transition = '';
-      t.style.transformOrigin = '50% 50%';
-      ld = Math.hypot(
-        e.touches[1].clientX - e.touches[0].clientX,
-        e.touches[1].clientY - e.touches[0].clientY
-      );
+  document.addEventListener('touchstart', e=>{
+    if (window.innerWidth>768 || document.getElementById('lb').classList.contains('open')) return;
+    const t=e.target.closest('.art-thumb'); if(!t) return;
+    if (e.touches.length===2) {
+      pinching=true; el=t;
+      ld=Math.hypot(e.touches[1].clientX-e.touches[0].clientX, e.touches[1].clientY-e.touches[0].clientY);
+      const rect=t.getBoundingClientRect();
+      const cx=(e.touches[0].clientX+e.touches[1].clientX)/2 - rect.left;
+      const cy=(e.touches[0].clientY+e.touches[1].clientY)/2 - rect.top;
+      t.style.transformOrigin=`${cx}px ${cy}px`;
     }
+    if (e.touches.length===1 && sc>1) { el=t; lx=e.touches[0].clientX; ly=e.touches[0].clientY; }
+  },{passive:true});
 
-    if (e.touches.length === 1) {
-      if (!el) { el = t; wrap = t.parentElement; }
-      if (sc > 1) {
-        t.style.transition = '';
-        lx = e.touches[0].clientX;
-        ly = e.touches[0].clientY;
-      }
-    }
-  }, {passive:true});
-
-  document.addEventListener('touchmove', e => {
+  document.addEventListener('touchmove', e=>{
     if (!el) return;
-    if (e.touches.length === 2 && pinching) {
+    if (e.touches.length===2 && pinching) {
       e.preventDefault();
-      const d = Math.hypot(
-        e.touches[1].clientX - e.touches[0].clientX,
-        e.touches[1].clientY - e.touches[0].clientY
-      );
-      sc = Math.max(1, Math.min(sc * (d / ld), 4));
-      ld = d;
-      applyTransform();
-    } else if (e.touches.length === 1 && sc > 1) {
+      const d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX, e.touches[1].clientY-e.touches[0].clientY);
+      sc=Math.max(1, Math.min(sc*(d/ld), 4)); ld=d;
+      el.style.transform=`scale(${sc}) translate(${px}px,${py}px)`;
+    } else if (e.touches.length===1 && sc>1) {
       e.preventDefault();
-      px += (e.touches[0].clientX - lx) / sc;
-      py += (e.touches[0].clientY - ly) / sc;
-      lx = e.touches[0].clientX;
-      ly = e.touches[0].clientY;
-      applyTransform();
+      px+=(e.touches[0].clientX-lx)/sc;
+      py+=(e.touches[0].clientY-ly)/sc;
+      lx=e.touches[0].clientX; ly=e.touches[0].clientY;
+      el.style.transform=`scale(${sc}) translate(${px}px,${py}px)`;
     }
-  }, {passive:false});
+  },{passive:false});
 
-  document.addEventListener('touchend', e => {
-    if (e.touches.length < 2) pinching = false;
-    if (e.touches.length === 0) {
-      if (sc <= 1.05) rst();
-      else { lx = 0; ly = 0; }
-    }
-  }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    if (e.touches.length<2) pinching=false;
+    if (e.touches.length===0 && sc<=1.05) rst();
+  },{passive:true});
 })();
 
 
@@ -725,7 +680,7 @@ async function loadStateFromSupabase(){
       const saved=JSON.parse(data.data);
       Object.assign(STATE,saved);
       if(STATE.artistName)
-        document.getElementById('artist-name-el').innerHTML=STATE.artistName.replace('\n','<br>');
+        document.getElementById('artist-name-el').innerHTML=STATE.artistName.replace(/\n/g,'<br>');
       if(STATE.homePhoto){
         document.getElementById('home-ph').style.display='none';
         const bg=document.getElementById('home-bg');
