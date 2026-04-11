@@ -105,13 +105,13 @@ img { display:block; max-width:100%; }
 }
 .sec-vec.show { opacity:.9; }
 
+/* Desktop: вектор живёт в sec-scroll */
 @media(min-width:769px){
-  .sec-vec-desk { width:20vw; height:auto; }
-  .sec-vec-mob  { display:none!important; }
+  .sec-vec { width:20vw; height:auto; }
 }
+/* Mobile: вектор живёт в sec-topbar, обрезается overflow:hidden снизу */
 @media(max-width:768px){
-  .sec-vec-mob  { width:45vw; height:auto; left:-5%; }
-  .sec-vec-desk { display:none!important; }
+  .sec-vec { width:45vw; height:auto; left:-5%; }
 }
 
 .sec-back { position:relative; z-index:1; font-size:clamp(12px,1vw,15px); font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
@@ -261,7 +261,7 @@ img { display:block; max-width:100%; }
   <div class="menu-panel" id="menu-panel">
     <nav class="menu-nav" id="menu-nav"></nav>
     <div class="menu-icons">
-      <a href="/cdn-cgi/l/email-protection#acc9dac9c2c5c2cbc3caca9d9aeccbc1cdc5c082cfc3c1" title="email">
+      <a href="mailto:eveningoff16@gmail.com" title="email">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
       </a>
       <a href="https://t.me/eveningoff" target="_blank" title="telegram">
@@ -281,7 +281,7 @@ img { display:block; max-width:100%; }
     <div class="sec-bg-dim"></div>
   </div>
   <div class="sec-topbar" id="sec-topbar">
-    <img class="sec-vec sec-vec-mob" id="sec-vec-mob" alt="" style="display:none">
+    <img class="sec-vec" id="sec-vec" alt="" onerror="this.style.display='none'" style="display:none">
     <button class="sec-back" id="sec-back">< назад</button>
     <div class="sec-right">
       <button class="sec-chrono" id="sec-chrono">хронология</button>
@@ -293,7 +293,6 @@ img { display:block; max-width:100%; }
   </div>
   <div class="sec-body">
     <div class="sec-scroll" id="sec-scroll">
-      <img class="sec-vec sec-vec-desk" id="sec-vec-desk" alt="" style="display:none">
       <div id="art-list"></div>
     </div>
     <!-- Прокси-область справа при закрытом описании — передаёт скролл в ленту -->
@@ -328,7 +327,7 @@ img { display:block; max-width:100%; }
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const STATE = {
   artistName: 'Александр\nВечеров',
   homePhoto: null,
@@ -410,13 +409,16 @@ function openSec(id) {
   document.getElementById('sec-title-btn').textContent = s.title;
   document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
 
-  /* Вектор: два статичных элемента — mob в топбаре, desk в скролле. CSS скрывает ненужный. */
-  const vecs = [document.getElementById('sec-vec-mob'), document.getElementById('sec-vec-desk')];
-  if (s.vec) {
-    vecs.forEach(v=>{ v.src=s.vec; v.style.display='block'; v.classList.add('show'); });
-  } else {
-    vecs.forEach(v=>{ v.style.display='none'; v.classList.remove('show'); });
-  }
+  /* Вектор: на десктопе — в sec-scroll (не наезжает на кнопки).
+             На мобиле — в sec-topbar (обрезается его нижним краем). */
+  const vec = document.getElementById('sec-vec');
+  const vecTarget = isMob()
+    ? document.getElementById('sec-topbar')
+    : document.getElementById('sec-scroll');
+  vecTarget.appendChild(vec); /* перемещаем в нужный контейнер */
+
+  if (s.vec) { vec.src=s.vec; vec.style.display='block'; vec.classList.add('show'); }
+  else { vec.style.display='none'; vec.classList.remove('show'); }
 
   document.getElementById('sec-desc-inner').innerHTML =
     s.desc.split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
@@ -429,7 +431,17 @@ function openSec(id) {
 }
 
 window.addEventListener('resize', () => {
-  if (cur) document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
+  if (cur) {
+    document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
+    /* Переставляем вектор при смене ориентации */
+    const vec = document.getElementById('sec-vec');
+    if (vec.style.display !== 'none') {
+      const vecTarget = isMob()
+        ? document.getElementById('sec-topbar')
+        : document.getElementById('sec-scroll');
+      vecTarget.appendChild(vec);
+    }
+  }
 });
 
 function setDesc(open) {
@@ -492,11 +504,7 @@ function renderArts() {
     const card = document.createElement('div'); card.className='art-card';
     if (art.images && art.images.length) {
       const wrap = document.createElement('div'); wrap.className='art-zoom-wrap';
-      const img = document.createElement('img'); img.className='art-thumb'; img.loading='lazy';
-      const w = Math.round(Math.min(window.innerWidth * 2, 1800));
-      img.src = art.images[0].includes('q_auto')
-        ? art.images[0].replace('q_auto', `w_${w},q_auto`)
-        : art.images[0];
+      const img = document.createElement('img'); img.className='art-thumb'; img.src=art.images[0];
       img.addEventListener('click', ()=>openLB(art.images, 0));
       wrap.appendChild(img);
       card.appendChild(wrap);
@@ -717,7 +725,7 @@ async function loadStateFromSupabase(){
       const saved=JSON.parse(data.data);
       Object.assign(STATE,saved);
       if(STATE.artistName)
-        document.getElementById('artist-name-el').innerHTML=STATE.artistName.replace(/\n/g,'<br>');
+        document.getElementById('artist-name-el').innerHTML=STATE.artistName.replace('\n','<br>');
       if(STATE.homePhoto){
         document.getElementById('home-ph').style.display='none';
         const bg=document.getElementById('home-bg');
@@ -727,3 +735,14 @@ async function loadStateFromSupabase(){
         document.getElementById('sec-bg-img').style.backgroundImage=`url('${STATE.homePhoto}')`;
         document.getElementById('sec-bg-img').classList.add('loaded');
       }
+      renderMenu();
+    }
+  }catch(e){ console.warn('Supabase:',e); }
+}
+
+renderMenu();
+show('home');
+loadStateFromSupabase();
+</script>
+</body>
+</html>
