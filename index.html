@@ -485,6 +485,7 @@ document.getElementById('sec-back').addEventListener('click',()=>{ renderMenu();
 /* Свайп вправо по секции — открывает меню */
 let secSwX=null, secSwY=null;
 document.getElementById('view-section').addEventListener('touchstart',e=>{
+  if(!document.getElementById('view-section').classList.contains('active'))return;
   secSwX=e.touches[0].clientX; secSwY=e.touches[0].clientY;
 },{passive:true});
 document.getElementById('view-section').addEventListener('touchend',e=>{
