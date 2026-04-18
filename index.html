@@ -515,7 +515,7 @@ function renderArts() {
     const card = document.createElement('div'); card.className='art-card';
     if (art.images && art.images.length) {
       const wrap = document.createElement('div'); wrap.className='art-zoom-wrap';
-      const img = document.createElement('img'); img.className='art-thumb'; img.src=art.images[0];
+      const img = document.createElement('img'); img.className='art-thumb'; img.src=art.images[0].replace('/upload/','/upload/q_auto,f_auto,w_800/');
       img.addEventListener('click', ()=>openLB(art.images, 0));
       wrap.appendChild(img);
       card.appendChild(wrap);
@@ -566,7 +566,7 @@ function openLB(imgs, startIdx) {
   const tr=document.getElementById('lb-track'); tr.innerHTML='';
   imgs.forEach(src=>{
     const slide=document.createElement('div'); slide.className='lb-slide';
-    const img=document.createElement('img'); img.src=src;
+    const img=document.createElement('img'); img.src=src.replace('/upload/','/upload/q_auto,f_auto,w_1600/');
     slide.appendChild(img); tr.appendChild(slide);
   });
   const dots=document.getElementById('lb-dots'); dots.innerHTML='';
@@ -742,8 +742,8 @@ async function loadStateFromSupabase(){
         const bg=document.getElementById('home-bg');
         let img=bg.querySelector('img');
         if(!img){img=document.createElement('img');bg.prepend(img);}
-        img.src=STATE.homePhoto;
-        document.getElementById('sec-bg-img').style.backgroundImage=`url('${STATE.homePhoto}')`;
+        img.src=STATE.homePhoto.replace('/upload/','/upload/q_auto,f_auto,w_1200/');
+        document.getElementById('sec-bg-img').style.backgroundImage=`url('${STATE.homePhoto.replace('/upload/','/upload/q_auto,f_auto,w_1200/')}')`;
         document.getElementById('sec-bg-img').classList.add('loaded');
       }
       renderMenu();
