@@ -516,8 +516,9 @@ document.getElementById('sec-chrono-m').addEventListener('click',togChrono);
 function openMenuInstant() {
   const panel = document.getElementById('menu-panel');
   panel.style.transition = 'none';
+  void panel.offsetHeight; /* force reflow */
   renderMenu(); mOv.classList.add('open');
-  requestAnimationFrame(()=>{ panel.style.transition = ''; });
+  setTimeout(()=>{ panel.style.transition = ''; }, 50);
 }
 
 document.getElementById('sec-back').addEventListener('click',()=>{ openMenuInstant(); show('home'); });
