@@ -100,6 +100,61 @@ img { display:block; max-width:100%; }
 .chrono-row { display:none; position:relative; z-index:20; flex-shrink:0; justify-content:flex-end; padding:0 20px 8px; }
 @media(max-width:768px){ .sec-topbar .sec-chrono{display:none} .chrono-row{display:flex!important} }
 
+/* ── MEDIUM ROW ── */
+.medium-row {
+  position:relative; z-index:20; flex-shrink:0;
+  display:flex; align-items:center;
+  padding:0 36px 10px;
+  gap:28px;
+}
+@media(max-width:768px){ .medium-row{ padding:0 20px 8px; } }
+/* На мобиле хронология в medium-row скрыта (она есть в chrono-row) */
+@media(max-width:768px){ .medium-row .medium-chrono{ display:none; } }
+/* На десктопе хронология из топбара скрыта (она в medium-row) */
+@media(min-width:769px){ .sec-topbar .sec-chrono{ display:none; } }
+
+
+/* Контейнер со скроллом — занимает всё между хронологией и правым краем */
+.medium-strip-wrap {
+  flex:1; overflow:hidden; position:relative;
+}
+/* Внутренняя полоса — горизонтальный скролл */
+.medium-strip {
+  display:flex; align-items:center; gap:20px;
+  overflow-x:auto; overflow-y:hidden;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  white-space:nowrap;
+  /* сдвиг управляется JS через scrollLeft */
+}
+.medium-strip::-webkit-scrollbar { display:none; }
+
+/* Якорь «медиум» — всегда первый элемент полосы */
+.medium-anchor {
+  font-size:clamp(11px,.95vw,13px); font-weight:300; letter-spacing:.3em;
+  text-transform:lowercase; flex-shrink:0; cursor:pointer;
+  transition:opacity .2s;
+  padding-right:4px; /* небольшой зазор перед медиумами */
+}
+.medium-anchor:hover { opacity:.6; }
+
+/* Разделитель между якорем и медиумами */
+.medium-sep {
+  width:1px; height:10px; background:rgba(255,255,255,.2);
+  flex-shrink:0;
+}
+
+/* Кнопки медиумов */
+.medium-btn {
+  font-size:clamp(11px,.95vw,13px); font-weight:300; letter-spacing:.3em;
+  text-transform:lowercase; flex-shrink:0; cursor:pointer;
+  transition:opacity .2s;
+}
+.medium-btn:hover { opacity:.7; }
+.medium-btn.dim { opacity:.8; }
+.medium-btn.active { opacity:1; }
+
 /* Body */
 .sec-body { flex:1; display:flex; min-height:0; position:relative; z-index:10; }
 
@@ -270,6 +325,17 @@ img { display:block; max-width:100%; }
   <div class="chrono-row">
     <button class="sec-chrono" id="sec-chrono-m">хронология</button>
   </div>
+  <!-- MEDIUM ROW -->
+  <div class="medium-row" id="medium-row">
+    <button class="sec-chrono medium-chrono" id="sec-chrono-d2">хронология</button>
+    <div class="medium-strip-wrap">
+      <div class="medium-strip" id="medium-strip">
+        <button class="medium-anchor" id="medium-anchor">медиум</button>
+        <div class="medium-sep"></div>
+        <!-- медиумы вставляются JS -->
+      </div>
+    </div>
+  </div>
   <div class="sec-body">
     <div class="sec-scroll" id="sec-scroll">
       <div id="art-list"></div>
@@ -399,7 +465,7 @@ document.getElementById('view-home').addEventListener('touchend',e=>{
 function openSec(id) {
   const s = STATE.sections.find(x=>x.id===id);
   if (!s || s.type!=='section') return;
-  cur = id; rev = false;
+  cur = id; rev = false; activeMedium = null; mediumOpen = false;
   document.getElementById('sec-title-btn').textContent = s.title;
   document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
 
@@ -409,7 +475,10 @@ function openSec(id) {
   setDesc(true);
   document.getElementById('sec-chrono').classList.remove('on');
   document.getElementById('sec-chrono-m').classList.remove('on');
+  document.getElementById('sec-chrono-d2').classList.remove('on');
+  document.getElementById('medium-strip').scrollLeft = 0;
   document.getElementById('sec-scroll').scrollTop = 0;
+  renderMediums();
   renderArts();
   show('section');
 }
@@ -465,10 +534,85 @@ function togChrono(){
   rev=!rev;
   document.getElementById('sec-chrono').classList.toggle('on',rev);
   document.getElementById('sec-chrono-m').classList.toggle('on',rev);
+  document.getElementById('sec-chrono-d2').classList.toggle('on',rev);
   renderArts();
 }
 document.getElementById('sec-chrono').addEventListener('click',togChrono);
 document.getElementById('sec-chrono-m').addEventListener('click',togChrono);
+document.getElementById('sec-chrono-d2').addEventListener('click',togChrono);
+
+/* ── MEDIUM FILTER ── */
+let activeMedium = null; // null = нет фильтра
+let mediumOpen = false;  // полоса раскрыта?
+
+function renderMediums() {
+  const sec = STATE.sections.find(s=>s.id===cur);
+  const mediums = (sec && sec.mediums) || [];
+  const strip = document.getElementById('medium-strip');
+  /* удаляем старые кнопки медиумов, оставляем якорь и разделитель */
+  strip.querySelectorAll('.medium-btn').forEach(b=>b.remove());
+  mediums.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'medium-btn';
+    btn.textContent = m;
+    btn.addEventListener('click', () => selectMedium(m));
+    strip.appendChild(btn);
+  });
+  /* Прячем строку целиком если медиумов нет */
+  document.getElementById('medium-row').style.display = mediums.length ? '' : 'none';
+  updateMediumBtns();
+}
+
+function updateMediumBtns() {
+  document.querySelectorAll('.medium-btn').forEach(b => {
+    if (!activeMedium) {
+      b.classList.remove('dim','active');
+    } else if (b.textContent === activeMedium) {
+      b.classList.add('active'); b.classList.remove('dim');
+    } else {
+      b.classList.add('dim'); b.classList.remove('active');
+    }
+  });
+}
+
+function selectMedium(m) {
+  activeMedium = (activeMedium === m) ? null : m;
+  updateMediumBtns();
+  renderArts();
+}
+
+function openMediumStrip() {
+  mediumOpen = true;
+  const strip = document.getElementById('medium-strip');
+  const sep = strip.querySelector('.medium-sep');
+  /* Скроллим так, чтобы якорь ушёл влево, медиумы стали видны */
+  const anchor = document.getElementById('medium-anchor');
+  strip.scrollLeft = anchor.offsetWidth + (sep ? sep.offsetWidth + 20 : 0);
+}
+
+function closeMediumStrip() {
+  mediumOpen = false;
+  activeMedium = null;
+  updateMediumBtns();
+  document.getElementById('medium-strip').scrollLeft = 0;
+  renderArts();
+}
+
+document.getElementById('medium-anchor').addEventListener('click', () => {
+  if (!mediumOpen) openMediumStrip();
+  else closeMediumStrip();
+});
+
+/* При ручном скролле полосы влево до упора — считаем что якорь стал виден */
+document.getElementById('medium-strip').addEventListener('scroll', () => {
+  if (mediumOpen && document.getElementById('medium-strip').scrollLeft < 4) {
+    /* якорь вернулся — сворачиваем без сброса через closeMediumStrip чтобы не зациклиться */
+    mediumOpen = false;
+    activeMedium = null;
+    updateMediumBtns();
+    renderArts();
+  }
+}, {passive:true});
 function openMenuInstant() {
   const panel = document.getElementById('menu-panel');
   panel.classList.add('no-anim');
@@ -501,7 +645,9 @@ document.getElementById('sec-scroll').addEventListener('touchend',e=>{
 
 function renderArts() {
   const sec = STATE.sections.find(s=>s.id===cur);
-  const arr = rev ? [...sec.arts].reverse() : sec.arts;
+  let arr = rev ? [...sec.arts].reverse() : sec.arts;
+  /* Фильтр по медиуму */
+  if (activeMedium) arr = arr.filter(a => a.medium === activeMedium);
   const list = document.getElementById('art-list');
   list.innerHTML = '';
   arr.forEach(art => {
