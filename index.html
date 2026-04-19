@@ -184,10 +184,14 @@ img { display:block; max-width:100%; }
 .art-price { margin-top:14px; font-size:clamp(14px,1.3vw,18px); font-weight:400; letter-spacing:.06em; color:#555; }
 
 /* ── TEXT VIEW (bio / statement) ── */
-#view-text { background:#0a0a0a; }
-.text-top { flex-shrink:0; display:flex; align-items:baseline; justify-content:space-between; padding:28px 48px; }
+#view-text { background:#0a0a0a; overflow:hidden; }
+.text-bg { position:absolute; inset:0; z-index:0; overflow:hidden; background:#0a0a0a; }
+.text-bg-img { position:absolute; inset:-5%; background-size:cover; background-position:center; filter:blur(20px); transform:scale(1.1); opacity:0; transition:opacity .5s; }
+.text-bg-img.loaded { opacity:1; }
+.text-bg-dim { position:absolute; inset:0; background:rgba(0,0,0,.75); }
+.text-top { position:relative; z-index:1; flex-shrink:0; display:flex; align-items:baseline; justify-content:space-between; padding:28px 48px; }
 .text-ttl { font-size:clamp(13px,1.1vw,16px); font-weight:300; letter-spacing:.3em; text-transform:lowercase; }
-.text-body { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:36px 10vw 60px; min-height:0; }
+.text-body { position:relative; z-index:1; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:36px 10vw 60px; min-height:0; }
 /* Абзацы в обычных страницах */
 .text-body p {
   font-size:clamp(14px,1.1vw,16px); font-weight:300; letter-spacing:.05em;
@@ -307,6 +311,10 @@ img { display:block; max-width:100%; }
 
 <!-- TEXT -->
 <div id="view-text" class="view">
+  <div class="text-bg">
+    <div class="text-bg-img" id="text-bg-img"></div>
+    <div class="text-bg-dim"></div>
+  </div>
   <div class="text-top">
     <button id="text-back" class="sec-back">< назад</button>
     <div class="text-ttl" id="text-ttl"></div>
@@ -402,6 +410,17 @@ document.getElementById('menu-panel').addEventListener('touchend', e=>{
   swX=null;
 },{passive:true});
 
+/* Свайп влево по главному экрану — открывает меню */
+let homeSwX=null, homeSwY=null;
+document.getElementById('view-home').addEventListener('touchstart',e=>{ homeSwX=e.touches[0].clientX; homeSwY=e.touches[0].clientY; },{passive:true});
+document.getElementById('view-home').addEventListener('touchend',e=>{
+  if(homeSwX===null)return;
+  const dx=homeSwX-e.changedTouches[0].clientX;
+  const dy=Math.abs(e.changedTouches[0].clientY-homeSwY);
+  if(dx>60&&dy<60){ renderMenu(); mOv.classList.add('open'); }
+  homeSwX=null; homeSwY=null;
+},{passive:true});
+
 /* ── SECTION ── */
 function openSec(id) {
   const s = STATE.sections.find(x=>x.id===id);
@@ -477,12 +496,12 @@ document.getElementById('sec-desc').addEventListener('touchend',e=>{
   dSwX=null;
 },{passive:true});
 
-/* Mobile: свайп вниз по описанию */
+/* Mobile: свайп вверх по описанию закрывает */
 let dSwY=null;
 document.getElementById('sec-desc').addEventListener('touchstart',e=>{dSwY=e.touches[0].clientY;},{passive:true});
 document.getElementById('sec-desc').addEventListener('touchend',e=>{
   if(!isMob()||dSwY===null)return;
-  if(e.changedTouches[0].clientY-dSwY>50) setDesc(false);
+  if(dSwY-e.changedTouches[0].clientY>50) setDesc(false);
   dSwY=null;
 },{passive:true});
 
@@ -495,6 +514,17 @@ function togChrono(){
 document.getElementById('sec-chrono').addEventListener('click',togChrono);
 document.getElementById('sec-chrono-m').addEventListener('click',togChrono);
 document.getElementById('sec-back').addEventListener('click',()=>{ renderMenu(); mOv.classList.add('open'); show('home'); });
+
+/* Свайп влево по разделу — выход назад */
+let secBackSwX=null, secBackSwY=null;
+document.getElementById('view-section').addEventListener('touchstart',e=>{ secBackSwX=e.touches[0].clientX; secBackSwY=e.touches[0].clientY; },{passive:true});
+document.getElementById('view-section').addEventListener('touchend',e=>{
+  if(secBackSwX===null)return;
+  const dx=secBackSwX-e.changedTouches[0].clientX;
+  const dy=Math.abs(e.changedTouches[0].clientY-secBackSwY);
+  if(dx>80&&dy<60){ renderMenu(); mOv.classList.add('open'); show('home'); }
+  secBackSwX=null; secBackSwY=null;
+},{passive:true});
 
 /* Свайп вправо по ленте — открывает меню */
 let secSwX=null, secSwY=null;
@@ -545,6 +575,14 @@ function openPage(id) {
   const body = document.getElementById('text-body');
   body.innerHTML = '';
 
+  /* Фон с блюром — берём homePhoto если есть */
+  const bgEl = document.getElementById('text-bg-img');
+  if(STATE.homePhoto){
+    const url = STATE.homePhoto.replace('/upload/','/upload/q_auto,f_auto,w_1200/');
+    bgEl.style.backgroundImage = `url('${url}')`;
+    bgEl.classList.add('loaded');
+  }
+
   if (p.type === 'cv') {
     /* CV — подразделы */
     (p.subsections||[]).forEach(sub => {
@@ -561,6 +599,17 @@ function openPage(id) {
   show('text');
 }
 document.getElementById('text-back').addEventListener('click',()=>{ renderMenu(); mOv.classList.add('open'); show('home'); });
+
+/* Свайп влево по текстовой странице — выход назад */
+let txtSwX=null, txtSwY=null;
+document.getElementById('view-text').addEventListener('touchstart',e=>{ txtSwX=e.touches[0].clientX; txtSwY=e.touches[0].clientY; },{passive:true});
+document.getElementById('view-text').addEventListener('touchend',e=>{
+  if(txtSwX===null)return;
+  const dx=txtSwX-e.changedTouches[0].clientX;
+  const dy=Math.abs(e.changedTouches[0].clientY-txtSwY);
+  if(dx>80&&dy<60){ renderMenu(); mOv.classList.add('open'); show('home'); }
+  txtSwX=null; txtSwY=null;
+},{passive:true});
 
 /* ── LIGHTBOX ── */
 function openLB(imgs, startIdx) {
@@ -740,6 +789,7 @@ async function loadStateFromSupabase(){
       if(STATE.artistName)
         document.getElementById('artist-name-el').innerHTML=STATE.artistName.replace('\n','<br>');
       if(STATE.homePhoto){
+        document.getElementById('home-ph').style.display='none';
         const bg=document.getElementById('home-bg');
         let img=bg.querySelector('img');
         if(!img){img=document.createElement('img');bg.prepend(img);}
@@ -756,6 +806,12 @@ async function loadStateFromSupabase(){
 renderMenu();
 show('home');
 loadStateFromSupabase();
+
+document.addEventListener('touchstart', e=>{
+  if(e.touches.length>1 && !e.target.closest('.art-zoom-wrap')){
+    e.preventDefault();
+  }
+},{passive:false});
 </script>
 </body>
 </html>
