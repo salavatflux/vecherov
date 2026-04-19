@@ -20,8 +20,9 @@ img { display:block; max-width:100%; }
 /* ── HOME ── */
 #view-home { overflow:hidden; }
 .home-bg { position:absolute; inset:0; background:#111; }
-.home-bg img { width:100%; height:100%; object-fit:cover; }
-.home-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.2em; color:rgba(255,255,255,.1); text-transform:uppercase; }
+.home-bg img { width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .6s ease; }
+.home-bg img.loaded { opacity:1; }
+.home-ph { display:none; }
 .home-ui { position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; }
 .home-top { display:flex; justify-content:space-between; align-items:flex-start; padding:28px 32px; }
 .artist-name { font-size:clamp(16px,1.8vw,24px); font-weight:300; letter-spacing:.22em; line-height:1.3; text-transform:uppercase; }
@@ -517,6 +518,7 @@ function renderArts() {
       const wrap = document.createElement('div'); wrap.className='art-zoom-wrap';
       const img = document.createElement('img'); img.className='art-thumb'; img.src=art.images[0].replace('/upload/','/upload/q_auto,f_auto,w_800/');
       img.addEventListener('click', ()=>openLB(art.images, 0));
+      art.images.forEach(src=>{ const p=new Image(); p.src=src.replace('/upload/','/upload/q_auto,f_auto,w_1600/'); });
       wrap.appendChild(img);
       card.appendChild(wrap);
     }
@@ -738,10 +740,10 @@ async function loadStateFromSupabase(){
       if(STATE.artistName)
         document.getElementById('artist-name-el').innerHTML=STATE.artistName.replace('\n','<br>');
       if(STATE.homePhoto){
-        document.getElementById('home-ph').style.display='none';
         const bg=document.getElementById('home-bg');
         let img=bg.querySelector('img');
         if(!img){img=document.createElement('img');bg.prepend(img);}
+        img.onload=()=>img.classList.add('loaded');
         img.src=STATE.homePhoto.replace('/upload/','/upload/q_auto,f_auto,w_1200/');
         document.getElementById('sec-bg-img').style.backgroundImage=`url('${STATE.homePhoto.replace('/upload/','/upload/q_auto,f_auto,w_1200/')}')`;
         document.getElementById('sec-bg-img').classList.add('loaded');
