@@ -513,7 +513,14 @@ function togChrono(){
 }
 document.getElementById('sec-chrono').addEventListener('click',togChrono);
 document.getElementById('sec-chrono-m').addEventListener('click',togChrono);
-document.getElementById('sec-back').addEventListener('click',()=>{ renderMenu(); mOv.classList.add('open'); show('home'); });
+function openMenuInstant() {
+  const panel = document.getElementById('menu-panel');
+  panel.style.transition = 'none';
+  renderMenu(); mOv.classList.add('open');
+  requestAnimationFrame(()=>{ panel.style.transition = ''; });
+}
+
+document.getElementById('sec-back').addEventListener('click',()=>{ openMenuInstant(); show('home'); });
 
 /* Свайп влево по разделу — выход назад */
 let secBackSwX=null, secBackSwY=null;
@@ -522,11 +529,8 @@ document.getElementById('view-section').addEventListener('touchend',e=>{
   if(secBackSwX===null)return;
   const dx=secBackSwX-e.changedTouches[0].clientX;
   const dy=Math.abs(e.changedTouches[0].clientY-secBackSwY);
-  if(dx>80&&dy<60){ renderMenu(); mOv.classList.add('open'); show('home'); }
+  if(dx>80&&dy<60){ openMenuInstant(); show('home'); }
   secBackSwX=null; secBackSwY=null;
-},{passive:true});
-
-/* Свайп вправо по ленте — открывает меню */
 let secSwX=null, secSwY=null;
 document.getElementById('sec-scroll').addEventListener('touchstart',e=>{ secSwX=e.touches[0].clientX; secSwY=e.touches[0].clientY; },{passive:true});
 document.getElementById('sec-scroll').addEventListener('touchend',e=>{
@@ -598,7 +602,7 @@ function openPage(id) {
   }
   show('text');
 }
-document.getElementById('text-back').addEventListener('click',()=>{ renderMenu(); mOv.classList.add('open'); show('home'); });
+document.getElementById('text-back').addEventListener('click',()=>{ openMenuInstant(); show('home'); });
 
 /* Свайп влево по текстовой странице — выход назад */
 let txtSwX=null, txtSwY=null;
@@ -607,7 +611,7 @@ document.getElementById('view-text').addEventListener('touchend',e=>{
   if(txtSwX===null)return;
   const dx=txtSwX-e.changedTouches[0].clientX;
   const dy=Math.abs(e.changedTouches[0].clientY-txtSwY);
-  if(dx>80&&dy<60){ renderMenu(); mOv.classList.add('open'); show('home'); }
+  if(dx>80&&dy<60){ openMenuInstant(); show('home'); }
   txtSwX=null; txtSwY=null;
 },{passive:true});
 
