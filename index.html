@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="assets/puzzle.png">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html, body { width:100%; height:100%; overflow:hidden; background:#0a0a0a; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#fff; -webkit-font-smoothing:antialiased; }
+html, body { width:100%; height:100%; overflow:hidden; background:#0a0a0a; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#fff; -webkit-font-smoothing:antialiased; touch-action:pan-x pan-y; }
 button { background:none; border:none; cursor:pointer; font-family:inherit; color:inherit; }
 a { color:inherit; text-decoration:none; }
 img { display:block; max-width:100%; }
@@ -724,7 +724,7 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
   }, {passive:true});
 
   document.addEventListener('touchstart', e => {
-    if (window.innerWidth > 768 || document.getElementById('lb').classList.contains('open')) return;
+    if (document.getElementById('lb').classList.contains('open')) return;
     const t = e.target.closest('.art-thumb');
     if (!t) return;
 
@@ -778,6 +778,50 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
       else { lx = 0; ly = 0; }
     }
   }, {passive:true});
+})();
+
+/* ── WHEEL ZOOM на фото (десктоп) ── */
+(function(){
+  document.getElementById('sec-scroll').addEventListener('wheel', e=>{
+    const t = e.target.closest('.art-thumb');
+    if (!t) return;
+    e.preventDefault();
+    const wrap = t.parentElement;
+    let sc = parseFloat(t.dataset.sc||1);
+    sc = Math.max(1, Math.min(sc * (e.deltaY < 0 ? 1.1 : 0.9), 4));
+    t.dataset.sc = sc;
+    let px = parseFloat(t.dataset.px||0);
+    let py = parseFloat(t.dataset.py||0);
+    if (sc === 1) { px = 0; py = 0; }
+    const maxX = wrap.offsetWidth  * (sc - 1) / (2 * sc);
+    const maxY = wrap.offsetHeight * (sc - 1) / (2 * sc);
+    px = Math.max(-maxX, Math.min(maxX, px));
+    py = Math.max(-maxY, Math.min(maxY, py));
+    t.dataset.px = px; t.dataset.py = py;
+    t.style.transform = sc > 1 ? `scale(${sc}) translate(${px}px,${py}px)` : '';
+  }, {passive:false});
+
+  let dragging=null, dEl=null, dWrap=null, dLx=0, dLy=0;
+  document.getElementById('sec-scroll').addEventListener('mousedown', e=>{
+    const t = e.target.closest('.art-thumb');
+    if (!t || parseFloat(t.dataset.sc||1) <= 1) return;
+    e.preventDefault();
+    dragging=true; dEl=t; dWrap=t.parentElement; dLx=e.clientX; dLy=e.clientY;
+  });
+  document.addEventListener('mousemove', e=>{
+    if (!dragging||!dEl) return;
+    const sc = parseFloat(dEl.dataset.sc||1);
+    let px = parseFloat(dEl.dataset.px||0) + (e.clientX-dLx)/sc;
+    let py = parseFloat(dEl.dataset.py||0) + (e.clientY-dLy)/sc;
+    dLx=e.clientX; dLy=e.clientY;
+    const maxX = dWrap.offsetWidth  * (sc-1) / (2*sc);
+    const maxY = dWrap.offsetHeight * (sc-1) / (2*sc);
+    px = Math.max(-maxX, Math.min(maxX, px));
+    py = Math.max(-maxY, Math.min(maxY, py));
+    dEl.dataset.px=px; dEl.dataset.py=py;
+    dEl.style.transform = `scale(${sc}) translate(${px}px,${py}px)`;
+  });
+  document.addEventListener('mouseup', ()=>{ dragging=false; dEl=null; dWrap=null; });
 })();
 
 
