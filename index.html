@@ -528,7 +528,7 @@ let secBackSwX=null, secBackSwY=null;
 document.getElementById('view-section').addEventListener('touchstart',e=>{ secBackSwX=e.touches[0].clientX; secBackSwY=e.touches[0].clientY; },{passive:true});
 document.getElementById('view-section').addEventListener('touchend',e=>{
   if(secBackSwX===null)return;
-  const dx=secBackSwX-e.changedTouches[0].clientX;
+  const dx=e.changedTouches[0].clientX-secBackSwX;
   const dy=Math.abs(e.changedTouches[0].clientY-secBackSwY);
   if(dx>80&&dy<60){ openMenuInstant(); show('home'); }
   secBackSwX=null; secBackSwY=null;
@@ -612,7 +612,7 @@ let txtSwX=null, txtSwY=null;
 document.getElementById('view-text').addEventListener('touchstart',e=>{ txtSwX=e.touches[0].clientX; txtSwY=e.touches[0].clientY; },{passive:true});
 document.getElementById('view-text').addEventListener('touchend',e=>{
   if(txtSwX===null)return;
-  const dx=txtSwX-e.changedTouches[0].clientX;
+  const dx=e.changedTouches[0].clientX-txtSwX;
   const dy=Math.abs(e.changedTouches[0].clientY-txtSwY);
   if(dx>80&&dy<60){ openMenuInstant(); show('home'); }
   txtSwX=null; txtSwY=null;
