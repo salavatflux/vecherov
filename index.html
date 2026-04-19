@@ -46,6 +46,7 @@ img { display:block; max-width:100%; }
   will-change:transform;
 }
 .menu-ov.open .menu-panel { transform:translateX(0); }
+.menu-panel.no-anim { transition:none!important; }
 @keyframes menuIn { from{opacity:0;transform:translateX(14px)} to{opacity:1;transform:translateX(0)} }
 .menu-ov.open .menu-item:nth-child(1){animation:menuIn .6s .08s both}
 .menu-ov.open .menu-item:nth-child(2){animation:menuIn .6s .15s both}
@@ -515,10 +516,9 @@ document.getElementById('sec-chrono').addEventListener('click',togChrono);
 document.getElementById('sec-chrono-m').addEventListener('click',togChrono);
 function openMenuInstant() {
   const panel = document.getElementById('menu-panel');
-  panel.style.transition = 'none';
-  void panel.offsetHeight; /* force reflow */
+  panel.classList.add('no-anim');
   renderMenu(); mOv.classList.add('open');
-  setTimeout(()=>{ panel.style.transition = ''; }, 50);
+  setTimeout(()=>{ panel.classList.remove('no-anim'); }, 100);
 }
 
 document.getElementById('sec-back').addEventListener('click',()=>{ openMenuInstant(); show('home'); });
