@@ -86,35 +86,9 @@ img { display:block; max-width:100%; }
   display:flex; align-items:center; justify-content:space-between;
   padding:22px 36px;
 }
-@media(max-width:768px){ .sec-topbar{ padding:16px 20px; overflow:hidden; } }
+@media(max-width:768px){ .sec-topbar{ padding:16px 20px; } }
 
-/*
-  Вектор:
-  Desktop — position:absolute в .sec-scroll (z-index:1, под картинками z-index:2).
-            Левый и верхний края выходят за пределы на 10%.
-            Ширина 20vw. Не обрезается, не наезжает на кнопки.
-  Mobile  — position:absolute в .sec-topbar.
-            Ширина 50vw. Обрезается нижним краем топбара (overflow:hidden).
-            При открытом описании нижняя часть выезжает вместе с .sec-desc (order:-1).
-*/
-.sec-vec {
-  position:absolute;
-  left:0; top:0;
-  pointer-events:none;
-  opacity:.1;
-  transition:opacity .4s;
-  z-index:1;
-}
-.sec-vec.show { opacity:.9; }
 
-/* Desktop: вектор живёт в sec-scroll */
-@media(min-width:769px){
-  .sec-vec { width:20vw; height:auto; }
-}
-/* Mobile: вектор живёт в sec-topbar, обрезается overflow:hidden снизу */
-@media(max-width:768px){
-  .sec-vec { width:45vw; height:auto; left:-5%; }
-}
 
 .sec-back { position:relative; z-index:1; font-size:clamp(12px,1vw,15px); font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
 .sec-right { position:relative; z-index:1; display:flex; align-items:center; gap:28px; flex-shrink:0; }
@@ -287,7 +261,6 @@ img { display:block; max-width:100%; }
     <div class="sec-bg-dim"></div>
   </div>
   <div class="sec-topbar" id="sec-topbar">
-    <img class="sec-vec" id="sec-vec" alt="" onerror="this.style.display='none'" style="display:none">
     <button class="sec-back" id="sec-back">< назад</button>
     <div class="sec-right">
       <button class="sec-chrono" id="sec-chrono">хронология</button>
@@ -430,16 +403,6 @@ function openSec(id) {
   document.getElementById('sec-title-btn').textContent = s.title;
   document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
 
-  /* Вектор: на десктопе — в sec-scroll (не наезжает на кнопки).
-             На мобиле — в sec-topbar (обрезается его нижним краем). */
-  const vec = document.getElementById('sec-vec');
-  const vecTarget = isMob()
-    ? document.getElementById('sec-topbar')
-    : document.getElementById('sec-scroll');
-  vecTarget.appendChild(vec); /* перемещаем в нужный контейнер */
-
-  if (s.vec) { vec.src=s.vec; vec.style.display='block'; vec.classList.add('show'); }
-  else { vec.style.display='none'; vec.classList.remove('show'); }
 
   document.getElementById('sec-desc-inner').innerHTML =
     s.desc.split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
@@ -454,14 +417,6 @@ function openSec(id) {
 window.addEventListener('resize', () => {
   if (cur) {
     document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
-    /* Переставляем вектор при смене ориентации */
-    const vec = document.getElementById('sec-vec');
-    if (vec.style.display !== 'none') {
-      const vecTarget = isMob()
-        ? document.getElementById('sec-topbar')
-        : document.getElementById('sec-scroll');
-      vecTarget.appendChild(vec);
-    }
   }
 });
 
