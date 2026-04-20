@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Александр Вечеров</title>
-<link rel="icon" type="image/png" href="assets/puzzle.png">
+<link rel="icon" type="image/png" href="https://res.cloudinary.com/dj1ejvvv0/image/upload/q_auto/f_auto/v1776681015/puzzle_white_rh2dx4.png">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html, body { width:100%; height:100%; overflow:hidden; background:#0a0a0a; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#fff; -webkit-font-smoothing:antialiased; }
@@ -25,6 +25,9 @@ img { display:block; max-width:100%; }
 .home-ph { display:none; }
 .home-ui { position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; }
 .home-top { display:flex; justify-content:space-between; align-items:flex-start; padding:28px 32px; }
+.home-brand { display:flex; align-items:stretch; gap:12px; }
+.home-brand-logo { flex-shrink:0; display:flex; align-items:stretch; }
+.home-brand-logo img { height:calc(clamp(16px,1.8vw,24px) * 1.3 * 2); width:auto; display:block; object-fit:contain; }
 .artist-name { font-size:clamp(16px,1.8vw,24px); font-weight:300; letter-spacing:.22em; line-height:1.3; text-transform:uppercase; }
 .dots-btn { display:flex; flex-direction:column; gap:5px; padding:2px; }
 .dots-btn span { display:block; width:4px; height:4px; background:#fff; }
@@ -240,6 +243,35 @@ img { display:block; max-width:100%; }
   line-height:1.85; color:rgba(255,255,255,.75);
 }
 .cv-section-text p { margin-bottom:.4em; }
+/* CV event line with photos */
+.cv-event { cursor:pointer; display:inline; }
+.cv-event.has-photos { text-decoration:underline; text-underline-offset:3px; text-decoration-color:rgba(255,255,255,.4); }
+.cv-carousel-wrap {
+  max-height:0; overflow:hidden;
+  transition:max-height .4s ease-out;
+}
+.cv-carousel-wrap.open { max-height:80vh; }
+.cv-carousel {
+  display:flex; gap:12px; align-items:flex-start;
+  padding:12px 0 16px;
+  overflow-x:auto; overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.cv-carousel::-webkit-scrollbar { display:none; }
+/* desktop: no scroll unless overflow */
+@media(min-width:769px){
+  .cv-carousel { overflow-x:auto; }
+}
+.cv-carousel img {
+  flex-shrink:0;
+  height:50vh; width:auto;
+  object-fit:contain; display:block;
+  pointer-events:none; user-select:none;
+}
+@media(max-width:768px){
+  .cv-carousel img { height:calc(100vw * 2 / 3); }
+}
 @media(max-width:768px){ .text-top{padding:20px 24px} .text-body{padding:24px 24px 60px} }
 
 /* ── LIGHTBOX ── */
@@ -282,7 +314,12 @@ img { display:block; max-width:100%; }
   </div>
   <div class="home-ui">
     <div class="home-top">
-      <div class="artist-name" id="artist-name-el">Александр<br>Вечеров</div>
+      <div class="home-brand">
+        <div class="home-brand-logo">
+          <img src="https://res.cloudinary.com/dj1ejvvv0/image/upload/q_auto/f_auto/v1776681015/puzzle_white_rh2dx4.png" id="brand-logo-img" alt="">
+        </div>
+        <div class="artist-name" id="artist-name-el">Александр<br>Вечеров</div>
+      </div>
       <button class="dots-btn" id="btn-menu">
         <span></span><span></span><span></span>
       </button>
@@ -558,8 +595,8 @@ function renderMediums() {
     btn.addEventListener('click', () => selectMedium(m));
     strip.appendChild(btn);
   });
-  /* Прячем строку целиком если медиумов нет */
-  document.getElementById('medium-row').style.display = mediums.length ? '' : 'none';
+  /* Прячем только полосу медиумов если список пуст, строку целиком не трогаем */
+  document.getElementById('medium-strip').parentElement.style.display = mediums.length ? '' : 'none';
   updateMediumBtns();
 }
 
@@ -697,7 +734,36 @@ function openPage(id) {
       const sec = document.createElement('div'); sec.className='cv-section';
       const t = document.createElement('div'); t.className='cv-section-title'; t.textContent=sub.title;
       const d = document.createElement('div'); d.className='cv-section-text';
-      d.innerHTML = sub.text.split('\n').map(l=>`<p>${l}</p>`).join('');
+      /* Строки: массив объектов {text, images:[]} или legacy-строка через \n */
+      const lines = sub.lines || sub.text.split('\n').map(l=>({text:l, images:[]}));
+      lines.forEach(line => {
+        const text = typeof line==='string' ? line : line.text;
+        const imgs = (typeof line==='object' && line.images) ? line.images : [];
+        const wrap = document.createElement('div');
+        const pEl = document.createElement('p');
+        const span = document.createElement('span');
+        span.className = 'cv-event' + (imgs.length ? ' has-photos' : '');
+        span.textContent = text;
+        pEl.appendChild(span);
+        wrap.appendChild(pEl);
+        if (imgs.length) {
+          const cWrap = document.createElement('div'); cWrap.className='cv-carousel-wrap';
+          const carousel = document.createElement('div'); carousel.className='cv-carousel';
+          imgs.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src.replace('/upload/','/upload/q_auto,f_auto,w_1200/');
+            carousel.appendChild(img);
+          });
+          cWrap.appendChild(carousel);
+          wrap.appendChild(cWrap);
+          span.addEventListener('click', () => {
+            const isOpen = cWrap.classList.contains('open');
+            d.querySelectorAll('.cv-carousel-wrap.open').forEach(el => el.classList.remove('open'));
+            if (!isOpen) cWrap.classList.add('open');
+          });
+        }
+        d.appendChild(wrap);
+      });
       sec.appendChild(t); sec.appendChild(d); body.appendChild(sec);
     });
   } else {
