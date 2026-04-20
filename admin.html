@@ -308,9 +308,16 @@ function renderAdmin(keepOpenId = null) {
     if (sec.type === 'section') {
       bBody.appendChild(makeField('Описание раздела', 'textarea', sec.desc, v => sec.desc = v));
 
-      bBody.appendChild(makeField('Медиумы (через запятую)', 'text', (sec.mediums||[]).join(', '), v => {
-        sec.mediums = v.split(',').map(s=>s.trim()).filter(Boolean);
-      }));
+      {
+        const mf = document.createElement('div'); mf.className='admin-field';
+        const ml = document.createElement('label'); ml.textContent='Медиумы (через запятую)';
+        const mi = document.createElement('input'); mi.type='text'; mi.value=(sec.mediums||[]).join(', ');
+        mi.addEventListener('input', () => {
+          sec.mediums = mi.value.split(',').map(s=>s.trim()).filter(Boolean);
+        });
+        mi.addEventListener('blur', () => { renderAdmin(sec.id); });
+        mf.appendChild(ml); mf.appendChild(mi); bBody.appendChild(mf);
+      }
 
       bBody.appendChild(Object.assign(document.createElement('hr'), {style:'border:none;border-top:1px solid rgba(255,255,255,.06);margin:14px 0'}));
 
