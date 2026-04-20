@@ -94,34 +94,24 @@ img { display:block; max-width:100%; }
 
 
 .sec-back { position:relative; z-index:1; font-size:clamp(12px,1vw,15px); font-weight:500; letter-spacing:.06em; white-space:nowrap; flex-shrink:0; }
-.sec-right { position:relative; z-index:1; display:flex; align-items:center; gap:28px; flex-shrink:0; }
+.sec-right { position:relative; z-index:1; display:flex; align-items:center; gap:20px; flex:1; min-width:0; }
 .sec-chrono { font-size:clamp(11px,.95vw,13px); font-weight:300; letter-spacing:.3em; text-transform:lowercase; transition:opacity .2s; }
 .sec-chrono:hover, .sec-chrono.on { opacity:.45; }
 .sec-title-btn { font-size:clamp(11px,.95vw,13px); font-weight:700; letter-spacing:.3em; text-transform:lowercase; transition:opacity .2s; }
 .sec-title-btn:hover { opacity:.7; }
 
-.chrono-row { display:none; position:relative; z-index:20; flex-shrink:0; justify-content:flex-end; padding:0 20px 8px; }
+.chrono-row { display:none; position:relative; z-index:20; flex-shrink:0; align-items:center; justify-content:flex-end; padding:0 20px 8px; gap:20px; }
 @media(max-width:768px){ .sec-topbar .sec-chrono{display:none} .chrono-row{display:flex!important} }
 
-/* ── MEDIUM ROW ── */
-.medium-row {
-  position:relative; z-index:20; flex-shrink:0;
-  display:flex; align-items:center;
-  padding:0 36px 10px;
-  gap:28px;
-}
-@media(max-width:768px){ .medium-row{ padding:0 20px 8px; } }
-/* На мобиле хронология в medium-row скрыта (она есть в chrono-row) */
-@media(max-width:768px){ .medium-row .medium-chrono{ display:none; } }
-/* На десктопе хронология из топбара скрыта (она в medium-row) */
-@media(min-width:769px){ .sec-topbar .sec-chrono{ display:none; } }
-
-
-/* Контейнер со скроллом — занимает всё между хронологией и правым краем */
+/* ── MEDIUM STRIP — встроена в топбар (десктоп) и chrono-row (мобиле) ── */
+/* Обёртка с overflow:hidden — ограничивает видимую область полосы */
 .medium-strip-wrap {
-  flex:1; overflow:hidden; position:relative;
+  overflow:hidden; position:relative;
+  /* на десктопе — flex:1 чтобы занять место между хронологией и названием */
 }
-/* Внутренняя полоса — горизонтальный скролл */
+@media(min-width:769px){ .medium-strip-wrap{ flex:1; } }
+@media(max-width:768px){ .medium-strip-wrap{ flex:1; } }
+
 .medium-strip {
   display:flex; align-items:center; gap:20px;
   overflow-x:auto; overflow-y:hidden;
@@ -129,26 +119,21 @@ img { display:block; max-width:100%; }
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
   white-space:nowrap;
-  /* сдвиг управляется JS через scrollLeft */
 }
 .medium-strip::-webkit-scrollbar { display:none; }
 
-/* Якорь «медиум» — всегда первый элемент полосы */
 .medium-anchor {
   font-size:clamp(11px,.95vw,13px); font-weight:300; letter-spacing:.3em;
   text-transform:lowercase; flex-shrink:0; cursor:pointer;
   transition:opacity .2s;
-  padding-right:4px; /* небольшой зазор перед медиумами */
 }
 .medium-anchor:hover { opacity:.6; }
 
-/* Разделитель между якорем и медиумами */
 .medium-sep {
   width:1px; height:10px; background:rgba(255,255,255,.2);
   flex-shrink:0;
 }
 
-/* Кнопки медиумов */
 .medium-btn {
   font-size:clamp(11px,.95vw,13px); font-weight:300; letter-spacing:.3em;
   text-transform:lowercase; flex-shrink:0; cursor:pointer;
@@ -359,19 +344,9 @@ img { display:block; max-width:100%; }
       <button class="sec-title-btn" id="sec-title-btn"></button>
     </div>
   </div>
-  <div class="chrono-row">
+  <div class="chrono-row" id="chrono-row">
     <button class="sec-chrono" id="sec-chrono-m">хронология</button>
-  </div>
-  <!-- MEDIUM ROW -->
-  <div class="medium-row" id="medium-row">
-    <button class="sec-chrono medium-chrono" id="sec-chrono-d2">хронология</button>
-    <div class="medium-strip-wrap">
-      <div class="medium-strip" id="medium-strip">
-        <button class="medium-anchor" id="medium-anchor">медиум</button>
-        <div class="medium-sep"></div>
-        <!-- медиумы вставляются JS -->
-      </div>
-    </div>
+    <!-- полоса медиумов вставляется JS -->
   </div>
   <div class="sec-body">
     <div class="sec-scroll" id="sec-scroll">
@@ -506,14 +481,12 @@ function openSec(id) {
   document.getElementById('sec-title-btn').textContent = s.title;
   document.getElementById('sec-back').textContent = isMob() ? '<' : '< назад';
 
-
   document.getElementById('sec-desc-inner').innerHTML =
     s.desc.split('\n\n').map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
   setDesc(true);
   document.getElementById('sec-chrono').classList.remove('on');
   document.getElementById('sec-chrono-m').classList.remove('on');
-  document.getElementById('sec-chrono-d2').classList.remove('on');
-  document.getElementById('medium-strip').scrollLeft = 0;
+  _strip.scrollLeft = 0;
   document.getElementById('sec-scroll').scrollTop = 0;
   renderMediums();
   renderArts();
@@ -571,37 +544,63 @@ function togChrono(){
   rev=!rev;
   document.getElementById('sec-chrono').classList.toggle('on',rev);
   document.getElementById('sec-chrono-m').classList.toggle('on',rev);
-  document.getElementById('sec-chrono-d2').classList.toggle('on',rev);
   renderArts();
 }
 document.getElementById('sec-chrono').addEventListener('click',togChrono);
 document.getElementById('sec-chrono-m').addEventListener('click',togChrono);
-document.getElementById('sec-chrono-d2').addEventListener('click',togChrono);
 
 /* ── MEDIUM FILTER ── */
-let activeMedium = null; // null = нет фильтра
-let mediumOpen = false;  // полоса раскрыта?
+let activeMedium = null;
+let mediumOpen = false;
+
+/* Создаём DOM полосы один раз */
+const _stripWrap = document.createElement('div');
+_stripWrap.className = 'medium-strip-wrap';
+_stripWrap.id = 'medium-strip-wrap';
+const _strip = document.createElement('div');
+_strip.className = 'medium-strip';
+_strip.id = 'medium-strip';
+const _anchor = document.createElement('button');
+_anchor.className = 'medium-anchor';
+_anchor.id = 'medium-anchor';
+_anchor.textContent = 'медиум';
+const _sep = document.createElement('div');
+_sep.className = 'medium-sep';
+_strip.appendChild(_anchor);
+_strip.appendChild(_sep);
+_stripWrap.appendChild(_strip);
+
+function placeMediumStrip() {
+  if (isMob()) {
+    /* мобиле: в конец chrono-row */
+    document.getElementById('chrono-row').appendChild(_stripWrap);
+  } else {
+    /* десктоп: между sec-chrono и sec-title-btn в sec-right */
+    const right = document.querySelector('.sec-right');
+    const titleBtn = document.getElementById('sec-title-btn');
+    right.insertBefore(_stripWrap, titleBtn);
+  }
+}
 
 function renderMediums() {
   const sec = STATE.sections.find(s=>s.id===cur);
   const mediums = (sec && sec.mediums) || [];
-  const strip = document.getElementById('medium-strip');
-  /* удаляем старые кнопки медиумов, оставляем якорь и разделитель */
-  strip.querySelectorAll('.medium-btn').forEach(b=>b.remove());
+  /* удаляем старые кнопки медиумов */
+  _strip.querySelectorAll('.medium-btn').forEach(b=>b.remove());
   mediums.forEach(m => {
     const btn = document.createElement('button');
     btn.className = 'medium-btn';
     btn.textContent = m;
     btn.addEventListener('click', () => selectMedium(m));
-    strip.appendChild(btn);
+    _strip.appendChild(btn);
   });
-  /* Прячем только полосу медиумов если список пуст, строку целиком не трогаем */
-  document.getElementById('medium-strip').parentElement.style.display = mediums.length ? '' : 'none';
+  _stripWrap.style.display = mediums.length ? '' : 'none';
+  placeMediumStrip();
   updateMediumBtns();
 }
 
 function updateMediumBtns() {
-  document.querySelectorAll('.medium-btn').forEach(b => {
+  _strip.querySelectorAll('.medium-btn').forEach(b => {
     if (!activeMedium) {
       b.classList.remove('dim','active');
     } else if (b.textContent === activeMedium) {
@@ -620,30 +619,30 @@ function selectMedium(m) {
 
 function openMediumStrip() {
   mediumOpen = true;
-  const strip = document.getElementById('medium-strip');
-  const sep = strip.querySelector('.medium-sep');
-  /* Скроллим так, чтобы якорь ушёл влево, медиумы стали видны */
-  const anchor = document.getElementById('medium-anchor');
-  strip.scrollLeft = anchor.offsetWidth + (sep ? sep.offsetWidth + 20 : 0);
+  _strip.scrollLeft = _anchor.offsetWidth + _sep.offsetWidth + 20;
 }
 
 function closeMediumStrip() {
   mediumOpen = false;
   activeMedium = null;
   updateMediumBtns();
-  document.getElementById('medium-strip').scrollLeft = 0;
+  _strip.scrollLeft = 0;
   renderArts();
 }
 
-document.getElementById('medium-anchor').addEventListener('click', () => {
-  if (!mediumOpen) openMediumStrip();
-  else closeMediumStrip();
+_anchor.addEventListener('click', () => {
+  if (!mediumOpen) {
+    openMediumStrip();
+  } else if (!isMob()) {
+    /* десктоп: кнопка всегда видна — переключаем */
+    closeMediumStrip();
+  }
+  /* мобиле: закрывается только скроллом вправо */
 });
 
-/* При ручном скролле полосы влево до упора — считаем что якорь стал виден */
-document.getElementById('medium-strip').addEventListener('scroll', () => {
-  if (mediumOpen && document.getElementById('medium-strip').scrollLeft < 4) {
-    /* якорь вернулся — сворачиваем без сброса через closeMediumStrip чтобы не зациклиться */
+/* Скролл вправо до упора — закрываем (работает на обоих режимах) */
+_strip.addEventListener('scroll', () => {
+  if (mediumOpen && _strip.scrollLeft < 4) {
     mediumOpen = false;
     activeMedium = null;
     updateMediumBtns();
