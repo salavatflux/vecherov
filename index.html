@@ -120,6 +120,7 @@ img { display:block; max-width:100%; }
   transition:max-width .35s ease;
 }
 .medium-strip-wrap.no-mediums { display:none; }
+.no-mediums { display:none; }
 .medium-strip-wrap.open {
   max-width:500px; /* достаточно для любого списка */
 }
@@ -564,32 +565,38 @@ let activeMedium = null;
 let mediumOpen = false;
 let medSwallowSwipe = false;
 
-/* DOM создаём один раз */
+/* DOM создаём один раз.
+   _anchor всегда виден — снаружи _stripWrap.
+   _stripWrap (max-width:0 → .open) содержит только разделитель и кнопки.
+   _mediumRoot — обёртка, вставляется в контейнер целиком. */
+const _mediumRoot = document.createElement('div');
+_mediumRoot.style.cssText = 'display:flex;align-items:center;flex-shrink:0';
+const _anchor = document.createElement('button');
+_anchor.className = 'medium-anchor';
+_anchor.textContent = 'медиум';
 const _stripWrap = document.createElement('div');
 _stripWrap.className = 'medium-strip-wrap';
 const _strip = document.createElement('div');
 _strip.className = 'medium-strip';
-const _anchor = document.createElement('button');
-_anchor.className = 'medium-anchor';
-_anchor.textContent = 'медиум';
 const _sep = document.createElement('div');
 _sep.className = 'medium-sep';
-_strip.appendChild(_anchor);
 _strip.appendChild(_sep);
 _stripWrap.appendChild(_strip);
+_mediumRoot.appendChild(_anchor);
+_mediumRoot.appendChild(_stripWrap);
 
 /* Вставляем полосу в нужный контейнер в зависимости от режима */
 function placeMediumStrip() {
   if (isMob()) {
     const row = document.getElementById('chrono-row');
-    if (_stripWrap.parentElement !== row) {
-      row.insertBefore(_stripWrap, row.firstChild);
+    if (_mediumRoot.parentElement !== row) {
+      row.insertBefore(_mediumRoot, row.firstChild);
       _stripWrap.classList.remove('open'); mediumOpen = false;
     }
   } else {
     const right = document.getElementById('sec-right');
-    if (_stripWrap.parentElement !== right) {
-      right.insertBefore(_stripWrap, right.firstChild);
+    if (_mediumRoot.parentElement !== right) {
+      right.insertBefore(_mediumRoot, right.firstChild);
       _stripWrap.classList.remove('open'); mediumOpen = false;
     }
   }
@@ -606,7 +613,7 @@ function renderMediums() {
     btn.addEventListener('click', () => selectMedium(m));
     _strip.appendChild(btn);
   });
-  _stripWrap.classList.toggle('no-mediums', mediums.length === 0);
+  _mediumRoot.classList.toggle('no-mediums', mediums.length === 0);
   /* Всегда закрыт при открытии раздела */
   _stripWrap.classList.remove('open');
   mediumOpen = false;
@@ -643,8 +650,8 @@ _anchor.addEventListener('click', () => {
 });
 
 /* Защита свайпа выхода: касание внутри полосы не триггерит выход */
-_stripWrap.addEventListener('touchstart', () => { medSwallowSwipe = true; }, {passive:true});
-_stripWrap.addEventListener('touchend',   () => { setTimeout(()=>{ medSwallowSwipe = false; }, 50); }, {passive:true});
+_mediumRoot.addEventListener('touchstart', () => { medSwallowSwipe = true; }, {passive:true});
+_mediumRoot.addEventListener('touchend',   () => { setTimeout(()=>{ medSwallowSwipe = false; }, 50); }, {passive:true});
 
 /* При resize — переставляем полосу в правильный контейнер */
 window.addEventListener('resize', () => {
@@ -667,7 +674,7 @@ document.getElementById('view-section').addEventListener('touchstart',e=>{
 document.getElementById('view-section').addEventListener('touchend',e=>{
   if(secBackSwX===null) return;
   /* Если касание началось внутри полосы медиумов — не свайпаем назад */
-  if(e.target.closest('.medium-strip-wrap')) { secBackSwX=null; secBackSwY=null; return; }
+  if(e.target.closest('.medium-strip-wrap') || e.target.closest('.medium-anchor')) { secBackSwX=null; secBackSwY=null; return; }
   if(medSwallowSwipe) return;
   const dx=e.changedTouches[0].clientX-secBackSwX;
   const dy=Math.abs(e.changedTouches[0].clientY-secBackSwY);
