@@ -116,6 +116,7 @@ img { display:block; max-width:100%; }
   max-width:0;
   transition:max-width .35s ease;
 }
+.medium-strip-wrap.no-mediums { display:none; }
 .medium-strip-wrap.open {
   max-width:500px; /* достаточно для любого списка */
 }
@@ -602,7 +603,7 @@ function renderMediums() {
     btn.addEventListener('click', () => selectMedium(m));
     _strip.appendChild(btn);
   });
-  _stripWrap.style.display = mediums.length ? '' : 'none';
+  _stripWrap.classList.toggle('no-mediums', mediums.length === 0);
   /* Всегда закрыт при открытии раздела */
   _stripWrap.classList.remove('open');
   mediumOpen = false;
