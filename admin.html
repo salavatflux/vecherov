@@ -166,6 +166,11 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 /* ── SAVE ── */
 document.getElementById('save-btn').addEventListener('click', async () => {
   const btn = document.getElementById('save-btn');
+  /* Принудительно считываем все поля медиумов перед сохранением */
+  document.querySelectorAll('input[data-sec-id]').forEach(mi => {
+    const sec = STATE.sections.find(s => s.id === mi.dataset.secId);
+    if (sec) sec.mediums = mi.value.split(',').map(s=>s.trim()).filter(Boolean);
+  });
   btn.textContent = 'сохраняю...';
   await saveState();
   btn.textContent = 'сохранено ✓';
@@ -312,10 +317,12 @@ function renderAdmin(keepOpenId = null) {
         const mf = document.createElement('div'); mf.className='admin-field';
         const ml = document.createElement('label'); ml.textContent='Медиумы (через запятую)';
         const mi = document.createElement('input'); mi.type='text'; mi.value=(sec.mediums||[]).join(', ');
-        mi.addEventListener('input', () => {
+        mi.dataset.secId = sec.id;
+        const updateMediums = () => {
           sec.mediums = mi.value.split(',').map(s=>s.trim()).filter(Boolean);
-        });
-        mi.addEventListener('blur', () => { renderAdmin(sec.id); });
+        };
+        mi.addEventListener('input', updateMediums);
+        mi.addEventListener('change', updateMediums);
         mf.appendChild(ml); mf.appendChild(mi); bBody.appendChild(mf);
       }
 
