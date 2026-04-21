@@ -1020,6 +1020,7 @@ async function loadStateFromSupabase(){
         document.getElementById('sec-bg-img').classList.add('loaded');
       }
       renderMenu();
+      if (cur) { renderMediums(); }
     }
   }catch(e){ console.warn('Supabase:',e); }
 }
