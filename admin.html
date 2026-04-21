@@ -166,11 +166,7 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 /* ── SAVE ── */
 document.getElementById('save-btn').addEventListener('click', async () => {
   const btn = document.getElementById('save-btn');
-  /* Принудительно считываем все поля медиумов перед сохранением */
-  document.querySelectorAll('input[data-sec-id]').forEach(mi => {
-    const sec = STATE.sections.find(s => s.id === mi.dataset.secId);
-    if (sec) sec.mediums = mi.value.split(',').map(s=>s.trim()).filter(Boolean);
-  });
+  flushMediums();
   btn.textContent = 'сохраняю...';
   await saveState();
   btn.textContent = 'сохранено ✓';
@@ -264,8 +260,17 @@ function addOrderBtns(block, si) {
   head.appendChild(wrap);
 }
 
+/* Считываем все поля медиумов из DOM перед пересозданием */
+function flushMediums() {
+  document.querySelectorAll('input[data-sec-id]').forEach(mi => {
+    const sec = STATE.sections.find(s => s.id === mi.dataset.secId);
+    if (sec) sec.mediums = mi.value.split(',').map(s=>s.trim()).filter(Boolean);
+  });
+}
+
 /* ── RENDER ADMIN ── */
 function renderAdmin(keepOpenId = null) {
+  flushMediums();
   const body = document.getElementById('admin-body');
   body.innerHTML = '';
 
