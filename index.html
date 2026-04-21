@@ -100,49 +100,49 @@ img { display:block; max-width:100%; }
 .sec-title-btn { font-size:clamp(11px,.95vw,13px); font-weight:700; letter-spacing:.3em; text-transform:lowercase; transition:opacity .2s; }
 .sec-title-btn:hover { opacity:.7; }
 
-/* chrono-row — мобиле: справа хронология, слева полоса медиумов */
+/* chrono-row: мобиле — справа хронология, левее полоса медиумов */
 .chrono-row {
   display:none; position:relative; z-index:20; flex-shrink:0;
   align-items:center; justify-content:flex-end;
   padding:0 20px 8px; gap:16px;
 }
 @media(max-width:768px){ .chrono-row{ display:flex!important; } }
-/* На мобиле хронология в топбаре скрыта */
 @media(max-width:768px){ .sec-topbar .sec-chrono{ display:none; } }
 
 /* ── MEDIUM STRIP ── */
-/* Обёртка: overflow:hidden обрезает полосу */
+/* По умолчанию скрыта (max-width:0), открывается классом .open */
 .medium-strip-wrap {
-  overflow:hidden; position:relative; flex-shrink:1;
-  /* десктоп — ограничиваем максимальную ширину чтобы не давить хронологию и название */
-  max-width:clamp(80px, 20vw, 260px);
+  overflow:hidden; position:relative; flex-shrink:0;
+  max-width:0;
+  transition:max-width .35s ease;
 }
+.medium-strip-wrap.open {
+  max-width:500px; /* достаточно для любого списка */
+}
+/* На мобиле скролл внутри полосы когда открыто */
 @media(max-width:768px){
-  .medium-strip-wrap { flex:1; max-width:none; }
+  .medium-strip-wrap.open { overflow-x:auto; }
 }
 
-/* Полоса — скролл */
 .medium-strip {
   display:flex; align-items:center; gap:16px;
   overflow-x:auto; overflow-y:hidden;
-  scroll-behavior:smooth; -webkit-overflow-scrolling:touch;
+  -webkit-overflow-scrolling:touch;
   scrollbar-width:none; white-space:nowrap;
+  padding:0 2px;
 }
 .medium-strip::-webkit-scrollbar { display:none; }
 
-/* Якорь «медиум» */
 .medium-anchor {
   font-size:clamp(11px,.95vw,13px); font-weight:300; letter-spacing:.3em;
   text-transform:lowercase; flex-shrink:0; cursor:pointer; transition:opacity .2s;
 }
 .medium-anchor:hover { opacity:.6; }
 
-/* Разделитель */
 .medium-sep { width:1px; height:10px; background:rgba(255,255,255,.2); flex-shrink:0; }
 
-/* Кнопки медиумов */
 .medium-btn {
-  font-size:clamp(11px,.95vw,13px); font-weight:300; letter-spacing:.3em;
+  font-size:clamp(11px,.95vw,13px); font-weight:100; letter-spacing:.3em;
   text-transform:lowercase; flex-shrink:0; cursor:pointer; transition:opacity .2s;
 }
 .medium-btn:hover { opacity:.7; }
@@ -345,14 +345,14 @@ img { display:block; max-width:100%; }
   </div>
   <div class="sec-topbar" id="sec-topbar">
     <button class="sec-back" id="sec-back">< назад</button>
-    <div class="sec-right">
-      <!-- полоса медиумов вставляется JS перед хронологией -->
+    <div class="sec-right" id="sec-right">
+      <!-- _stripWrap вставляется JS перед хронологией на десктопе -->
       <button class="sec-chrono" id="sec-chrono">хронология</button>
       <button class="sec-title-btn" id="sec-title-btn"></button>
     </div>
   </div>
   <div class="chrono-row" id="chrono-row">
-    <!-- полоса медиумов вставляется JS, хронология всегда справа -->
+    <!-- _stripWrap вставляется JS перед хронологией на мобиле -->
     <button class="sec-chrono" id="sec-chrono-m">хронология</button>
   </div>
   <div class="sec-body">
@@ -493,7 +493,6 @@ function openSec(id) {
   setDesc(true);
   document.getElementById('sec-chrono').classList.remove('on');
   document.getElementById('sec-chrono-m').classList.remove('on');
-  _strip.scrollLeft = 0;
   document.getElementById('sec-scroll').scrollTop = 0;
   renderMediums();
   renderArts();
@@ -559,8 +558,9 @@ document.getElementById('sec-chrono-m').addEventListener('click',togChrono);
 /* ── MEDIUM FILTER ── */
 let activeMedium = null;
 let mediumOpen = false;
+let medSwallowSwipe = false;
 
-/* DOM полосы — создаём один раз, JS перемещает в нужный контейнер */
+/* DOM создаём один раз */
 const _stripWrap = document.createElement('div');
 _stripWrap.className = 'medium-strip-wrap';
 const _strip = document.createElement('div');
@@ -574,15 +574,20 @@ _strip.appendChild(_anchor);
 _strip.appendChild(_sep);
 _stripWrap.appendChild(_strip);
 
+/* Вставляем полосу в нужный контейнер в зависимости от режима */
 function placeMediumStrip() {
   if (isMob()) {
-    /* мобиле: вставляем в начало chrono-row (перед хронологией) */
     const row = document.getElementById('chrono-row');
-    row.insertBefore(_stripWrap, row.firstChild);
+    if (_stripWrap.parentElement !== row) {
+      row.insertBefore(_stripWrap, row.firstChild);
+      _stripWrap.classList.remove('open'); mediumOpen = false;
+    }
   } else {
-    /* десктоп: вставляем в sec-right перед хронологией */
-    const right = document.querySelector('.sec-right');
-    right.insertBefore(_stripWrap, right.firstChild);
+    const right = document.getElementById('sec-right');
+    if (_stripWrap.parentElement !== right) {
+      right.insertBefore(_stripWrap, right.firstChild);
+      _stripWrap.classList.remove('open'); mediumOpen = false;
+    }
   }
 }
 
@@ -598,6 +603,9 @@ function renderMediums() {
     _strip.appendChild(btn);
   });
   _stripWrap.style.display = mediums.length ? '' : 'none';
+  /* Всегда закрыт при открытии раздела */
+  _stripWrap.classList.remove('open');
+  mediumOpen = false;
   placeMediumStrip();
   updateMediumBtns();
 }
@@ -620,39 +628,24 @@ function selectMedium(m) {
   renderArts();
 }
 
-function openMediumStrip() {
-  mediumOpen = true;
-  /* Скроллим вправо — «медиум» уходит влево, кнопки появляются */
-  _strip.scrollLeft = _anchor.offsetWidth + _sep.offsetWidth + 16;
-}
-
-function closeMediumStrip() {
-  mediumOpen = false;
-  activeMedium = null;
-  updateMediumBtns();
-  _strip.scrollLeft = 0;
-  renderArts();
-}
-
 _anchor.addEventListener('click', () => {
+  mediumOpen = !mediumOpen;
+  _stripWrap.classList.toggle('open', mediumOpen);
   if (!mediumOpen) {
-    openMediumStrip();
-  } else if (!isMob()) {
-    /* десктоп: «медиум» всегда виден — нажатие закрывает */
-    closeMediumStrip();
-  }
-  /* мобиле: закрывается только скроллом вправо до упора */
-});
-
-/* Скролл вправо до упора → «медиум» вернулся → закрываем */
-_strip.addEventListener('scroll', () => {
-  if (mediumOpen && _strip.scrollLeft < 4) {
-    mediumOpen = false;
     activeMedium = null;
     updateMediumBtns();
     renderArts();
   }
-}, {passive:true});
+});
+
+/* Защита свайпа выхода: касание внутри полосы не триггерит выход */
+_stripWrap.addEventListener('touchstart', () => { medSwallowSwipe = true; }, {passive:true});
+_stripWrap.addEventListener('touchend',   () => { setTimeout(()=>{ medSwallowSwipe = false; }, 50); }, {passive:true});
+
+/* При resize — переставляем полосу в правильный контейнер */
+window.addEventListener('resize', () => {
+  if (cur) placeMediumStrip();
+});
 function openMenuInstant() {
   const panel = document.getElementById('menu-panel');
   panel.classList.add('no-anim');
@@ -664,9 +657,14 @@ document.getElementById('sec-back').addEventListener('click',()=>{ openMenuInsta
 
 /* Свайп влево по разделу — выход назад */
 let secBackSwX=null, secBackSwY=null;
-document.getElementById('view-section').addEventListener('touchstart',e=>{ secBackSwX=e.touches[0].clientX; secBackSwY=e.touches[0].clientY; },{passive:true});
+document.getElementById('view-section').addEventListener('touchstart',e=>{
+  secBackSwX=e.touches[0].clientX; secBackSwY=e.touches[0].clientY;
+},{passive:true});
 document.getElementById('view-section').addEventListener('touchend',e=>{
-  if(secBackSwX===null)return;
+  if(secBackSwX===null) return;
+  /* Если касание началось внутри полосы медиумов — не свайпаем назад */
+  if(e.target.closest('.medium-strip-wrap')) { secBackSwX=null; secBackSwY=null; return; }
+  if(medSwallowSwipe) return;
   const dx=e.changedTouches[0].clientX-secBackSwX;
   const dy=Math.abs(e.changedTouches[0].clientY-secBackSwY);
   if(dx>80&&dy<60){ openMenuInstant(); show('home'); }
@@ -676,7 +674,7 @@ document.getElementById('view-section').addEventListener('touchend',e=>{
 let secSwX=null, secSwY=null;
 document.getElementById('sec-scroll').addEventListener('touchstart',e=>{ secSwX=e.touches[0].clientX; secSwY=e.touches[0].clientY; },{passive:true});
 document.getElementById('sec-scroll').addEventListener('touchend',e=>{
-  if(secSwX===null)return;
+  if(secSwX===null||medSwallowSwipe)return;
   const dx=e.changedTouches[0].clientX-secSwX;
   const dy=Math.abs(e.changedTouches[0].clientY-secSwY);
   if(dx>80&&dy<50){ renderMenu(); mOv.classList.add('open'); show('home'); }
@@ -782,6 +780,8 @@ let txtSwX=null, txtSwY=null;
 document.getElementById('view-text').addEventListener('touchstart',e=>{ txtSwX=e.touches[0].clientX; txtSwY=e.touches[0].clientY; },{passive:true});
 document.getElementById('view-text').addEventListener('touchend',e=>{
   if(txtSwX===null)return;
+  /* Карусель CV изолирована от свайпа назад */
+  if(e.target.closest('.cv-carousel')) { txtSwX=null; txtSwY=null; return; }
   const dx=e.changedTouches[0].clientX-txtSwX;
   const dy=Math.abs(e.changedTouches[0].clientY-txtSwY);
   if(dx>80&&dy<60){ openMenuInstant(); show('home'); }
