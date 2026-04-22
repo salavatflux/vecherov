@@ -638,7 +638,6 @@ function selectMedium(m) {
 _anchor.addEventListener('click', () => {
   mediumOpen = !mediumOpen;
   _stripWrap.classList.toggle('open', mediumOpen);
-  _stripWrap.style.overflowX = mediumOpen ? 'auto' : 'hidden';
   if (!mediumOpen) {
     activeMedium = null;
     updateMediumBtns();
@@ -649,6 +648,18 @@ _anchor.addEventListener('click', () => {
 /* Защита свайпа выхода: касание внутри полосы не триггерит выход */
 _mediumRoot.addEventListener('touchstart', () => { medSwallowSwipe = true; }, {passive:true});
 _mediumRoot.addEventListener('touchend',   () => { setTimeout(()=>{ medSwallowSwipe = false; }, 50); }, {passive:true});
+
+/* Временный дебаг на андроид */
+const _dbg = document.createElement('div');
+_dbg.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:rgba(0,0,0,.8);color:#fff;font-size:11px;padding:8px;z-index:99999;pointer-events:none;border-radius:4px;';
+document.body.appendChild(_dbg);
+function dbg(msg){ _dbg.textContent = msg; }
+_mediumRoot.addEventListener('touchstart', e => {
+  dbg('touchstart: x='+e.touches[0].clientX+' scrollLeft='+_stripWrap.scrollLeft+' scrollWidth='+_stripWrap.scrollWidth+' clientWidth='+_stripWrap.clientWidth+' overflow='+getComputedStyle(_stripWrap).overflowX);
+}, {passive:true});
+_mediumRoot.addEventListener('touchmove', e => {
+  dbg('touchmove: x='+e.touches[0].clientX+' scrollLeft='+_stripWrap.scrollLeft);
+}, {passive:true});
 
 /* При resize — переставляем полосу в правильный контейнер */
 window.addEventListener('resize', () => {
