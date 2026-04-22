@@ -126,7 +126,7 @@ img { display:block; max-width:100%; }
 }
 /* На мобиле скролл внутри полосы когда открыто */
 @media(max-width:768px){
-  .medium-strip-wrap.open { overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; width:60vw; max-width:60vw; }
+  .medium-strip-wrap.open { overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; }
 }
 
 .medium-strip {
@@ -638,6 +638,7 @@ function selectMedium(m) {
 _anchor.addEventListener('click', () => {
   mediumOpen = !mediumOpen;
   _stripWrap.classList.toggle('open', mediumOpen);
+  _stripWrap.style.overflowX = mediumOpen ? 'auto' : 'hidden';
   if (!mediumOpen) {
     activeMedium = null;
     updateMediumBtns();
