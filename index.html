@@ -638,15 +638,7 @@ function selectMedium(m) {
 _anchor.addEventListener('click', () => {
   mediumOpen = !mediumOpen;
   _stripWrap.classList.toggle('open', mediumOpen);
-  if (mediumOpen) {
-    /* Фиксируем ширину явно чтобы overflow-x:auto работал на Android */
-    const row = _mediumRoot.parentElement;
-    const available = row.clientWidth - _anchor.offsetWidth - 32;
-    _stripWrap.style.width = Math.max(80, available) + 'px';
-    _stripWrap.style.overflowX = 'auto';
-  } else {
-    _stripWrap.style.width = '';
-    _stripWrap.style.overflowX = '';
+  if (!mediumOpen) {
     activeMedium = null;
     updateMediumBtns();
     renderArts();
@@ -656,8 +648,6 @@ _anchor.addEventListener('click', () => {
 /* Защита свайпа выхода: касание внутри полосы не триггерит выход */
 _mediumRoot.addEventListener('touchstart', () => { medSwallowSwipe = true; }, {passive:true});
 _mediumRoot.addEventListener('touchend',   () => { setTimeout(()=>{ medSwallowSwipe = false; }, 50); }, {passive:true});
-
-
 
 /* При resize — переставляем полосу в правильный контейнер */
 window.addEventListener('resize', () => {
