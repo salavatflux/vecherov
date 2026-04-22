@@ -645,9 +645,22 @@ _anchor.addEventListener('click', () => {
   }
 });
 
-/* Защита свайпа выхода: касание внутри полосы не триггерит выход */
-_mediumRoot.addEventListener('touchstart', () => { medSwallowSwipe = true; }, {passive:true});
-_mediumRoot.addEventListener('touchend',   () => { setTimeout(()=>{ medSwallowSwipe = false; }, 50); }, {passive:true});
+/* Защита свайпа выхода + ручной скролл полосы медиумов */
+let _mTouchX = null;
+_mediumRoot.addEventListener('touchstart', e => {
+  medSwallowSwipe = true;
+  _mTouchX = e.touches[0].clientX;
+}, {passive:true});
+_mediumRoot.addEventListener('touchmove', e => {
+  if (_mTouchX === null) return;
+  const dx = _mTouchX - e.touches[0].clientX;
+  _stripWrap.scrollLeft += dx;
+  _mTouchX = e.touches[0].clientX;
+}, {passive:true});
+_mediumRoot.addEventListener('touchend', () => {
+  _mTouchX = null;
+  setTimeout(()=>{ medSwallowSwipe = false; }, 50);
+}, {passive:true});
 
 /* При resize — переставляем полосу в правильный контейнер */
 window.addEventListener('resize', () => {
