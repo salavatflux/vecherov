@@ -107,7 +107,7 @@ img { display:block; max-width:100%; }
   padding:0 20px 8px; gap:16px;
 }
 @media(max-width:768px){
-  .chrono-row{ display:flex!important; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; flex-wrap:nowrap; }
+  .chrono-row{ display:flex!important; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; flex-wrap:nowrap; touch-action:pan-x; }
   .chrono-row::-webkit-scrollbar{ display:none; }
 }
 @media(max-width:768px){ .sec-topbar .sec-chrono{ display:none; } }
