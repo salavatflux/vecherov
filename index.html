@@ -126,8 +126,7 @@ img { display:block; max-width:100%; }
 }
 /* На мобиле скролл внутри полосы когда открыто */
 @media(max-width:768px){
-  .medium-strip-wrap.open { overflow:visible; }
-  .medium-strip-wrap.open .medium-strip { overflow-x:auto; }
+  .medium-strip-wrap.open { overflow-x:auto; }
 }
 
 .medium-strip {
@@ -701,9 +700,9 @@ function renderArts() {
     const card = document.createElement('div'); card.className='art-card';
     if (art.images && art.images.length) {
       const wrap = document.createElement('div'); wrap.className='art-zoom-wrap';
-      const img = document.createElement('img'); img.className='art-thumb'; img.src=art.images[0].replace('/upload/','/upload/q_auto,f_auto,w_1200/');
+      const img = document.createElement('img'); img.className='art-thumb'; img.src=art.images[0].replace('/upload/','/upload/q_auto,f_auto,w_800/');
       img.addEventListener('click', ()=>openLB(art.images, 0));
-      art.images.forEach(src=>{ const p=new Image(); p.src=src.replace('/upload/','/upload/q_auto,f_auto,w_1800/'); });
+      art.images.forEach(src=>{ const p=new Image(); p.src=src.replace('/upload/','/upload/q_auto,f_auto,w_1600/'); });
       wrap.appendChild(img);
       card.appendChild(wrap);
     }
@@ -761,7 +760,7 @@ function openPage(id) {
           const carousel = document.createElement('div'); carousel.className='cv-carousel';
           imgs.forEach(src => {
             const img = document.createElement('img');
-            img.src = src.replace('/upload/','/upload/q_auto,f_auto,w_800/');
+            img.src = src.replace('/upload/','/upload/q_auto,f_auto,w_1200/');
             carousel.appendChild(img);
           });
           cWrap.appendChild(carousel);
@@ -803,7 +802,7 @@ function openLB(imgs, startIdx) {
   const tr=document.getElementById('lb-track'); tr.innerHTML='';
   imgs.forEach(src=>{
     const slide=document.createElement('div'); slide.className='lb-slide';
-    const img=document.createElement('img'); img.src=src.replace('/upload/','/upload/q_auto,f_auto,w_1800/');
+    const img=document.createElement('img'); img.src=src.replace('/upload/','/upload/q_auto,f_auto,w_1600/');
     slide.appendChild(img); tr.appendChild(slide);
   });
   const dots=document.getElementById('lb-dots'); dots.innerHTML='';
