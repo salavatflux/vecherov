@@ -126,7 +126,7 @@ img { display:block; max-width:100%; }
 }
 /* На мобиле скролл внутри полосы когда открыто */
 @media(max-width:768px){
-  .medium-strip-wrap.open { overflow-x:auto; }
+  .medium-strip-wrap.open { overflow-x:auto; touch-action:pan-x; }
 }
 
 .medium-strip {
@@ -135,6 +135,7 @@ img { display:block; max-width:100%; }
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none; white-space:nowrap;
   padding:0 2px;
+  touch-action:pan-x;
 }
 .medium-strip::-webkit-scrollbar { display:none; }
 
@@ -668,6 +669,7 @@ let secBackSwX=null, secBackSwY=null, secBackBlocked=false;
 document.getElementById('view-section').addEventListener('touchstart',e=>{
   secBackSwX=e.touches[0].clientX; secBackSwY=e.touches[0].clientY;
   secBackBlocked=!!e.target.closest('.art-zoom-wrap');
+  if(e.target.closest('.medium-strip-wrap')) { secBackSwX=null; secBackSwY=null; }
 },{passive:true});
 document.getElementById('view-section').addEventListener('touchend',e=>{
   if(secBackSwX===null) return;
