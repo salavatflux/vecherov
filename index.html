@@ -932,7 +932,7 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
 
   document.addEventListener('touchmove', e => {
     if (!el) return;
-    if (e.target.closest('.chrono-row')) return;
+    if (!e.target.closest('.art-zoom-wrap')) return;
     if (e.touches.length === 2 && pinching) {
       e.preventDefault();
       const d = Math.hypot(
