@@ -107,7 +107,7 @@ img { display:block; max-width:100%; }
   padding:0 20px 8px; gap:16px;
 }
 @media(max-width:768px){
-  .chrono-row{ display:flex!important; overflow-x:clip; overflow-y:hidden; scrollbar-width:none; flex-wrap:nowrap; }
+  .chrono-row{ display:flex!important; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; flex-wrap:nowrap; }
   .chrono-row::-webkit-scrollbar{ display:none; }
 }
 @media(max-width:768px){ .sec-topbar .sec-chrono{ display:none; } }
@@ -126,16 +126,14 @@ img { display:block; max-width:100%; }
 }
 /* На мобиле скролл внутри полосы когда открыто */
 @media(max-width:768px){
-  .medium-strip-wrap.open { overflow-x:auto; touch-action:pan-x; }
+  .medium-strip-wrap.open { overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; }
 }
 
 .medium-strip {
   display:flex; align-items:center; gap:16px;
-  overflow-x:auto; overflow-y:hidden;
-  -webkit-overflow-scrolling:touch;
+  overflow-x:visible; overflow-y:visible;
   scrollbar-width:none; white-space:nowrap;
   padding:0 2px;
-  touch-action:pan-x;
 }
 .medium-strip::-webkit-scrollbar { display:none; }
 
