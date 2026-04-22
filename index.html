@@ -126,7 +126,7 @@ img { display:block; max-width:100%; }
 }
 /* На мобиле скролл внутри полосы когда открыто */
 @media(max-width:768px){
-  .medium-strip-wrap.open { overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; }
+  .medium-strip-wrap.open { overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; width:60vw; max-width:60vw; }
 }
 
 .medium-strip {
@@ -645,23 +645,9 @@ _anchor.addEventListener('click', () => {
   }
 });
 
-/* Защита свайпа выхода + ручной скролл полосы медиумов */
-let _mTouchX = null;
-_mediumRoot.addEventListener('touchstart', e => {
-  medSwallowSwipe = true;
-  _mTouchX = e.touches[0].clientX;
-}, {passive:true});
-_mediumRoot.addEventListener('touchmove', e => {
-  if (_mTouchX === null) return;
-  e.stopPropagation();
-  const dx = _mTouchX - e.touches[0].clientX;
-  _stripWrap.scrollLeft += dx;
-  _mTouchX = e.touches[0].clientX;
-}, {passive:true});
-_mediumRoot.addEventListener('touchend', () => {
-  _mTouchX = null;
-  setTimeout(()=>{ medSwallowSwipe = false; }, 50);
-}, {passive:true});
+/* Защита свайпа выхода: касание внутри полосы не триггерит выход */
+_mediumRoot.addEventListener('touchstart', () => { medSwallowSwipe = true; }, {passive:true});
+_mediumRoot.addEventListener('touchend',   () => { setTimeout(()=>{ medSwallowSwipe = false; }, 50); }, {passive:true});
 
 /* При resize — переставляем полосу в правильный контейнер */
 window.addEventListener('resize', () => {
@@ -944,7 +930,7 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
 
   document.addEventListener('touchmove', e => {
     if (!el) return;
-    if (e.target.closest('.medium-strip-wrap') || e.target.closest('.medium-anchor')) return;
+    if (e.target.closest('.chrono-row')) return;
     if (e.touches.length === 2 && pinching) {
       e.preventDefault();
       const d = Math.hypot(
