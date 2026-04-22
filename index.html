@@ -653,6 +653,7 @@ _mediumRoot.addEventListener('touchstart', e => {
 }, {passive:true});
 _mediumRoot.addEventListener('touchmove', e => {
   if (_mTouchX === null) return;
+  e.stopPropagation();
   const dx = _mTouchX - e.touches[0].clientX;
   _stripWrap.scrollLeft += dx;
   _mTouchX = e.touches[0].clientX;
@@ -943,7 +944,7 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
 
   document.addEventListener('touchmove', e => {
     if (!el) return;
-    if (e.target.closest('.chrono-row')) return;
+    if (e.target.closest('.medium-strip-wrap') || e.target.closest('.medium-anchor')) return;
     if (e.touches.length === 2 && pinching) {
       e.preventDefault();
       const d = Math.hypot(
