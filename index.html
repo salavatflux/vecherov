@@ -131,7 +131,8 @@ img { display:block; max-width:100%; }
 
 .medium-strip {
   display:flex; align-items:center; gap:16px;
-  overflow-x:visible; overflow-y:visible;
+  overflow-x:auto; overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
   scrollbar-width:none; white-space:nowrap;
   padding:0 2px;
 }
@@ -651,7 +652,8 @@ _mediumRoot.addEventListener('touchend',   () => { setTimeout(()=>{ medSwallowSw
 
 /* Временный дебаг на андроид */
 const _dbg = document.createElement('div');
-_dbg.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:rgba(0,0,0,.8);color:#fff;font-size:11px;padding:8px;z-index:99999;pointer-events:none;border-radius:4px;';
+_dbg.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:#fff;font-size:14px;padding:10px;z-index:999999;pointer-events:none;';
+_dbg.textContent = 'DBG READY';
 document.body.appendChild(_dbg);
 function dbg(msg){ _dbg.textContent = msg; }
 _mediumRoot.addEventListener('touchstart', e => {
