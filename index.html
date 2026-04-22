@@ -126,7 +126,8 @@ img { display:block; max-width:100%; }
 }
 /* На мобиле скролл внутри полосы когда открыто */
 @media(max-width:768px){
-  .medium-strip-wrap.open { overflow-x:auto; }
+  .medium-strip-wrap.open { overflow:visible; }
+  .medium-strip-wrap.open .medium-strip { overflow-x:auto; }
 }
 
 .medium-strip {
