@@ -107,7 +107,7 @@ img { display:block; max-width:100%; }
   padding:0 20px 8px; gap:16px;
 }
 @media(max-width:768px){
-  .chrono-row{ display:flex!important; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; flex-wrap:nowrap; }
+  .chrono-row{ display:flex!important; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; flex-wrap:nowrap; touch-action:pan-x; }
   .chrono-row::-webkit-scrollbar{ display:none; }
 }
 @media(max-width:768px){ .sec-topbar .sec-chrono{ display:none; } }
@@ -115,10 +115,7 @@ img { display:block; max-width:100%; }
 /* ── MEDIUM STRIP ── */
 /* По умолчанию скрыта (max-width:0), открывается классом .open */
 .medium-strip-wrap {
-  overflow-x:auto; overflow-y:hidden;
-  -webkit-overflow-scrolling:touch;
-  touch-action:pan-x;
-  position:relative; flex-shrink:0;
+  overflow:hidden; position:relative; flex-shrink:0;
   max-width:0;
   transition:max-width .35s ease;
 }
@@ -134,7 +131,9 @@ img { display:block; max-width:100%; }
 
 .medium-strip {
   display:flex; align-items:center; gap:16px;
-  overflow-x:visible; overflow-y:visible;
+  overflow-x:auto; overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-x;
   scrollbar-width:none; white-space:nowrap;
   padding:0 2px;
 }
@@ -143,6 +142,7 @@ img { display:block; max-width:100%; }
 .medium-anchor {
   font-size:clamp(11px,.95vw,13px); font-weight:300; letter-spacing:.3em;
   text-transform:lowercase; flex-shrink:0; cursor:pointer; transition:opacity .2s;
+  touch-action:pan-x;
 }
 .medium-anchor:hover { opacity:.6; }
 
@@ -151,6 +151,7 @@ img { display:block; max-width:100%; }
 .medium-btn {
   font-size:clamp(11px,.95vw,13px); font-weight:100; letter-spacing:.3em;
   text-transform:lowercase; flex-shrink:0; cursor:pointer; transition:opacity .2s;
+  touch-action:pan-x;
 }
 .medium-btn:hover { opacity:.7; }
 .medium-btn.dim { opacity:.8; }
@@ -641,7 +642,9 @@ function selectMedium(m) {
 _anchor.addEventListener('click', () => {
   mediumOpen = !mediumOpen;
   _stripWrap.classList.toggle('open', mediumOpen);
-  if (!mediumOpen) {
+  if (mediumOpen) {
+    setTimeout(() => { _stripWrap.style.overflowX = 'auto'; }, 360);
+  } else {
     _stripWrap.style.overflowX = '';
     activeMedium = null;
     updateMediumBtns();
