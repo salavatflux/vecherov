@@ -638,7 +638,10 @@ function selectMedium(m) {
 _anchor.addEventListener('click', () => {
   mediumOpen = !mediumOpen;
   _stripWrap.classList.toggle('open', mediumOpen);
-  if (!mediumOpen) {
+  if (mediumOpen) {
+    setTimeout(() => { _stripWrap.style.overflowX = 'auto'; }, 360);
+  } else {
+    _stripWrap.style.overflowX = '';
     activeMedium = null;
     updateMediumBtns();
     renderArts();
@@ -1039,7 +1042,6 @@ show('home');
 loadStateFromSupabase();
 
 document.addEventListener('touchstart', e=>{
-  if(e.target.closest('.chrono-row')) return;
   if(e.touches.length>1 && !e.target.closest('.art-zoom-wrap')){
     e.preventDefault();
   }
