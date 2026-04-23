@@ -241,6 +241,8 @@ img { display:block; max-width:100%; }
 /* CV event line with photos */
 .cv-event { cursor:pointer; display:inline; }
 .cv-event.has-photos { text-decoration:underline; text-underline-offset:3px; text-decoration-color:rgba(255,255,255,.4); }
+.cv-event a.cv-link { color:inherit; text-decoration:underline; text-underline-offset:3px; text-decoration-color:rgba(255,255,255,.4); }
+.cv-event a.cv-link:hover { text-decoration-color:rgba(255,255,255,.8); }
 .cv-carousel-wrap {
   max-height:0; overflow:hidden;
   transition:max-height .4s ease-out;
@@ -748,11 +750,22 @@ function openPage(id) {
       lines.forEach(line => {
         const text = typeof line==='string' ? line : line.text;
         const imgs = (typeof line==='object' && line.images) ? line.images : [];
+        const lnk  = (typeof line==='object' && line.link) ? line.link : '';
         const wrap = document.createElement('div');
         const pEl = document.createElement('p');
         const span = document.createElement('span');
         span.className = 'cv-event' + (imgs.length ? ' has-photos' : '');
-        span.textContent = text;
+        if (lnk) {
+          const a = document.createElement('a');
+          a.className = 'cv-link';
+          a.href = lnk;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = text;
+          span.appendChild(a);
+        } else {
+          span.textContent = text;
+        }
         pEl.appendChild(span);
         wrap.appendChild(pEl);
         if (imgs.length) {

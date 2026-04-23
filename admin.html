@@ -445,6 +445,13 @@ function renderAdmin(keepOpenId = null) {
             ti.addEventListener('input', () => { line.text = ti.value; });
             tf.appendChild(tl); tf.appendChild(ti); lEl.appendChild(tf);
 
+            // Link field
+            const lf = document.createElement('div'); lf.className='admin-field'; lf.style.marginBottom='8px';
+            const ll = document.createElement('label'); ll.textContent='Ссылка (необязательно)';
+            const li2 = document.createElement('input'); li2.type='url'; li2.value=line.link||''; li2.placeholder='https://';
+            li2.addEventListener('input', () => { line.link = li2.value.trim() || ''; });
+            lf.appendChild(ll); lf.appendChild(li2); lEl.appendChild(lf);
+
             // Images for this line
             const lineImgs = document.createElement('div'); lineImgs.className='admin-art-imgs';
             (line.images||[]).forEach((url, ii) => {
