@@ -928,7 +928,7 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
     }
   }, {passive:true});
 
-  document.getElementById('sec-scroll').addEventListener('touchmove', e => {
+  document.addEventListener('touchmove', e => {
     if (!el) return;
     if (e.target.closest('.chrono-row')) return;
     if (e.touches.length === 2 && pinching) {
@@ -1039,6 +1039,7 @@ show('home');
 loadStateFromSupabase();
 
 document.addEventListener('touchstart', e=>{
+  if(e.target.closest('.chrono-row')) return;
   if(e.touches.length>1 && !e.target.closest('.art-zoom-wrap')){
     e.preventDefault();
   }
