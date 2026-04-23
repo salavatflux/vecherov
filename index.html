@@ -133,7 +133,6 @@ img { display:block; max-width:100%; }
   display:flex; align-items:center; gap:16px;
   overflow-x:auto; overflow-y:hidden;
   -webkit-overflow-scrolling:touch;
-  touch-action:pan-x;
   scrollbar-width:none; white-space:nowrap;
   padding:0 2px;
 }
@@ -142,6 +141,7 @@ img { display:block; max-width:100%; }
 .medium-anchor {
   font-size:clamp(11px,.95vw,13px); font-weight:300; letter-spacing:.3em;
   text-transform:lowercase; flex-shrink:0; cursor:pointer; transition:opacity .2s;
+  touch-action:pan-x;
 }
 .medium-anchor:hover { opacity:.6; }
 
@@ -150,6 +150,7 @@ img { display:block; max-width:100%; }
 .medium-btn {
   font-size:clamp(11px,.95vw,13px); font-weight:100; letter-spacing:.3em;
   text-transform:lowercase; flex-shrink:0; cursor:pointer; transition:opacity .2s;
+  touch-action:pan-x;
 }
 .medium-btn:hover { opacity:.7; }
 .medium-btn.dim { opacity:.8; }
@@ -640,10 +641,7 @@ function selectMedium(m) {
 _anchor.addEventListener('click', () => {
   mediumOpen = !mediumOpen;
   _stripWrap.classList.toggle('open', mediumOpen);
-  if (mediumOpen) {
-    setTimeout(() => { _stripWrap.style.overflowX = 'auto'; }, 360);
-  } else {
-    _stripWrap.style.overflowX = '';
+  if (!mediumOpen) {
     activeMedium = null;
     updateMediumBtns();
     renderArts();
@@ -935,7 +933,6 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
 
   document.addEventListener('touchmove', e => {
     if (!el) return;
-    if (e.target.closest('.chrono-row')) return;
     if (e.touches.length === 2 && pinching) {
       e.preventDefault();
       const d = Math.hypot(
