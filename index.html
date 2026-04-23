@@ -124,9 +124,11 @@ img { display:block; max-width:100%; }
 .medium-strip-wrap.open {
   max-width:500px; /* достаточно для любого списка */
 }
-/* На мобиле скролл внутри полосы когда открыто */
+/* На мобиле убираем вложенный скролл — скроллится весь chrono-row */
 @media(max-width:768px){
-  .medium-strip-wrap.open { overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; }
+  .medium-strip-wrap { overflow:visible; max-width:none; transition:none; }
+  .medium-strip-wrap.open { max-width:none; overflow:visible; }
+  .medium-strip { overflow:visible; }
 }
 
 .medium-strip {
@@ -141,7 +143,6 @@ img { display:block; max-width:100%; }
 .medium-anchor {
   font-size:clamp(11px,.95vw,13px); font-weight:300; letter-spacing:.3em;
   text-transform:lowercase; flex-shrink:0; cursor:pointer; transition:opacity .2s;
-  touch-action:pan-x;
 }
 .medium-anchor:hover { opacity:.6; }
 
@@ -150,7 +151,6 @@ img { display:block; max-width:100%; }
 .medium-btn {
   font-size:clamp(11px,.95vw,13px); font-weight:100; letter-spacing:.3em;
   text-transform:lowercase; flex-shrink:0; cursor:pointer; transition:opacity .2s;
-  touch-action:pan-x;
 }
 .medium-btn:hover { opacity:.7; }
 .medium-btn.dim { opacity:.8; }
