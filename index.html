@@ -928,7 +928,7 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
     }
   }, {passive:true});
 
-  document.addEventListener('touchmove', e => {
+  document.getElementById('sec-scroll').addEventListener('touchmove', e => {
     if (!el) return;
     if (e.target.closest('.chrono-row')) return;
     if (e.touches.length === 2 && pinching) {
