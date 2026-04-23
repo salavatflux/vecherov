@@ -107,7 +107,7 @@ img { display:block; max-width:100%; }
   padding:0 20px 8px; gap:16px;
 }
 @media(max-width:768px){
-  .chrono-row{ display:flex!important; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; flex-wrap:nowrap; touch-action:pan-x; }
+  .chrono-row{ display:flex!important; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; flex-wrap:nowrap; }
   .chrono-row::-webkit-scrollbar{ display:none; }
 }
 @media(max-width:768px){ .sec-topbar .sec-chrono{ display:none; } }
@@ -124,17 +124,14 @@ img { display:block; max-width:100%; }
 .medium-strip-wrap.open {
   max-width:500px; /* достаточно для любого списка */
 }
-/* На мобиле убираем вложенный скролл — скроллится весь chrono-row */
+/* На мобиле скролл внутри полосы когда открыто */
 @media(max-width:768px){
-  .medium-strip-wrap { overflow:visible; max-width:none; transition:none; }
-  .medium-strip-wrap.open { max-width:none; overflow:visible; }
-  .medium-strip { overflow:visible; }
+  .medium-strip-wrap.open { overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; }
 }
 
 .medium-strip {
   display:flex; align-items:center; gap:16px;
-  overflow-x:auto; overflow-y:hidden;
-  -webkit-overflow-scrolling:touch;
+  overflow-x:visible; overflow-y:visible;
   scrollbar-width:none; white-space:nowrap;
   padding:0 2px;
 }
@@ -933,6 +930,7 @@ document.getElementById('lb-stage').addEventListener('touchend',e=>{
 
   document.addEventListener('touchmove', e => {
     if (!el) return;
+    if (e.target.closest('.chrono-row')) return;
     if (e.touches.length === 2 && pinching) {
       e.preventDefault();
       const d = Math.hypot(
