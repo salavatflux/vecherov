@@ -385,6 +385,7 @@ function renderAdmin(keepOpenId = null) {
         artEl.appendChild(makeField('Формат', 'text', art.size, v => art.size = v || null));
         artEl.appendChild(makeField('Год', 'text', art.year, v => art.year = v || null));
         artEl.appendChild(makeField('Цена (опционально)', 'text', art.price, v => art.price = v || null));
+        artEl.appendChild(makeField('Описание работы (опционально)', 'textarea', art.desc, v => art.desc = v || null));
         // medium selector
         {
           const mField = document.createElement('div'); mField.className='admin-field';
@@ -414,7 +415,7 @@ function renderAdmin(keepOpenId = null) {
       const addArtBtn = document.createElement('button'); addArtBtn.className='admin-btn'; addArtBtn.textContent='+ добавить работу';
       addArtBtn.style.marginTop='4px';
       addArtBtn.addEventListener('click', () => {
-        sec.arts.push({images:[], title:null, material:null, size:null, year:null, price:null});
+        sec.arts.push({images:[], title:null, material:null, size:null, year:null, price:null, desc:null});
         renderAdmin(sec.id);
       });
       bBody.appendChild(addArtBtn);
