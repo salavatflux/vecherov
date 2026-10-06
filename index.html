@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Александр Вечеров</title>
 <link rel="icon" type="image/png" href="https://res.cloudinary.com/dj1ejvvv0/image/upload/q_auto/f_auto/v1776681015/puzzle_white_rh2dx4.png">
 <style>
@@ -126,7 +126,7 @@ img { display:block; max-width:100%; }
 }
 /* На мобиле скролл внутри полосы когда открыто */
 @media(max-width:768px){
-  .medium-strip-wrap.open { overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x; }
+  .medium-strip-wrap.open { overflow-x:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x pinch-zoom; }
 }
 
 .medium-strip {
@@ -294,7 +294,8 @@ img { display:block; max-width:100%; }
 
 /* ── LIGHTBOX ── */
 .lb { position:fixed; inset:0; z-index:500; display:none; align-items:center; justify-content:center; }
-.lb.open { display:flex; }
+.lb.open { display:flex; touch-action:none; } /* все жесты внутри карусели обрабатывает JS */
+.lb.lb-zoomed .lb-viewport { overflow:visible; } /* при зуме картинка может занять весь экран */
 /* Фон — полный клик закрывает */
 .lb-bg { position:absolute; inset:0; cursor:pointer; backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); background:rgba(0,0,0,.88); }
 .lb-stage { position:relative; z-index:1; width:100%; max-width:calc(100vw - 80px); }
@@ -485,6 +486,16 @@ function renderMenu() {
   });
 }
 
+/* ── Нативный зум страницы (щипок) ──
+   Пока идёт щипок или страница увеличена, жесты-свайпы (меню, «назад», описание) отключены,
+   чтобы панорамирование/щипок не принимались за свайп. */
+let _multiSeq=false;
+document.addEventListener('touchstart',e=>{ if(e.touches.length>1) _multiSeq=true; },{passive:true,capture:true});
+window.addEventListener('touchend',e=>{ if(e.touches.length===0) _multiSeq=false; },{passive:true});
+window.addEventListener('touchcancel',()=>{ _multiSeq=false; },{passive:true});
+function pageZoomed(){ const v=window.visualViewport; return !!v && v.scale>1.02; }
+function swipeLocked(){ return _multiSeq || pageZoomed(); }
+
 const mOv = document.getElementById('menu-ov');
 document.getElementById('btn-menu').addEventListener('click', () => { renderMenu(); mOv.classList.add('open'); });
 document.getElementById('menu-dismiss').addEventListener('click', e => {
@@ -493,7 +504,7 @@ document.getElementById('menu-dismiss').addEventListener('click', e => {
 let swX = null;
 document.getElementById('menu-panel').addEventListener('touchstart', e=>{ swX=e.touches[0].clientX; },{passive:true});
 document.getElementById('menu-panel').addEventListener('touchend', e=>{
-  if (swX!==null && e.changedTouches[0].clientX-swX>60) mOv.classList.remove('open');
+  if (swX!==null && !swipeLocked() && e.changedTouches[0].clientX-swX>60) mOv.classList.remove('open');
   swX=null;
 },{passive:true});
 
@@ -501,7 +512,7 @@ document.getElementById('menu-panel').addEventListener('touchend', e=>{
 let homeSwX=null, homeSwY=null;
 document.getElementById('view-home').addEventListener('touchstart',e=>{ homeSwX=e.touches[0].clientX; homeSwY=e.touches[0].clientY; },{passive:true});
 document.getElementById('view-home').addEventListener('touchend',e=>{
-  if(homeSwX===null)return;
+  if(homeSwX===null||swipeLocked()){homeSwX=null;return;}
   const dx=homeSwX-e.changedTouches[0].clientX;
   const dy=Math.abs(e.changedTouches[0].clientY-homeSwY);
   if(dx>60&&dy<60){ renderMenu(); mOv.classList.add('open'); }
@@ -560,7 +571,7 @@ document.getElementById('sec-scroll').addEventListener('click', e=>{
 let dSwX=null;
 document.getElementById('sec-desc').addEventListener('touchstart',e=>{dSwX=e.touches[0].clientX;},{passive:true});
 document.getElementById('sec-desc').addEventListener('touchend',e=>{
-  if(dSwX===null)return;
+  if(dSwX===null||swipeLocked())return;
   if(!isMob()&&e.changedTouches[0].clientX-dSwX>60) setDesc(false);
   dSwX=null;
 },{passive:true});
@@ -569,7 +580,7 @@ document.getElementById('sec-desc').addEventListener('touchend',e=>{
 let dSwY=null;
 document.getElementById('sec-desc').addEventListener('touchstart',e=>{dSwY=e.touches[0].clientY;},{passive:true});
 document.getElementById('sec-desc').addEventListener('touchend',e=>{
-  if(!isMob()||dSwY===null)return;
+  if(!isMob()||dSwY===null||swipeLocked())return;
   if(dSwY-e.changedTouches[0].clientY>50) setDesc(false);
   dSwY=null;
 },{passive:true});
@@ -694,7 +705,7 @@ document.getElementById('view-section').addEventListener('touchstart',e=>{
   if(e.target.closest('.medium-strip-wrap')) { secBackSwX=null; secBackSwY=null; }
 },{passive:true});
 document.getElementById('view-section').addEventListener('touchend',e=>{
-  if(secBackSwX===null) return;
+  if(secBackSwX===null||swipeLocked()) { secBackSwX=null; secBackSwY=null; return; }
   if(e.target.closest('.medium-strip-wrap')) { secBackSwX=null; secBackSwY=null; return; }
   if(medSwallowSwipe||secBackBlocked) { secBackSwX=null; secBackSwY=null; return; }
   const dx=e.changedTouches[0].clientX-secBackSwX;
@@ -706,7 +717,7 @@ document.getElementById('view-section').addEventListener('touchend',e=>{
 let secSwX=null, secSwY=null, secSwBlocked=false;
 document.getElementById('sec-scroll').addEventListener('touchstart',e=>{ secSwX=e.touches[0].clientX; secSwY=e.touches[0].clientY; secSwBlocked=!!e.target.closest('.art-zoom-wrap'); },{passive:true});
 document.getElementById('sec-scroll').addEventListener('touchend',e=>{
-  if(secSwX===null||medSwallowSwipe||secSwBlocked)return;
+  if(secSwX===null||medSwallowSwipe||secSwBlocked||swipeLocked())return;
   const dx=e.changedTouches[0].clientX-secSwX;
   const dy=Math.abs(e.changedTouches[0].clientY-secSwY);
   if(dx>80&&dy<50){ renderMenu(); mOv.classList.add('open'); show('home'); }
@@ -843,7 +854,7 @@ document.getElementById('text-back').addEventListener('click',()=>{ openMenuInst
 let txtSwX=null, txtSwY=null;
 document.getElementById('view-text').addEventListener('touchstart',e=>{ txtSwX=e.touches[0].clientX; txtSwY=e.touches[0].clientY; },{passive:true});
 document.getElementById('view-text').addEventListener('touchend',e=>{
-  if(txtSwX===null)return;
+  if(txtSwX===null||swipeLocked()){txtSwX=null;return;}
   /* Карусель CV изолирована от свайпа назад */
   if(e.target.closest('.cv-carousel')) { txtSwX=null; txtSwY=null; return; }
   const dx=e.changedTouches[0].clientX-txtSwX;
@@ -854,6 +865,7 @@ document.getElementById('view-text').addEventListener('touchend',e=>{
 
 /* ── LIGHTBOX ── */
 function openLB(imgs, startIdx) {
+  lbReset();
   lbArr=imgs; lbI=startIdx;
   const tr=document.getElementById('lb-track'); tr.innerHTML='';
   imgs.forEach(src=>{
@@ -875,19 +887,20 @@ function openLB(imgs, startIdx) {
   requestAnimationFrame(()=>requestAnimationFrame(()=>updLB()));
 }
 
-function closeLB() { document.getElementById('lb').classList.remove('open'); }
+function closeLB() { lbReset(); document.getElementById('lb').classList.remove('open'); }
 
-document.getElementById('lb-bg').addEventListener('click', closeLB);
+document.getElementById('lb-bg').addEventListener('click', ()=>{ if(lbSc>1) return; closeLB(); }); /* при зуме тап по фону не закрывает */
 
 /* stage: клик вне img/кнопок закрывает. Но нужно stopPropagation от кнопок чтобы не всплывало на bg */
 document.getElementById('lb-stage').addEventListener('click', e => {
   e.stopPropagation(); /* не пускаем на lb-bg */
+  if (lbSc>1) return;
   if (!e.target.closest('img') && !e.target.closest('.lb-arr') && !e.target.closest('.lb-dot') && !e.target.closest('.lb-viewport')) {
     closeLB();
   }
 });
 
-function goLB(i){ lbI=Math.max(0,Math.min(i,lbArr.length-1)); updLB(); }
+function goLB(i){ const n=Math.max(0,Math.min(i,lbArr.length-1)); if(n!==lbI) lbReset(); lbI=n; updLB(); }
 
 function updLB(){
   const vp = document.querySelector('.lb-viewport');
@@ -907,113 +920,91 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape') closeLB();
 });
 
-/* Свайп по LB */
-let ltx=null;
-document.getElementById('lb-stage').addEventListener('touchstart',e=>{
+/* ── Жесты в карусели: свайп (1 палец), щипок-зум (2 пальца), пан при зуме ──
+   Пока картинка увеличена (или идёт щипок) — перелистывание и закрытие по тапу отключены.
+   Зум идёт вокруг точки между пальцами, масштаб 1…4, границы не дают картинке уйти за экран. */
+const LB_MAX=4;
+let lbSc=1, lbTx=0, lbTy=0, lbPinch=false, lbGesture=false, lbPd=0, lbPmx=0, lbPmy=0, lbPx=0, lbPy=0, ltx=null;
+const lbEl=document.getElementById('lb');
+
+function lbImg(){ const sl=document.getElementById('lb-track').children[lbI]; return sl?sl.querySelector('img'):null; }
+function lbBound(v,c,size,view){ const h=size/2; if(size<=view) return view/2-c; return Math.max(view-c-h,Math.min(h-c,v)); }
+function lbCenter(im){ const r=im.parentElement.getBoundingClientRect(); return {x:r.left+r.width/2, y:r.top+r.height/2}; }
+function lbApply(clampIt){
+  const im=lbImg(); if(!im) return;
+  if(clampIt && lbSc>1){
+    const c=lbCenter(im);
+    lbTx=lbBound(lbTx,c.x,im.offsetWidth*lbSc,window.innerWidth);
+    lbTy=lbBound(lbTy,c.y,im.offsetHeight*lbSc,window.innerHeight);
+  }
+  const z=lbSc>1;
+  im.style.transform = z ? `translate(${lbTx}px,${lbTy}px) scale(${lbSc})` : '';
+  lbEl.classList.toggle('lb-zoomed',z);
+  [...document.getElementById('lb-track').children].forEach((sl,i)=>{ sl.style.visibility = (z && i!==lbI) ? 'hidden' : ''; });
+}
+function lbReset(){
+  lbSc=1; lbTx=0; lbTy=0; lbPinch=false; lbGesture=false; ltx=null;
+  document.querySelectorAll('#lb-track img').forEach(i=>{ i.style.transform=''; i.style.transition=''; });
+  document.querySelectorAll('#lb-track .lb-slide').forEach(sl=>{ sl.style.visibility=''; });
+  lbEl.classList.remove('lb-zoomed');
+}
+function lbMid(e){
+  const a=e.touches[0], b=e.touches[1];
+  return {x:(a.clientX+b.clientX)/2, y:(a.clientY+b.clientY)/2, d:Math.hypot(b.clientX-a.clientX,b.clientY-a.clientY)};
+}
+
+lbEl.addEventListener('gesturestart',e=>e.preventDefault()); /* Safari: не даём странице зумиться под лайтбоксом */
+
+lbEl.addEventListener('touchstart',e=>{
   if(e.target.closest('.lb-arr')||e.target.closest('.lb-dot'))return;
-  ltx=e.touches[0].clientX;
+  const im=lbImg(); if(im) im.style.transition='';
+  if(e.touches.length>=2){
+    const m=lbMid(e);
+    lbPinch=true; lbGesture=true; ltx=null;
+    lbPd=m.d||1; lbPmx=m.x; lbPmy=m.y;
+    return;
+  }
+  lbPx=e.touches[0].clientX; lbPy=e.touches[0].clientY;
+  ltx = lbSc>1 ? null : e.touches[0].clientX;
 },{passive:true});
-document.getElementById('lb-stage').addEventListener('touchend',e=>{
+
+lbEl.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  const im=lbImg(); if(!im) return;
+  if(e.touches.length>=2 && lbPinch){
+    const m=lbMid(e), c=lbCenter(im);
+    const s0=lbSc, s1=Math.max(1,Math.min(LB_MAX,s0*(m.d/lbPd))), k=s1/s0;
+    lbTx=(m.x-c.x)-k*((lbPmx-c.x)-lbTx);
+    lbTy=(m.y-c.y)-k*((lbPmy-c.y)-lbTy);
+    lbSc=s1; lbPd=m.d||1; lbPmx=m.x; lbPmy=m.y;
+    lbApply(true);
+  } else if(e.touches.length===1 && !lbPinch && lbSc>1){
+    const t=e.touches[0];
+    lbTx+=t.clientX-lbPx; lbTy+=t.clientY-lbPy; lbPx=t.clientX; lbPy=t.clientY;
+    lbApply(true);
+  }
+},{passive:false});
+
+lbEl.addEventListener('touchend',e=>{
+  if(e.touches.length>=2) return;
+  if(e.touches.length===1){ /* из щипка остался один палец — дальше он двигает картинку */
+    lbPinch=false; lbPx=e.touches[0].clientX; lbPy=e.touches[0].clientY; ltx=null;
+    return;
+  }
+  const wasGesture=lbGesture;
+  lbPinch=false; lbGesture=false;
+  if(lbSc<=1.05){ /* вернулись к 1× — плавно возвращаем на место */
+    const im=lbImg(); if(im && (lbSc!==1 || im.style.transform)) im.style.transition='transform .2s ease';
+    lbSc=1; lbTx=0; lbTy=0; lbApply(false);
+  }
+  if(wasGesture || lbSc>1){ ltx=null; return; }
   if(ltx===null)return;
   const dx=e.changedTouches[0].clientX-ltx;
   if(Math.abs(dx)>40){ dx<0?goLB(lbI+1):goLB(lbI-1); }
   else if(Math.abs(dx)<8 && !e.target.closest('img') && !e.target.closest('.lb-arr') && !e.target.closest('.lb-dot')){ closeLB(); }
   ltx=null;
 },{passive:true});
-
-/* ── PINCH ZOOM на фото в ленте ──
-   transform-origin зафиксирован 50% 50%. Масштаб от центра, пан одним пальцем.
-   clampPan не даёт картинке уйти за края .art-zoom-wrap.
-   Сброс при скролле ленты или сведении пальцев к sc=1. */
-(function(){
-  let el=null, wrap=null, sc=1, px=0, py=0, ld=0, lx=0, ly=0, pinching=false;
-
-  function clampPan() {
-    if (!wrap) return;
-    const maxX = wrap.offsetWidth  * (sc - 1) / (2 * sc);
-    const maxY = wrap.offsetHeight * (sc - 1) / (2 * sc);
-    px = Math.max(-maxX, Math.min(maxX, px));
-    py = Math.max(-maxY, Math.min(maxY, py));
-  }
-
-  function applyTransform() {
-    if (!el) return;
-    clampPan();
-    el.style.transform = `scale(${sc}) translate(${px}px,${py}px)`;
-  }
-
-  function rst() {
-    if (!el) return;
-    el.style.transition = 'transform .25s ease';
-    el.style.transform = 'scale(1) translate(0,0)';
-    const _el = el;
-    el = null; wrap = null; sc = 1; px = 0; py = 0; pinching = false; lx = 0; ly = 0;
-    setTimeout(() => { _el.style.transition = ''; }, 260);
-  }
-
-  document.getElementById('sec-scroll').addEventListener('scroll', rst, {passive:true});
-  /* Сброс зума при касании вне картинки (начало скролла ленты) */
-  document.getElementById('sec-scroll').addEventListener('touchstart', e => {
-    if (el && !e.target.closest('.art-thumb')) rst();
-  }, {passive:true});
-
-  document.addEventListener('touchstart', e => {
-    if (document.getElementById('lb').classList.contains('open')) return;
-    const t = e.target.closest('.art-thumb');
-    if (!t) return;
-
-    if (e.touches.length === 2) {
-      if (el && el !== t) rst();
-      pinching = true;
-      el = t; wrap = t.parentElement;
-      t.style.transition = '';
-      t.style.transformOrigin = '50% 50%';
-      ld = Math.hypot(
-        e.touches[1].clientX - e.touches[0].clientX,
-        e.touches[1].clientY - e.touches[0].clientY
-      );
-    }
-
-    if (e.touches.length === 1) {
-      if (!el) { el = t; wrap = t.parentElement; }
-      if (sc > 1) {
-        t.style.transition = '';
-        lx = e.touches[0].clientX;
-        ly = e.touches[0].clientY;
-      }
-    }
-  }, {passive:true});
-
-  document.addEventListener('touchmove', e => {
-    if (!el) return;
-    if (e.target.closest('.chrono-row')) return;
-    if (e.touches.length === 2 && pinching) {
-      e.preventDefault();
-      const d = Math.hypot(
-        e.touches[1].clientX - e.touches[0].clientX,
-        e.touches[1].clientY - e.touches[0].clientY
-      );
-      sc = Math.max(1, Math.min(sc * (d / ld), 4));
-      ld = d;
-      applyTransform();
-    } else if (e.touches.length === 1 && sc > 1) {
-      e.preventDefault();
-      px += (e.touches[0].clientX - lx) / sc;
-      py += (e.touches[0].clientY - ly) / sc;
-      lx = e.touches[0].clientX;
-      ly = e.touches[0].clientY;
-      applyTransform();
-    }
-  }, {passive:false});
-
-  document.addEventListener('touchend', e => {
-    if (e.touches.length < 2) pinching = false;
-    if (e.touches.length === 0) {
-      if (sc <= 1.05) rst();
-      else { lx = 0; ly = 0; }
-    }
-  }, {passive:true});
-})();
+lbEl.addEventListener('touchcancel',()=>{ lbPinch=false; lbGesture=false; ltx=null; },{passive:true});
 
 /* ── WHEEL ZOOM на фото (десктоп) ── */
 (function(){
@@ -1094,11 +1085,6 @@ renderMenu();
 show('home');
 loadStateFromSupabase();
 
-document.addEventListener('touchstart', e=>{
-  if(e.touches.length>1 && !e.target.closest('.art-zoom-wrap')){
-    e.preventDefault();
-  }
-},{passive:false});
 </script>
 </body>
 </html>
