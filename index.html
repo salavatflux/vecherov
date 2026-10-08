@@ -296,7 +296,7 @@ img { display:block; max-width:100%; }
 .lb { position:fixed; inset:0; z-index:500; display:none; align-items:center; justify-content:center; }
 .lb.open { display:flex; touch-action:none; } /* все жесты внутри карусели обрабатывает JS */
 .lb.lb-zoomed .lb-viewport { overflow:visible; } /* при зуме картинка может занять весь экран */
-.lb.lb-zoomed .lb-dots, .lb.lb-zoomed .lb-counter { z-index:0; } /* при зуме точки и счётчик остаются под картинкой */
+.lb.lb-zoomed .lb-dots { z-index:0; } /* при зуме точки и счётчик остаются под картинкой */
 /* Фон — полный клик закрывает */
 .lb-bg { position:absolute; inset:0; cursor:pointer; backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); background:rgba(0,0,0,.88); }
 .lb-stage { position:relative; z-index:1; width:100%; max-width:calc(100vw - 80px); }
@@ -308,7 +308,6 @@ img { display:block; max-width:100%; }
 .lb-dots { position:absolute; bottom:-32px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:2; }
 .lb-dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.3); cursor:pointer; transition:background .2s; }
 .lb-dot.on { background:rgba(255,255,255,.9); }
-.lb-counter { position:absolute; z-index:2; top:-28px; right:0; font-size:10px; font-weight:300; letter-spacing:.2em; color:rgba(255,255,255,.4); }
 /* Мобильная карусель: на весь экран, без полей и затемнения; горизонтальные картинки впритык к краям */
 @media(max-width:768px){
   .lb-bg { backdrop-filter:none; -webkit-backdrop-filter:none; background:#0a0a0a; }
@@ -317,7 +316,6 @@ img { display:block; max-width:100%; }
   .lb-slide img { max-width:100vw; max-height:100vh; max-height:100dvh; }
   .lb-dots { position:fixed; bottom:calc(env(safe-area-inset-bottom,0px) + 14px); }
   .lb-dot { box-shadow:0 0 3px rgba(0,0,0,.7); }
-  .lb-counter { position:fixed; top:calc(env(safe-area-inset-top,0px) + 12px); right:16px; }
 }
 
 ::-webkit-scrollbar { width:2px; }
@@ -414,7 +412,6 @@ img { display:block; max-width:100%; }
 <div class="lb" id="lb">
   <div class="lb-bg" id="lb-bg"></div>
   <div class="lb-stage" id="lb-stage">
-    <div class="lb-counter" id="lb-counter"></div>
     <div class="lb-viewport">
       <div class="lb-track" id="lb-track"></div>
     </div>
@@ -903,7 +900,6 @@ function updLB(){
   const vp = document.querySelector('.lb-viewport');
   const w = vp ? vp.offsetWidth : (window.innerWidth-80);
   document.getElementById('lb-track').style.transform=`translateX(${-lbI*w}px)`;
-  document.getElementById('lb-counter').textContent=lbArr.length>1?`${lbI+1} / ${lbArr.length}`:'';
   document.querySelectorAll('.lb-dot').forEach((d,i)=>d.classList.toggle('on',i===lbI));
 }
 
